@@ -49,7 +49,7 @@ each microservice.
 The best way to run RabbitMQ is with Docker:
 
 ```shell
-docker run -it --rm --name rabbitmq-1 --hostname rabbitmq-1 -p 5672:5672 -p 15672:15672 rabbitmq:3.9-management
+docker run -it --rm --name rabbitmq --hostname rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:3.9-management
 ```
 
 > :info: INFO :info:
