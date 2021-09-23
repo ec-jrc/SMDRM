@@ -1,0 +1,23 @@
+version: "3.7"
+
+services:
+  file_uploader:
+    build:
+      context: file_uploader
+    container_name: file_uploader
+    image: ${DOCKER_HUB_USERNAME}/file_uploader:0.1
+    restart: on-failure
+    volumes:
+      - type: bind
+        source: ${PWD}/file_uploader/files_to_upload
+        target: /tmp/observed
+
+  rabbitmq:
+    container_name: rabbitmq
+    image: rabbitmq:3.9-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    restart: on-failure
+    healthcheck:
+      test: rabbitmq-diagnostics check_running

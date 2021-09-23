@@ -1,0 +1,15 @@
+# python
+venv
+.pytest_cache
+**/__pycache__
+*.pyc
+*.egg-info
+
+# pycharm
+.idea
+
+# commons
+commons/dist
+
+# file_uploader
+files_to_upload/*.zip
