@@ -1,7 +1,7 @@
 #################################
 # Versioning
 #################################
-VERSION=0.1
+VERSION=1.0.0.dev4
 
 #################################
 # Install targets
@@ -12,6 +12,15 @@ install-dev:
 	@echo "+ $@"
 	@pip install .
 	@pip install black pylint pytest
+
+.PHONY: pkg-deploy
+pkg-deploy: version
+	@echo "+ $@"
+	@python3 -m pip install --upgrade build twine
+	@python3 -m build --sdist --wheel
+	@twine check dist/libdrm-${VERSION}-*
+	@twine upload --config-file ~/.pypirc --repository testpypi dist/libdrm-${VERSION}-*
+	@rm -r dist/
 
 .PHONY: pip-freeze
 pip-freeze:

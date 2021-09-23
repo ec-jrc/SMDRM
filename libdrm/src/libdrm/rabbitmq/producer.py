@@ -2,7 +2,7 @@
 
 import pika
 
-from config import Config
+from .config import Config
 
 
 def produce(message: bytes):

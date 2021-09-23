@@ -5,7 +5,7 @@ import pika
 import sys
 import typing
 
-from config import Config
+from .config import Config
 
 
 def consume(callback_logic: typing.Callable):

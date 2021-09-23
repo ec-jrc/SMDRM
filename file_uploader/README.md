@@ -12,7 +12,7 @@ Uploaded files must be *.zip. The files in the archive must be formatted as foll
 > :warning: **WARNING** :warning:
 > events with invalid JSON format are discarded.
 
-A common data model, defined in [event.py](../commons/src/libdrm/datamodel/event.py) is enforced for all valid events.
+A common data model, defined in [event.py](../commons/libdrm/datamodel/event.py) is enforced for all valid events.
 After the event data model is set, this is sent to the `sanitize` RabbitMQ queue, and it is ready to be received by
 the next service in the pipeline: the [Sanitizer](../sanitizer/README.md).
 
