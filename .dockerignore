@@ -12,5 +12,9 @@ venv
 libdrm/dist
 libdrm/build
 
-# file_uploader
-files_to_upload/*.zip
+# annotators
+annotators/floods/models
+
+# uploader
+uploader/data
+uploader/logs

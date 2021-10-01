@@ -1,7 +1,7 @@
 #################################
 # Versioning
 #################################
-VERSION=1.0.0.dev4
+VERSION=1.0.0.dev20
 
 #################################
 # Install targets
@@ -10,13 +10,12 @@ VERSION=1.0.0.dev4
 .PHONY: install-dev
 install-dev:
 	@echo "+ $@"
+	@pip install --upgrade pip black build pylint pytest twine
 	@pip install .
-	@pip install black pylint pytest
 
 .PHONY: pkg-deploy
-pkg-deploy: version
+pkg-deploy: version install-dev
 	@echo "+ $@"
-	@python3 -m pip install --upgrade build twine
 	@python3 -m build --sdist --wheel
 	@twine check dist/libdrm-${VERSION}-*
 	@twine upload --config-file ~/.pypirc --repository testpypi dist/libdrm-${VERSION}-*
@@ -32,10 +31,15 @@ pip-freeze:
 # Test targets
 #################################
 
+.PHONY: elasticsearch-test
+elasticsearch-test:
+	@echo "+ $@"
+	@docker run --rm --name elasticsearch-test -p "19200:19200" docker.elastic.co/elasticsearch/elasticsearch:7.14.0
+
 .PHONY: unittests
 unittests:
 	@echo "+ $@"
-	@pytest -v tests
+	@pytest -v tests --ignore **/rabbitmq
 
 
 #################################
@@ -45,15 +49,22 @@ unittests:
 .PHONY: version
 version:
 	@echo "+ $@"
-	@if [ -n "${VERSION}" ] ; then echo "v${VERSION}" ; else echo "Missing version"; exit 1 ; fi
+	@if [ -n "${VERSION}" ]; then echo "v${VERSION}"; else echo "Missing version"; exit 1; fi
 	@sed -i "s/version=.*/version=\'${VERSION}\',/" ./setup.py
 
 .PHONY: linter # https://vald-phoenix.github.io/pylint-errors/
 linter:
 	@echo "+ $@"
-	@pylint **/*.py
+	@pylint src/libdrm/**/*.py
+	@pylint tests/**/*.py
 
 .PHONY: code-format
 code-format:
 	@echo "+ $@"
-	@black **/*.py
+	@black src/libdrm/**/*.py
+	@black tests/**/*.py
+
+.PHONY: repo-clean
+repo-clean:
+	@echo "+ $@"
+	@rm -fr build **/*.egg-info .pytest_cache

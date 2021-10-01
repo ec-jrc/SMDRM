@@ -2,41 +2,124 @@ version: "3.7"
 
 services:
 
-  rabbitmq:
-    container_name: rabbitmq
-    image: rabbitmq:3.9-management
-    hostname: rabbitmq
-    networks:
-      - rabbit
-    ports:
-      - "5672:5672"
-      - "15672:15672"
-    restart: on-failure
-    healthcheck:
-      test: rabbitmq-diagnostics check_running
+#  rabbitmq:
+#    container_name: rabbitmq
+#    image: rabbitmq:3.9-management
+#    hostname: rabbitmq
+#    networks:
+#      - rabbit
+#    ports:
+#      - "5672:5672"
+#      - "15672:15672"
+#    restart: on-failure
+#    healthcheck:
+#      test: rabbitmq-diagnostics check_running
 
-  file_uploader:
+  uploader:
     build:
-      context: file_uploader
-    container_name: file_uploader
-    image: file_uploader:latest
+      context: uploader
+      target: builder
+    container_name: uploader
+    env_file:
+      - uploader/.env
+    healthcheck:
+      test: python -c '''import requests; requests.get("http://localhost:5000").status_code == 200'''
+      interval: 10s
+      timeout: 10s
+      retries: 3
+    image: uploaderapi:latest
     networks:
-      - rabbit
+      - backend
+      - elastic
+    ports:
+      - "5000:5000"
+    restart: on-failure
+    volumes:
+      - type: volume
+        source: uploads_db
+        target: /uploader/data
+
+#  observer:
+#    build:
+#      context: observer
+#      target: builder
+#    container_name: observer
+#    env_file:
+#      - observer/.env
+#    healthcheck:
+#      test: python -c '''import requests; requests.get("http://localhost:5000").status_code == 200'''
+#      interval: 10s
+#      timeout: 10s
+#      retries: 3
+#    image: observer:latest
+#    networks:
+#      - backend
+#      - elastic
+#    ports:
+#      - "5002:5000"
+#    restart: on-failure
+#    volumes:
+#      - type: volume
+#        source: event_logs
+#        target: ${LOGROTATE_PATH}
+
+  floods:
+    build:
+      context: annotators/floods
+      target: builder
+    container_name: floods
+    healthcheck:
+      test: python -c '''import requests; requests.get("http://localhost:5000").status_code == 200'''
+      interval: 10s
+      timeout: 10s
+      retries: 3
+    image: floodsapi:latest
+    networks:
+      - backend
+    ports:
+      - "5010:5000"
     restart: on-failure
     volumes:
       - type: bind
-        source: ${PWD}/file_uploader/files_to_upload
-        target: /tmp/observed
+        source: ${PWD}/annotators/floods/models
+        target: /floods/models
 
-  sanitizer:
-    build:
-      context: sanitizer
-    container_name: sanitizer
-    image: sanitizer:latest
+  elasticsearch:
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    healthcheck:
+        test: ["CMD-SHELL", "curl --silent --fail localhost:9200/_cluster/health || exit 1"]
+        interval: 30s
+        timeout: 30s
+        retries: 3
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.14.0
     networks:
-      - rabbit
-    restart: on-failure
+      - elastic
+    ports:
+      - "9200:9200"
+    volumes:
+      - es_node:/usr/share/elasticsearch/data
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.14.0
+    container_name: kibana
+    depends_on:
+      - elasticsearch
+    networks:
+      - elastic
+    ports:
+      - "5601:5601"
+
+volumes:
+  es_node:
+  logs_db:
+  uploads_db:
 
 networks:
-  rabbit:
+  backend:
     attachable: true
+  elastic:
+    driver: bridge

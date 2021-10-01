@@ -1,4 +1,4 @@
-# python
+# Python
 venv
 .pytest_cache
 **/__pycache__
@@ -12,5 +12,8 @@ venv
 libdrm/dist
 libdrm/build
 
-# file_uploader
-files_to_upload/*.zip
+# annotator
+annotators/floods/models
+# uploader
+uploader/data
+uploader/logs

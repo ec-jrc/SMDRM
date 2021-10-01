@@ -1,0 +1,6 @@
+--index-url https://pypi.org/simple --extra-index-url https://test.pypi.org/simple
+libdrm==1.0.0.dev20
+
+Flask==2.0.1
+Flask-RESTful==0.3.9
+marshmallow==3.13.0
