@@ -23,13 +23,12 @@ class DisasterModel:
     created_at: str
     lang: str
     text: str
+    disaster_type: str  # we expect the disaster type coming from the user
     uploaded_at: str = datetime.datetime.now(
         pytz.timezone(os.getenv("TIMEZONE", "UTC"))
     ).isoformat()
 
     # runtime event properties to be populated by Sanitizer and Annotator APIs, respectively
-    # we expect the disaster type coming from the user
-    disaster_type: str = None
     # sanitized text contains the text prepared for the machine learning models
     text_sanitized: str = None
     # annotation dictionary will be the placeholder for disaster type related model probability score
@@ -38,12 +37,12 @@ class DisasterModel:
     img: dict = dataclasses.field(default_factory=dict)
 
     @classmethod
-    def validate_json(cls, raw_bytes: bytes):
+    def validate_json(cls, data: bytes):
         try:
-            json.loads(raw_bytes)
-        except ValueError as err:
+            json.loads(data)
+        except json.decoder.JSONDecodeError as err:
             console.exception(err)
-            console.debug(raw_bytes)
+            console.debug(data)
             return False
         return True
 

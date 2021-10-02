@@ -24,7 +24,7 @@ class ZipFileModel:
         result = zipfile.is_zipfile(self._file)
         return result
 
-    def has_valid_content(self) -> bool:
+    def has_valid_content(self) -> typing.Union[None, str]:
         """
         Read all the files in the archive and check their CRC’s and file headers.
         Return the name of the first bad file, or else return None.
@@ -32,13 +32,14 @@ class ZipFileModel:
         """
 
         with zipfile.ZipFile(self._file, "r") as zf:
-            result = zf.testzip()
-        return result
+            return zf.testzip()
 
     def iter_content(self) -> typing.Iterable[bytes]:
         """
-        Extract zip file content file by file.
+        Iter files out of the zip archive.
+
         """
+
         with zipfile.ZipFile(self._file, "r") as archive:
             for file in archive.infolist():
                 with archive.open(file) as json_file:
