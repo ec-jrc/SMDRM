@@ -7,8 +7,8 @@ on:
   push:
     branches:
       - master
-#     paths:
-#       - 'libdrm'
+     paths:
+       - 'libdrm/**/*'
 
 jobs:
   build-n-publish:
