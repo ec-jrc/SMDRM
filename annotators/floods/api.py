@@ -10,7 +10,7 @@ from src import (
 
 from libdrm import datamodels, nicelogging
 
-console = nicelogging.setup_logger("smdrm.floods.api")
+console = nicelogging.console_logger("smdrm.floods.api")
 
 name = "FloodsAPI"
 app = Flask(name)
