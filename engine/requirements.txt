@@ -1,0 +1,4 @@
+--index-url https://pypi.org/simple --extra-index-url https://test.pypi.org/simple
+libdrm==1.0.0.dev20
+
+requests==2.26.0
