@@ -14,6 +14,7 @@ libdrm/build
 
 # annotator
 annotators/floods/models
+# engine
+engine/data
 # uploader
 uploader/data
-uploader/logs
