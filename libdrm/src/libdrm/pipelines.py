@@ -7,7 +7,7 @@ Recombining filters allow you to build families of related systems.
 """
 
 import json
-import pathlib
+import os
 import typing
 import zipfile
 
@@ -43,35 +43,50 @@ def iter_zipfile_filter(zip_files: typing.Iterable) -> typing.Iterable[zipfile.Z
         yield from upload.ZipFileModel(zip_file).iter_content()
 
 
-def iter_jsonfile_filter(json_files: typing.Iterable) -> typing.Iterable[bytes]:
+def iter_jsonfile_filter(json_files: typing.Iterable[zipfile.ZipExtFile]) -> typing.Iterable[bytes]:
     # Receive ZipExtFile based JSON files and iter bytes content.
     # Bytes are validated and objectified in the next step: iter_datapoint_filter()
     for json_file in json_files:
         yield from json_file
 
 
-def iter_datapoint_filter(json_file: typing.Iterable) -> disaster.DisasterModel:
+def iter_valid_jsondata_filter(bytes_lines: typing.Iterable[bytes]) -> typing.Iterable[dict]:
     # Receive bytes rows from the JSON file and iter OO disaster data points.
     # Data point objects text is prepared in the next step: iter_annotation_filter()
-    for brow in json_file:
-        valid = disaster.DisasterModel.validate_json(brow)
-        if not valid:
-            console.debug("Malformed JSON data: {}".format(brow))
-        yield disaster.DisasterModel.from_bytes(brow)
+    for bytes_line in bytes_lines:
+        is_valid = disaster.DisasterModel.is_valid_json(bytes_line)
+        if is_valid is False:
+            console.warning("Invalid JSON data found. Skipping {}".format(bytes_line))
+            continue
+        # filter well formatted JSON bytes only
+        yield json.loads(bytes_line)
 
 
-def iter_annotation_filter(data_points: typing.Iterable[disaster.DisasterModel]):
+def iter_datapoints_filter(json_lines: typing.Iterable[dict]) -> typing.Iterable[disaster.DisasterModel]:
+    for json_line in json_lines:
+        # apply schema validation to detect errors
+        errors = schemas.DisasterSchema().validate(json_line)
+        # disaster_type field validation error may occur
+        if "disaster_type" in errors:
+            console.warning(errors)
+            # add disaster type from global env
+            json_line["disaster_type"] = os.environ["DISASTER_TYPE"]
+        data_point = disaster.DisasterModel.schema_serialize_from_dict(json_line)
+        yield data_point
+
+
+def iter_annotation_filter(data_points: typing.Iterable[disaster.DisasterModel]) -> typing.Iterable[disaster.DisasterModel]:
     for data_point in data_points:
-        # make API call
+        # make API call (assuming the endpoints are up and running)
         # include batch annotate
         yield data_point    # annotated
 
 
-#files = pathlib.Path("/home/ep/Downloads/fires").glob("*.zip")
-
-files = [pathlib.Path("/home/ep/Downloads/fires/test_data.zip")]
-filters = [iter_zipfile_filter, iter_jsonfile_filter, iter_datapoint_filter, ]
-pipeline = pipe_and_filter(files, filters)
-
-for step in pipeline:
-    print(step)
+# zip file processing pipeline steps for each data point (i.e. disaster event)
+processing_steps = [
+    iter_zipfile_filter,
+    iter_jsonfile_filter,
+    iter_valid_jsondata_filter,
+    iter_datapoints_filter,
+    iter_annotation_filter,
+]

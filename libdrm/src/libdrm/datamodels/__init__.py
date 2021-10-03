@@ -5,6 +5,6 @@ from .upload import (
     ZipFileModel,
 )
 from .schemas import (
-    EventUploadSchema,
+    DisasterSchema,
     ZipFileUploadSchema,
 )

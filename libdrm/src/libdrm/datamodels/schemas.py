@@ -1,4 +1,5 @@
 import marshmallow.validate
+
 from .upload import ZipFileModel
 
 
@@ -20,9 +21,9 @@ class ZipFileUploadSchema(marshmallow.Schema):
     )
 
 
-class EventUploadSchema(marshmallow.Schema):
+class DisasterSchema(marshmallow.Schema):
     # default data fields
-    id = marshmallow.fields.String(required=True)
+    id = marshmallow.fields.Integer(required=True)
     created_at = marshmallow.fields.String(required=True)
     lang = marshmallow.fields.String(required=True)
     text = marshmallow.fields.String(required=True)
@@ -31,22 +32,22 @@ class EventUploadSchema(marshmallow.Schema):
     # we expect the disaster type coming from the user
     disaster_type = marshmallow.fields.String(
         validate=marshmallow.validate.OneOf(["floods", "fires", ]),
-        required=True
+        required=True,
     )
     # runtime event properties to be populated by internal APIs
     # sanitized text contains the text prepared for the machine learning models
-    text_sanitized = marshmallow.fields.String(required=False)
+    text_sanitized = marshmallow.fields.String(default="")
     # annotation dictionary will be the placeholder for disaster type related model probability score
     annotations = marshmallow.fields.Dict(
         keys=marshmallow.fields.Str(),
         values=marshmallow.fields.Str(),
-        required=False,
+        default=dict(),
     )
     # TODO: img dictionary contains image metadata e.g., path, size, format, etc.
     img = marshmallow.fields.Dict(
         keys=marshmallow.fields.Str(),
         values=marshmallow.fields.Str(),
-        required=False,
+        default=dict(),
     )
 
     class Meta:

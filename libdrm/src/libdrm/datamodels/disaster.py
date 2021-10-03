@@ -6,10 +6,7 @@ import os
 import typing
 import pytz
 
-from libdrm.nicelogging import console_logger
-
-
-console = console_logger("libdrm.datamodels.event")
+from .schemas import DisasterSchema
 
 
 @dataclasses.dataclass()
@@ -23,59 +20,62 @@ class DisasterModel:
     created_at: str
     lang: str
     text: str
-    disaster_type: str  # we expect the disaster type coming from the user
+    # we expect the disaster type to come from the user
+    # either in the raw event or as a global env variable
+    disaster_type: str
+    # event upload datetime at initialization
     uploaded_at: str = datetime.datetime.now(
         pytz.timezone(os.getenv("TIMEZONE", "UTC"))
     ).isoformat()
 
     # runtime event properties to be populated by Sanitizer and Annotator APIs, respectively
     # sanitized text contains the text prepared for the machine learning models
-    text_sanitized: str = None
+    text_sanitized: str = str()
     # annotation dictionary will be the placeholder for disaster type related model probability score
     annotations: dict = dataclasses.field(default_factory=dict)
     # TODO: img dictionary contains image metadata e.g., path, size, format, etc.
     img: dict = dataclasses.field(default_factory=dict)
 
     @classmethod
-    def validate_json(cls, data: bytes):
+    def is_valid_json(cls, data: bytes):
+        # bytes is the input format from the zip file
         try:
             json.loads(data)
-        except json.decoder.JSONDecodeError as err:
-            console.exception(err)
-            console.debug(data)
+        except json.decoder.JSONDecodeError:
             return False
         return True
 
     @classmethod
-    def from_dict(cls, data: dict) -> DisasterModel:
+    def schema_serialize_from_bytes(cls, data: typing.Union[bytes, str]):
+        schema = DisasterSchema()
+        return cls.serialize_from_dict(schema.loads(data))
+
+    @classmethod
+    def schema_serialize_from_dict(cls, data: dict):
+        schema = DisasterSchema()
+        return cls.serialize_from_dict(schema.load(data))
+
+    @classmethod
+    def serialize_from_bytes(cls, data: bytes) -> DisasterModel:
+        # convert passed data to JSON dict and load
+        json_data = json.loads(data)
+        return cls.serialize_from_dict(json_data)
+
+    @classmethod
+    def serialize_from_dict(cls, data: dict) -> DisasterModel:
         # build object from dict with required fields only
         class_fields = {f.name for f in dataclasses.fields(cls)}
         return cls(**{k: v for k, v in data.items() if k in class_fields})
 
-    @classmethod
-    def from_bytes(cls, data: bytes) -> DisasterModel:
-        # convert passed data to JSON dict and load
-        json_data = json.loads(data)
-        return cls.from_dict(json_data)
-
-    def to_bytes(self) -> bytes:
+    def deserialize_to_bytes(self) -> bytes:
         # convert self to dict and serialize to JSON
         return json.dumps(vars(self)).encode("utf-8")
 
-    def to_dict(self) -> dict:
-        return json.loads(self.to_bytes())
+    def deserialize_to_dict(self) -> dict:
+        return json.loads(self.deserialize_to_bytes())
 
     def sanitize_text(self, sanitizer: typing.Callable) -> None:
         self.text_sanitized = sanitizer(self.text)
 
     def annotate_text(self, annotator: typing.Callable) -> None:
         self.annotations[self.disaster_type] = annotator(self.text_sanitized)
-
-    def add_disaster_type(self, disaster_type: str) -> None:
-        self.disaster_type = disaster_type
-
-    @property
-    def is_ready(self):
-        # event is annotated
-        # TODO: and geotagged
-        return bool(self.annotations)

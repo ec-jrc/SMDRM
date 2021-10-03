@@ -10,10 +10,10 @@ from abc import ABC, abstractmethod
 import pathlib
 import typing
 
-from libdrm.nicelogging import setup_logger
+from libdrm import nicelogging
 
 
-console = setup_logger("smdrm.observer")
+console = nicelogging.console_logger("libdrm.observer")
 
 
 class Subject(ABC):
@@ -71,7 +71,6 @@ class FileUploadSubject(Subject):
     can be stored more comprehensively (categorized by event type, etc.).
     """
 
-    _seen: set = {}
     _state: bool = False
     _observers: typing.List[Observer] = []
 
@@ -98,7 +97,7 @@ class FileUploadSubject(Subject):
         Trigger an update in each subscriber.
         """
 
-        console.info("Notifying observers...")
+        console.info("Notifying attached observers...")
         for observer in self._observers:
             observer.update(self)
 
@@ -108,13 +107,13 @@ class FileUploadSubject(Subject):
         - observe path for updates
     """
 
-    def get_logs(self) -> typing.List[pathlib.Path]:
+    def get_files(self, pattern: str = "*.zip") -> typing.List[pathlib.Path]:
         """
         Helper function to get the list of zip files in the given input directory.
         Uses `UPLOAD_GLOB_PATTERN` glob pattern to search for the file extension in the input path.
         """
 
-        return [_ for _ in self.observed_path.glob("*.log*")]
+        return [_ for _ in self.observed_path.glob(pattern)]
 
     def observe(self) -> None:
         """
@@ -124,14 +123,11 @@ class FileUploadSubject(Subject):
         The subject._state will be set to False once the observe() method is called again after sleeping.
         """
 
-        logs = self.get_logs()
-        for file in logs:
-            if file in self._seen:
-                continue
-            self._seen.add(file)
+        console.debug("Observing the path...")
+        files = self.get_files()
+        if files:
             self._state = True
             self.notify()
-            console.info("{}: new file -> state updated: {}".format(file, self._state))
 
 
 class FileUploadObserver(Observer):
@@ -140,17 +136,22 @@ class FileUploadObserver(Observer):
     issued by the Subject it had been attached to.
     """
 
+    def __init__(self, pipeline: typing.Callable, filters: typing.List[typing.Callable]) -> None:
+        # the business logic to process observed uploads
+        self.pipeline = pipeline
+        self.filters = filters
+
     def update(self, subject: Subject) -> None:
         if subject._state is False:
             console.debug("Subject state did not change... Nothing to do.")
             pass
-        console.debug("observed logs: {}".format(subject._seen))
-        for file in subject.get_logs():
-            if file not in subject._seen:
-                console.info(file)
-                # TODO processing:
-                #   - annotate
-                #   - geocode (coming soon...)
-                #   -
-        else:
-            subject._state = False
+        files = subject.get_files()
+        console.info("New files: {}".format(files))
+        processing = self.pipeline(files, self.filters)
+        for step in processing:
+            console.info(step)
+
+        # remove processed files and restore subject state
+        for _ in files:
+            _.unlink()
+        subject._state = False

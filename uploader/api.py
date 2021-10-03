@@ -13,7 +13,6 @@ For more info, see the Dockerfile in the directory of this Python file.
 
 from flask import Flask, request
 from flask_restful import Resource, Api, reqparse, abort
-from marshmallow import ValidationError
 import pathlib
 import werkzeug
 
@@ -31,13 +30,11 @@ app = Flask(name)
 api = Api(app)
 
 # filesystem
-logs_dir = root / "logs"
-logs_dir.mkdir(parents=True, exist_ok=True)
 data_dir = root / "data"
 data_dir.mkdir(parents=True, exist_ok=True)
 
 # loggers
-file_log = nicelogging.file_logger("uploads", logs_dir)
+file_log = nicelogging.file_logger("uploads", data_dir)
 console = nicelogging.console_logger("uploader.api")
 
 
@@ -60,20 +57,17 @@ class EventUploaderAPI(Resource):
         return response, 200
 
     def post(self):
-        try:
-            schema = datamodels.schemas.EventUploadSchema()
-            sorted_data = schema.load(request.get_json())
-            console.debug("validated data: {}".format(sorted_data))
-        except ValidationError as err:
-            console.exception(err.messages)
-            console.debug("valid data: {}".format(err.valid_data))
-            abort(404, message="Invalid JSON format for given event.")
-        else:
-            disaster_event = datamodels.disaster.DisasterModel(**sorted_data)
-            file_log.info(disaster_event.to_dict())
-            response = {"uploaded": True, "type": "json", "status_code": 201}
-            console.info(response)
-            return response, 201
+        upload_data = request.get_json()
+        errors = datamodels.schemas.DisasterSchema().validate(upload_data)
+        if errors:
+            console.error(errors)
+            abort(404, message=errors)
+        # parse data as per schema
+        data = datamodels.disaster.DisasterModel.serialize_from_dict(upload_data)
+        file_log.info(data.deserialize_to_dict())
+        response = {"uploaded": True, "type": "json", "status_code": 201}
+        console.info(response)
+        return response, 201
 
 
 class ZipFileUploaderAPI(Resource):
@@ -89,19 +83,15 @@ class ZipFileUploaderAPI(Resource):
         )
         req_args = parse.parse_args()
         file = req_args["file"]
-        filename = file.filename
-        try:
-            schema = datamodels.schemas.ZipFileUploadSchema()
-            schema.load({"upload_file": file})
-        except ValidationError as err:
-            console.exception(err.messages)
-            console.debug("valid data: {}".format(err.valid_data))
-        else:
-            file.save(data_dir / filename)
-            file.close()
-            console.debug("file saved and closed.")
-
-        response = {"uploaded": True, "type": "zip", "filename": filename, "status_code": 201}
+        # validate uploaded form data
+        errors = datamodels.schemas.ZipFileUploadSchema().validate({"upload_file": file})
+        if errors:
+            console.error(errors)
+            abort(404, message=errors)
+        # cache file if passes validation
+        file.save(data_dir / file.filename)
+        file.close()
+        response = {"uploaded": True, "type": "zip", "filename": file.filename, "status_code": 201}
         console.info(response)
         return response, 201
 

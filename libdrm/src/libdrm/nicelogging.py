@@ -24,7 +24,7 @@ import time
 
 # logging config
 DATE_FORMAT = "%Y-%m-%dT%H:%M:%S%z"
-LOG_FORMAT = "[%(asctime)s] [%(name)s] [%(levelname)s]: %(message)s"
+LOG_FORMAT = "[%(asctime)s] [%(name)s:%(lineno)d] [%(levelname)s]: %(message)s"
 LOGGING_LEVEL = os.getenv("LOGGING_LEVEL", logging.INFO)
 LOG_FILE_SIZE_MB = int(os.getenv("LOG_FILE_SIZE_MB", 32))
 LOG_FILE_BACKUPS = int(os.getenv("LOG_FILE_BACKUPS", 10))
