@@ -2,66 +2,29 @@ version: "3.7"
 
 services:
 
-#  rabbitmq:
-#    container_name: rabbitmq
-#    image: rabbitmq:3.9-management
-#    hostname: rabbitmq
-#    networks:
-#      - rabbit
-#    ports:
-#      - "5672:5672"
-#      - "15672:15672"
-#    restart: on-failure
-#    healthcheck:
-#      test: rabbitmq-diagnostics check_running
-
-  uploader:
+  engine:
     build:
-      context: uploader
+      context: engine
       target: builder
-    container_name: uploader
+    container_name: engine
     env_file:
-      - uploader/.env
+      - engine/.env
     healthcheck:
-      test: python -c '''import requests; requests.get("http://localhost:5000").status_code == 200'''
+      test: python -c '''import requests; requests.get("http://localhost:5555").status_code == 200'''
       interval: 10s
       timeout: 10s
       retries: 3
-    image: uploaderapi:latest
+    image: engine:latest
     networks:
       - backend
       - elastic
     ports:
-      - "5000:5000"
-    restart: on-failure
+      - "5555:5555"
+    restart: always
     volumes:
-      - type: volume
-        source: uploads_db
-        target: /uploader/data
-
-#  observer:
-#    build:
-#      context: observer
-#      target: builder
-#    container_name: observer
-#    env_file:
-#      - observer/.env
-#    healthcheck:
-#      test: python -c '''import requests; requests.get("http://localhost:5000").status_code == 200'''
-#      interval: 10s
-#      timeout: 10s
-#      retries: 3
-#    image: observer:latest
-#    networks:
-#      - backend
-#      - elastic
-#    ports:
-#      - "5002:5000"
-#    restart: on-failure
-#    volumes:
-#      - type: volume
-#        source: event_logs
-#        target: ${LOGROTATE_PATH}
+      - type: bind
+        source: ${PWD}/engine/data
+        target: /engine/data
 
   floods:
     build:
@@ -69,7 +32,7 @@ services:
       target: builder
     container_name: floods
     healthcheck:
-      test: python -c '''import requests; requests.get("http://localhost:5000").status_code == 200'''
+      test: python -c '''import requests; requests.get("http://localhost:5001").status_code == 200'''
       interval: 10s
       timeout: 10s
       retries: 3
@@ -77,7 +40,7 @@ services:
     networks:
       - backend
     ports:
-      - "5010:5000"
+      - "5001:5001"
     restart: on-failure
     volumes:
       - type: bind
@@ -115,8 +78,7 @@ services:
 
 volumes:
   es_node:
-  logs_db:
-  uploads_db:
+  disaster_db:
 
 networks:
   backend:
