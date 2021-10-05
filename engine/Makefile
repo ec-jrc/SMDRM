@@ -55,6 +55,11 @@ push: clean-image image
 # Test targets
 #################################
 
+.PHONY: unittests
+unittests:
+	@echo "+ $@"
+	@pytest -v tests/
+
 .PHONY: integration
 integration:
 	@echo "+ $@"
@@ -72,9 +77,15 @@ version:
 .PHONY: linter # https://vald-phoenix.github.io/pylint-errors/
 linter:
 	@echo "+ $@"
-	@pylint start.py
+	@pylint *.py src/*.py tests/*.py
 
-.PHONY: code-clean
-code-clean:
+.PHONY: pep-format
+pep-format:
 	@echo "+ $@"
-	@black start.py
+	@black *.py src/*.py tests/*.py
+
+.PHONY: clean-repo
+clean-repo:
+	@echo "+ $@"
+	@rm -fr **/*.egg-info .pytest_cache
+

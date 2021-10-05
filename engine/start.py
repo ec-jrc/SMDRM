@@ -1,27 +1,31 @@
 # -*- coding: utf-8 -*-
 
 import os
+import pathlib
 import time
 
-from libdrm import (
-    observer,
-    pipelines,
-)
+from src import pipelines
+
+import libdrm.datamodels
+import libdrm.deploy
+import libdrm.observer
 
 
-def foo():
-    # check if ml APIs are up
-    # client_floods.wait_for_it()
-    # block until APIs are up
-    pass
+# current directory
+root = pathlib.Path(__file__).resolve().parent
+
+# filesystem
+data_dir = root / "data"
+data_dir.mkdir(parents=True, exist_ok=True)
 
 
-def observe(path):
+def observe():
     # subject concrete class implements state and observation logic
-    subject = observer.FileUploadSubject(observed_path=path)
+    subject = libdrm.observer.FileUploadSubject(observed_path=data_dir)
     # observe the subject's state for updates
-    upload_observer = observer.FileUploadObserver(
-        pipelines.pipe_and_filter, pipelines.processing_steps
+    upload_observer = libdrm.observer.FileUploadObserver(
+        pipelines.pipe_and_filter,
+        pipelines.processing_steps,
     )
     subject.attach(upload_observer)
     # start observing every OBSERVE_INTERVAL_SEC
@@ -40,12 +44,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Observe path for new files to add to the processing pipeline."
     )
-    parser.add_argument(
-        "-p",
-        "--path-to-observe",
-        required=True,
-        help="The directory path under observation.",
-    )
     args = parser.parse_args()
+    # wait for annotations API to be available
+    libdrm.deploy.wait_for(os.getenv("FLOODS_API_URL", "http://localhost:5100"))
     # start observing defined paths
-    observe(args.path_to_observe)
+    observe()
