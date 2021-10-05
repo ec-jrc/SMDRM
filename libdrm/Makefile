@@ -1,7 +1,7 @@
 #################################
 # Versioning
 #################################
-VERSION=1.0.0.dev20
+VERSION=1.0.0.dev24
 
 #################################
 # Install targets
@@ -10,16 +10,15 @@ VERSION=1.0.0.dev20
 .PHONY: install-dev
 install-dev:
 	@echo "+ $@"
-	@pip install --upgrade pip black build pylint pytest twine
+	@pip install --upgrade pip black build pylint pytest twine wheel
 	@pip install .
 
 .PHONY: pkg-deploy
-pkg-deploy: version install-dev
+pkg-deploy: version install-dev clean-repo
 	@echo "+ $@"
 	@python3 -m build --sdist --wheel
 	@twine check dist/libdrm-${VERSION}-*
 	@twine upload --config-file ~/.pypirc --repository testpypi dist/libdrm-${VERSION}-*
-	@rm -r dist/
 
 .PHONY: pip-freeze
 pip-freeze:
@@ -31,15 +30,10 @@ pip-freeze:
 # Test targets
 #################################
 
-.PHONY: elasticsearch-test
-elasticsearch-test:
-	@echo "+ $@"
-	@docker run --rm --name elasticsearch-test -p "19200:19200" docker.elastic.co/elasticsearch/elasticsearch:7.14.0
-
 .PHONY: unittests
 unittests:
 	@echo "+ $@"
-	@pytest -v tests --ignore **/rabbitmq
+	@pytest -v tests
 
 
 #################################
@@ -55,16 +49,14 @@ version:
 .PHONY: linter # https://vald-phoenix.github.io/pylint-errors/
 linter:
 	@echo "+ $@"
-	@pylint src/libdrm/**/*.py
-	@pylint tests/**/*.py
+	@pylint *.py src/libdrm/**/*.py tests/**/*.py
 
-.PHONY: code-format
-code-format:
+.PHONY: pep-format
+pep-format:
 	@echo "+ $@"
-	@black src/libdrm/**/*.py
-	@black tests/**/*.py
+	@black *.py src/libdrm/**/*.py tests/**/*.py
 
-.PHONY: repo-clean
-repo-clean:
+.PHONY: clean-repo
+clean-repo:
 	@echo "+ $@"
-	@rm -fr build **/*.egg-info .pytest_cache
+	@rm -fr build dist **/*.egg-info .pytest_cache

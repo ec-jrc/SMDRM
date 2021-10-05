@@ -2,11 +2,16 @@ from __future__ import annotations
 import dataclasses
 import datetime
 import json
+import marshmallow.validate
 import os
-import typing
 import pytz
+import typing
 
-from .schemas import DisasterSchema
+
+DISASTER_TYPES = [
+    "floods",
+    "fires",
+]
 
 
 @dataclasses.dataclass()
@@ -74,8 +79,36 @@ class DisasterModel:
     def deserialize_to_dict(self) -> dict:
         return json.loads(self.deserialize_to_bytes())
 
-    def sanitize_text(self, sanitizer: typing.Callable) -> None:
-        self.text_sanitized = sanitizer(self.text)
 
-    def annotate_text(self, annotator: typing.Callable) -> None:
-        self.annotations[self.disaster_type] = annotator(self.text_sanitized)
+class DisasterSchema(marshmallow.Schema):
+    # default data fields
+    id = marshmallow.fields.Integer(required=True)
+    created_at = marshmallow.fields.String(required=True)
+    lang = marshmallow.fields.String(required=True)
+    text = marshmallow.fields.String(required=True)
+    # created at model init
+    uploaded_at = marshmallow.fields.String()
+    # we expect the disaster type coming from the user
+    disaster_type = marshmallow.fields.String(
+        validate=marshmallow.validate.OneOf(DISASTER_TYPES),
+        required=True,
+    )
+    # runtime event properties to be populated by internal APIs
+    # sanitized text contains the text prepared for the machine learning models
+    text_sanitized = marshmallow.fields.String(default="")
+    # annotation dictionary will be the placeholder for disaster type related model probability score
+    annotations = marshmallow.fields.Dict(
+        keys=marshmallow.fields.Str(),
+        values=marshmallow.fields.Str(),
+        default=dict(),
+    )
+    # TODO: img dictionary contains image metadata e.g., path, size, format, etc.
+    img = marshmallow.fields.Dict(
+        keys=marshmallow.fields.Str(),
+        values=marshmallow.fields.Str(),
+        default=dict(),
+    )
+
+    class Meta:
+        ordered = True
+        unknown = marshmallow.EXCLUDE

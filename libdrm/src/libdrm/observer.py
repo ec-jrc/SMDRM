@@ -74,10 +74,10 @@ class FileUploadSubject(Subject):
     _state: bool = False
     _observers: typing.List[Observer] = []
 
-    def __init__(self, observed_path: str):
+    def __init__(self, observed_path: pathlib.Path):
         super(FileUploadSubject, self).__init__()
         # input path to observe
-        self.observed_path = pathlib.Path(observed_path)
+        self.observed_path = observed_path
         self.observed_path.mkdir(parents=True, exist_ok=True)
 
     def attach(self, observer: Observer) -> None:

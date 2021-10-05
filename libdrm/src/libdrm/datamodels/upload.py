@@ -1,46 +1,41 @@
-# -*- coding: utf-8 -*-
-
 from __future__ import annotations
-import dataclasses
+import marshmallow.validate
 import typing
 import zipfile
-import werkzeug
 
 
-@dataclasses.dataclass()
-class ZipFileModel:
+def has_valid_content(path) -> typing.Union[None, str]:
     """
-    FileUploadModel Class creates instances of user-uploaded files and simplify common file operations.
+    Read all the files in the archive and check their CRC’s and file headers.
+    Return the name of the first bad file, or else return None.
+    Source: https://docs.python.org/3/library/zipfile.html#zipfile.ZipFile.testzip
     """
 
-    # default uploaded file properties
-    _file: typing.Type[werkzeug.datastructures.FileStorage]
+    with zipfile.ZipFile(path, "r") as zf:
+        return zf.testzip()
 
-    def is_valid_file(self) -> bool:
-        """
-        Check if file is zip file,
-        Source: https://docs.python.org/3/library/zipfile.html#zipfile.is_zipfile
-        """
-        result = zipfile.is_zipfile(self._file)
-        return result
 
-    def has_valid_content(self) -> typing.Union[None, str]:
-        """
-        Read all the files in the archive and check their CRC’s and file headers.
-        Return the name of the first bad file, or else return None.
-        Source: https://docs.python.org/3/library/zipfile.html#zipfile.ZipFile.testzip
-        """
+def iter_content(path: str) -> typing.Iterable[zipfile.ZipExtFile]:
+    """
+    Iter extracted files out of the zip archive.
+    """
 
-        with zipfile.ZipFile(self._file, "r") as zf:
-            return zf.testzip()
+    with zipfile.ZipFile(path, "r") as archive:
+        for file in archive.infolist():
+            with archive.open(file) as ext_file:
+                yield ext_file
 
-    def iter_content(self) -> typing.Iterable[bytes]:
-        """
-        Iter files out of the zip archive.
 
-        """
+def validate_zip_file(path):
+    if not zipfile.is_zipfile(path):
+        raise marshmallow.ValidationError("Uploaded file is not a zip file.")
+    if has_valid_content(path) is not None:
+        raise marshmallow.ValidationError("Invalid zip file content uploaded.")
 
-        with zipfile.ZipFile(self._file, "r") as archive:
-            for file in archive.infolist():
-                with archive.open(file) as json_file:
-                    yield json_file
+
+class ZipFileUploadSchema(marshmallow.Schema):
+    zip_file = marshmallow.fields.Raw(
+        type="file",
+        required=True,
+        validate=validate_zip_file,
+    )
