@@ -18,7 +18,7 @@ MODEL_DIR ?= ${ROOT_DIR}/models
 .PHONY: install-dev
 install-dev:
 	@echo "+ $@"
-	@pip install --upgrade pip black pylint pytest
+	@pip install --upgrade pip wheel black pylint pytest
 	@pip install -r requirements.txt
 
 .PHONY: pip-freeze
@@ -57,9 +57,9 @@ push: clean-image image
 #################################
 
 .PHONY: unittests
-unittests: image download-model download-laser
+unittests: image
 	@echo "+ $@"
-	@docker run --rm -v ${MODEL_DIR}:/models ${IMAGE_NAME} pytest -v
+	@docker run --rm -v ${MODEL_DIR}:/floods/models ${IMAGE_NAME} bash -c 'pip install pytest; pytest -v tests'
 
 
 #################################
@@ -88,9 +88,9 @@ download-laser: install-dev
 .PHONY: linter # https://vald-phoenix.github.io/pylint-errors/
 linter:
 	@echo "+ $@"
-	@pylint src/*.py tests/*.py
+	@pylint *.py src/*.py tests/*.py
 
-.PHONY: code-format
-code-format:
+.PHONY: pep-format
+pep-format:
 	@echo "+ $@"
-	@black src/*.py tests/*.py
+	@black *.py src/*.py tests/*.py

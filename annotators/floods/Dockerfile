@@ -1,8 +1,6 @@
-FROM python:3.7-slim as builder
-ENV CUDA_VISIBLE_DEVICES=0 \
-    DEBIAN_FRONTEND=noninteractive \
+FROM python:3.8-slim as builder
+ENV DEBIAN_FRONTEND=noninteractive \
     LANG=C.UTF-8 \
-    PIP_NO_CACHE_DIR=1 \
     PYENV=/floods/venv \
     ROOT_DIR=/floods
 
@@ -11,13 +9,11 @@ WORKDIR $ROOT_DIR
 COPY ./requirements.txt ./requirements.txt
 RUN set -ex; \
     # update OS
-    apt-get update; \
-    # dev tools
-    apt-get install -y net-tools vim; \
+    apt update && apt clean && rm -rf /var/lib/apt/lists/*; \
     # make virtual env
     python3 -m venv $PYENV; \
     # install pip dependencies
-    ./venv/bin/pip install --upgrade pip -r requirements.txt
+    ./venv/bin/python3 -m pip install -U pip wheel -r requirements.txt
 # update PATH with python env
 ENV PATH="$PYENV/bin:$PATH"
 # copy resources into image
@@ -28,10 +24,10 @@ COPY ./src ./src
 COPY ./api.py ./api.py
 
 # start api
-CMD ["python", "api.py"]
+CMD python api.py
 
 
-FROM python:3.7-alpine3.14 as production
+FROM python:3.8-alpine3.14 as production
 LABEL author="emanuele.panizio@ext.ec.europa.eu"
 
 # prepare workspace
@@ -47,5 +43,4 @@ RUN set -ex;\
 USER $USER
 
 # start api
-ENTRYPOINT ["python", "api.py"]
-CMD ["--port=$API_PORT"]
+ENTRYPOINT python api.py

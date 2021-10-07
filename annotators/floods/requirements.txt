@@ -1,7 +1,8 @@
 --index-url https://pypi.org/simple --extra-index-url https://test.pypi.org/simple
-libdrm==1.0.0.dev19
+libdrm==1.0.0.dev33
 
-laserembeddings==1.1.0
-tensorflow>=2.2,<2.6
 Flask==2.0.1
 Flask-RESTful==0.3.9
+marshmallow==3.13.0
+tensorflow==2.6.0
+laserembeddings==1.1.1

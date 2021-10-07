@@ -1,7 +1,5 @@
-# -*- coding: utf-8 -*-
-
-import os
 import json
+import os
 
 import joblib
 import laserembeddings
@@ -15,6 +13,7 @@ class FloodsAnnotator(object):
     params
         - lang: the language of the incoming text
     """
+
     # the path to the floods models
     MODELS_PATH = os.path.join(os.path.abspath(os.path.dirname(__file__)), "../models")
 
@@ -24,17 +23,27 @@ class FloodsAnnotator(object):
         # model id (filename from config file)
         self._model_id = self._get_model_id()
         # load model at init
-        self._model = load_model(os.path.join(self.MODELS_PATH, f"{self._model_id}.model.h5"), compile=False)
+        self._model = load_model(
+            os.path.join(self.MODELS_PATH, f"{self._model_id}.model.h5"), compile=False
+        )
         # load embeddings if multi lingual model is selected
         if self.is_multi_lang:
             self._embeddings = laserembeddings.Laser(
-                bpe_codes=os.path.join(self.MODELS_PATH, "embeddings", "93langs.fcodes"),
-                bpe_vocab=os.path.join(self.MODELS_PATH, "embeddings", "93langs.fvocab"),
-                encoder=os.path.join(self.MODELS_PATH, "embeddings", "bilstm.93langs.2018-12-26.pt"),
+                bpe_codes=os.path.join(
+                    self.MODELS_PATH, "embeddings", "93langs.fcodes"
+                ),
+                bpe_vocab=os.path.join(
+                    self.MODELS_PATH, "embeddings", "93langs.fvocab"
+                ),
+                encoder=os.path.join(
+                    self.MODELS_PATH, "embeddings", "bilstm.93langs.2018-12-26.pt"
+                ),
             )
         else:
             # tokenizer model is available only for in-house built models
-            self._tokenizer = joblib.load(os.path.join(self.MODELS_PATH, f"{self._model_id}.tokenizer"))
+            self._tokenizer = joblib.load(
+                os.path.join(self.MODELS_PATH, f"{self._model_id}.tokenizer")
+            )
             self._tokenizer.oov_token = None
 
     @classmethod
@@ -42,9 +51,11 @@ class FloodsAnnotator(object):
         # load config file (language mapping)
         _config_file = os.path.join(cls.MODELS_PATH, "current-model.json")
         if not os.path.exists(_config_file):
-            raise ValueError(f"Model is not initialized. {_config_file} lookup table filepath not found")
+            raise ValueError(
+                f"Model is not initialized. {_config_file} lookup table filepath not found"
+            )
         with open(_config_file) as _input:
-            return json.load(_input)['model-by-language']
+            return json.load(_input)["model-by-language"]
 
     @classmethod
     def available_languages(cls):
@@ -63,7 +74,9 @@ class FloodsAnnotator(object):
             tokens = self._embeddings.embed_sentences(input_data, lang="ml")
         else:
             # tokenize using language specific in-house built models
-            tokens = pad_sequences(self._tokenizer.texts_to_sequences(input_data),
-                                   maxlen=self._model.layers[0].input_shape[0][1])
+            tokens = pad_sequences(
+                self._tokenizer.texts_to_sequences(input_data),
+                maxlen=self._model.layers[0].input_shape[0][1],
+            )
 
-        return self._model.predict(tokens)[:, 1][0]
+        return self._model.predict(tokens)[:, 1]

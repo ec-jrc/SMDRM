@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import re
 import string
 
@@ -20,7 +18,7 @@ regexp = {
 }
 
 
-def remove_punctuation(text, punctuation=string.punctuation):
+def no_punctuation(text, punctuation=string.punctuation):
     """
     removing the following chars from text:
         !"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~
@@ -28,7 +26,7 @@ def remove_punctuation(text, punctuation=string.punctuation):
     return text.translate(str.maketrans("", "", punctuation))
 
 
-def normalize_twitter_features(text):
+def features_normalizer(text):
     """
     Perform Twitter text normalization.
     """
@@ -56,5 +54,7 @@ def normalize_twitter_features(text):
     return text.strip()
 
 
-def sanitize(text):
-    return remove_punctuation(normalize_twitter_features(text))
+def sanitize(texts: list):
+    normalized = list(map(features_normalizer, texts))
+    normalized_clean = list(map(no_punctuation, normalized))
+    return normalized_clean

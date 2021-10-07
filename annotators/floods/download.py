@@ -22,8 +22,7 @@ def download(output, username=None, password=None):
             - pull the master branch
     """
     url = "https://{username}:{password}@bitbucket.org/lorinivalerio/smfr_models_data.git".format(
-        username=username,
-        password=password
+        username=username, password=password
     )
 
     commands = [
@@ -41,7 +40,7 @@ def download(output, username=None, password=None):
 
     for cmd in commands:
         query = subprocess.Popen(
-            cmd.split(' '),
+            cmd.split(" "),
             cwd=output,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
@@ -53,15 +52,19 @@ def download(output, username=None, password=None):
 if __name__ == "__main__":
     from argparse import ArgumentParser
 
-    parser = ArgumentParser(description="Download Floods model to a user defined directory.")
-    parser.add_argument('--username', help='Bitlocker username', required=True)
-    parser.add_argument('--password', help='Bitlocker password', required=True)
-    parser.add_argument('-o', '--output', help='Output path', default=os.path.join(root, "model"))
-    parser.add_argument('-d', '--debug', action='store_true', default=False)
+    parser = ArgumentParser(
+        description="Download Floods model to a user defined directory."
+    )
+    parser.add_argument("--username", help="Bitlocker username", required=True)
+    parser.add_argument("--password", help="Bitlocker password", required=True)
+    parser.add_argument(
+        "-o", "--output", help="Output path", default=os.path.join(root, "model")
+    )
+    parser.add_argument("-d", "--debug", action="store_true", default=False)
     args = parser.parse_args()
     # configure logging
     logging.basicConfig(
-        format='%(asctime)s - %(levelname)s: %(message)s',
+        format="%(asctime)s - %(levelname)s: %(message)s",
         level=logging.DEBUG if args.debug else logging.INFO,
     )
     if not os.path.exists(args.output):
