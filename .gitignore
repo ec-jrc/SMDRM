@@ -13,8 +13,9 @@ libdrm/dist
 libdrm/build
 
 # annotator
-annotators/floods/models
+annotators/floods/models/*
 # engine
-engine/data
-# uploader
-uploader/data
+engine/uploads/*
+engine/logs/*
+# var
+temp

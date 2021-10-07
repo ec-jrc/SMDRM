@@ -16,7 +16,7 @@ IMAGE_NAME ?= "engine"
 .PHONY: install-dev
 install-dev:
 	@echo "+ $@"
-	@pip install --upgrade pip black pylint pytest
+	@pip install --upgrade pip wheel black pylint pytest
 	@pip install -r requirements.txt
 
 
@@ -55,10 +55,15 @@ push: clean-image image
 # Test targets
 #################################
 
+.PHONY: service
+service: image
+	@echo "+ $@"
+	@docker run --rm -it --name ${IMAGE_NAME}-dev --network smdrm_backend -v ${PWD}/uploads:/engine/uploads -v ${PWD}/logs:/engine/logs -p 5555:5555 --env-file ${PWD}/conf/test.env ${IMAGE_NAME}:latest
+
 .PHONY: unittests
 unittests:
 	@echo "+ $@"
-	@pytest -v tests/
+	@DISASTER_TYPE=floods pytest -v tests/
 
 .PHONY: integration
 integration:
@@ -77,12 +82,12 @@ version:
 .PHONY: linter # https://vald-phoenix.github.io/pylint-errors/
 linter:
 	@echo "+ $@"
-	@pylint *.py src/*.py tests/*.py
+	@pylint *.py tests/*.py
 
 .PHONY: pep-format
 pep-format:
 	@echo "+ $@"
-	@black *.py src/*.py tests/*.py
+	@black *.py tests/*.py
 
 .PHONY: clean-repo
 clean-repo:

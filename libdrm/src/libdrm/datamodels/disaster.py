@@ -8,10 +8,13 @@ import pytz
 import typing
 
 
-DISASTER_TYPES = [
+ALLOWED_DISASTER_TYPES = [
     "floods",
     "fires",
 ]
+# must fail if not passed
+DISASTER_TYPE = os.environ["DISASTER_TYPE"]
+TIMEZONE = pytz.timezone(os.getenv("TIMEZONE", "UTC"))
 
 
 @dataclasses.dataclass()
@@ -21,28 +24,25 @@ class DisasterModel:
     """
 
     # default data fields
-    id: str
+    id: int
     created_at: str
     lang: str
     text: str
-    # we expect the disaster type to come from the user
-    # either in the raw event or as a global env variable
+    # we expect the disaster type to come from the user either in each
+    # data point being uploaded or as a global environment variable
     disaster_type: str
-    # event upload datetime at initialization
-    uploaded_at: str = datetime.datetime.now(
-        pytz.timezone(os.getenv("TIMEZONE", "UTC"))
-    ).isoformat()
 
-    # runtime event properties to be populated by Sanitizer and Annotator APIs, respectively
-    # sanitized text contains the text prepared for the machine learning models
-    text_sanitized: str = str()
+    # uploaded_at, text_sanitized, annotations, and img data point properties are
+    # populated at runtime via the marshmallow schema model
+    uploaded_at: str
+    text_sanitized: str
     # annotation dictionary will be the placeholder for disaster type related model probability score
-    annotations: dict = dataclasses.field(default_factory=dict)
+    annotation: float
     # TODO: img dictionary contains image metadata e.g., path, size, format, etc.
-    img: dict = dataclasses.field(default_factory=dict)
+    img: dict
 
     @classmethod
-    def is_valid_json(cls, data: bytes):
+    def valid_json_bytes(cls, data: bytes):
         # bytes is the input format from the zip file
         try:
             json.loads(data)
@@ -51,33 +51,34 @@ class DisasterModel:
         return True
 
     @classmethod
-    def schema_serialize_from_bytes(cls, data: typing.Union[bytes, str]):
-        schema = DisasterSchema()
-        return cls.serialize_from_dict(schema.loads(data))
+    def get_required_fields(cls) -> set:
+        return {f.name for f in dataclasses.fields(cls)}
 
     @classmethod
-    def schema_serialize_from_dict(cls, data: dict):
-        schema = DisasterSchema()
-        return cls.serialize_from_dict(schema.load(data))
+    def safe_load_bytes(cls, data: typing.Union[bytes, str]) -> dict:
+        return DisasterSchema().loads(data)
 
     @classmethod
-    def serialize_from_bytes(cls, data: bytes) -> DisasterModel:
-        # convert passed data to JSON dict and load
-        json_data = json.loads(data)
-        return cls.serialize_from_dict(json_data)
+    def safe_load_dict(cls, data: dict) -> dict:
+        return DisasterSchema().load(data)
 
     @classmethod
-    def serialize_from_dict(cls, data: dict) -> DisasterModel:
-        # build object from dict with required fields only
-        class_fields = {f.name for f in dataclasses.fields(cls)}
-        return cls(**{k: v for k, v in data.items() if k in class_fields})
+    def from_bytes(cls, data: typing.Union[bytes, str]) -> DisasterModel:
+        # serialize JSON bytes to object
+        return cls(**DisasterSchema().loads(data))
 
-    def deserialize_to_bytes(self) -> bytes:
-        # convert self to dict and serialize to JSON
-        return json.dumps(vars(self)).encode("utf-8")
+    @classmethod
+    def from_dict(cls, data: dict) -> DisasterModel:
+        # serialize JSON dict to object
+        return cls(**DisasterSchema().load(data))
 
-    def deserialize_to_dict(self) -> dict:
-        return json.loads(self.deserialize_to_bytes())
+    def to_string(self) -> str:
+        # deserialize self to JSON string
+        return DisasterSchema().dumps(self)
+
+    def to_dict(self) -> dict:
+        # deserialize self to JSON dict
+        return DisasterSchema().dump(self)
 
 
 class DisasterSchema(marshmallow.Schema):
@@ -86,27 +87,30 @@ class DisasterSchema(marshmallow.Schema):
     created_at = marshmallow.fields.String(required=True)
     lang = marshmallow.fields.String(required=True)
     text = marshmallow.fields.String(required=True)
-    # created at model init
-    uploaded_at = marshmallow.fields.String()
-    # we expect the disaster type coming from the user
+    # we expect the disaster type coming from the user,
+    # user can choose to mark disaster type by data point of globally.
     disaster_type = marshmallow.fields.String(
-        validate=marshmallow.validate.OneOf(DISASTER_TYPES),
-        required=True,
+        # validate if present
+        validate=marshmallow.validate.OneOf(ALLOWED_DISASTER_TYPES),
+        # else add from global env
+        missing=DISASTER_TYPE,
     )
-    # runtime event properties to be populated by internal APIs
+    # data point properties to be populated at runtime
+    # created at model init
+    uploaded_at = marshmallow.fields.String(
+        missing=datetime.datetime.now(TIMEZONE).isoformat(),
+    )
     # sanitized text contains the text prepared for the machine learning models
-    text_sanitized = marshmallow.fields.String(default="")
+    text_sanitized = marshmallow.fields.String(missing="")
     # annotation dictionary will be the placeholder for disaster type related model probability score
-    annotations = marshmallow.fields.Dict(
-        keys=marshmallow.fields.Str(),
-        values=marshmallow.fields.Str(),
-        default=dict(),
+    annotation = marshmallow.fields.Float(
+        missing=0.0,
     )
     # TODO: img dictionary contains image metadata e.g., path, size, format, etc.
     img = marshmallow.fields.Dict(
         keys=marshmallow.fields.Str(),
         values=marshmallow.fields.Str(),
-        default=dict(),
+        missing=dict(),
     )
 
     class Meta:

@@ -20,7 +20,7 @@ def wait_for(url, freq: int = 10, max_attempts: int = 5) -> None:
         attempts += 1
         try:
             console.info("Attempt {a}/{t}".format(a=attempts, t=max_attempts))
-            ping = requests.get(url)
+            requests.get(url)
         except requests.exceptions.ConnectionError:
             time.sleep(freq)
             if attempts == max_attempts:

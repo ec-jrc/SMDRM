@@ -12,9 +12,10 @@ venv
 libdrm/dist
 libdrm/build
 
-# annotators
+# annotator
 annotators/floods/models
-
-# uploader
-uploader/data
-uploader/logs
+# engine
+engine/uploads
+engine/logs
+# var
+temp

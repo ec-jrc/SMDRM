@@ -1,10 +1,16 @@
 from __future__ import annotations
+
+import pathlib
+
 import marshmallow.validate
 import typing
 import zipfile
 
 
-def has_valid_content(path) -> typing.Union[None, str]:
+path_type = typing.Union[str, pathlib.Path]
+
+
+def has_valid_content(path: path_type) -> typing.Union[None, str]:
     """
     Read all the files in the archive and check their CRC’s and file headers.
     Return the name of the first bad file, or else return None.
@@ -15,7 +21,7 @@ def has_valid_content(path) -> typing.Union[None, str]:
         return zf.testzip()
 
 
-def iter_content(path: str) -> typing.Iterable[zipfile.ZipExtFile]:
+def iter_content(path: path_type) -> typing.Iterable[zipfile.ZipExtFile]:
     """
     Iter extracted files out of the zip archive.
     """
@@ -26,7 +32,7 @@ def iter_content(path: str) -> typing.Iterable[zipfile.ZipExtFile]:
                 yield ext_file
 
 
-def validate_zip_file(path):
+def validate_zip_file(path: path_type):
     if not zipfile.is_zipfile(path):
         raise marshmallow.ValidationError("Uploaded file is not a zip file.")
     if has_valid_content(path) is not None:

@@ -1,3 +1,5 @@
+import collections
+
 import pytest
 import marshmallow
 
@@ -6,88 +8,79 @@ from libdrm import datamodels
 
 def test_init(valid_json):
     """
-    Test class __init__ method.
+    Test class __init__ method. All fields must be specified to use the default method.
     """
+    valid_json.update(
+        {"uploaded_at": "now", "text_sanitized": "", "annotation": 0.0, "img": {}}
+    )
     m = datamodels.disaster.DisasterModel(**valid_json)
-    assert m.id == 123456789
-    assert m.created_at == "Sat May 15 08:49:13 +0000 2021"
-    assert m.lang == "it"
-    assert m.text == "A text to be annotated with floods model"
-    assert m.disaster_type == "floods"
+    required = m.get_required_fields()
+    for k in valid_json:
+        assert k in required
 
 
-def test_is_valid_json(valid_bytes):
+def test_init_invalid(valid_json):
     """
-    Test is_valid_json() helper method to validate JSON formatted bytes.
+    DisasterModel should not be initialized with __init__ method
+    if not all required fields are set
     """
-    assert datamodels.disaster.DisasterModel.is_valid_json(valid_bytes)
+    with pytest.raises(TypeError):
+        datamodels.disaster.DisasterModel(**valid_json)
 
 
-def test_schema_serialize_from_bytes(valid_bytes):
-    m = datamodels.disaster.DisasterModel.schema_serialize_from_bytes(valid_bytes)
-    for f in (
-        "uploaded_at",
-        "text_sanitized",
-        "annotations",
-        "img",
-    ):
-        assert hasattr(m, f), "{} field is missing".format(f)
-
-
-def test_schema_serialize_from_dict(valid_json):
-    m = datamodels.disaster.DisasterModel.schema_serialize_from_dict(valid_json)
-    for f in (
-        "uploaded_at",
-        "text_sanitized",
-        "annotations",
-        "img",
-    ):
-        assert hasattr(m, f), "{} field is missing".format(f)
-
-
-def test_schema_serialize_from_bytes_invalid(invalid_bytes):
+def test_valid_json_bytes(valid_bytes):
     """
-    Validation against schema fails because of missing keys and return marshmallow exception.
+    Test helper method to validate JSON formatted bytes.
     """
-    with pytest.raises(marshmallow.exceptions.ValidationError):
-        datamodels.disaster.DisasterModel.schema_serialize_from_bytes(invalid_bytes)
+    assert datamodels.disaster.DisasterModel.valid_json_bytes(valid_bytes)
 
 
-def test_schema_serialize_from_dict_invalid(invalid_bytes):
+def test_invalid_json_bytes():
     """
-    Validation against schema fails because of missing keys and return marshmallow exception.
+    Test helper method to validate JSON formatted bytes.
     """
-    with pytest.raises(marshmallow.exceptions.ValidationError):
-        datamodels.disaster.DisasterModel.schema_serialize_from_dict(invalid_bytes)
+    assert not datamodels.disaster.DisasterModel.valid_json_bytes(
+        b"not a JSON formatted bytes data"
+    )
+
+
+def test_save_load_bytes(valid_bytes):
+    m = datamodels.disaster.DisasterModel.safe_load_bytes(valid_bytes)
+    assert isinstance(m, collections.OrderedDict)
+
+
+def test_save_load_dict(valid_json):
+    m = datamodels.disaster.DisasterModel.safe_load_dict(valid_json)
+    assert isinstance(m, collections.OrderedDict)
 
 
 def test_serialize_from_bytes_invalid(invalid_bytes):
     """
-    Raises TypeError because of data is not validated against schema.
+    Validation against schema fails because of missing keys and return marshmallow exception.
     """
-    with pytest.raises(TypeError):
-        datamodels.disaster.DisasterModel.serialize_from_bytes(invalid_bytes)
+    with pytest.raises(marshmallow.exceptions.ValidationError):
+        datamodels.disaster.DisasterModel.from_bytes(invalid_bytes)
 
 
 def test_serialize_from_dict_invalid(invalid_json):
     """
-    Raises TypeError because of data is not validated against schema.
+    Validation against schema fails because of missing keys and return marshmallow exception.
     """
-    with pytest.raises(TypeError):
-        datamodels.disaster.DisasterModel.serialize_from_dict(invalid_json)
+    with pytest.raises(marshmallow.exceptions.ValidationError):
+        datamodels.disaster.DisasterModel.from_dict(invalid_json)
 
 
-def test_deserialize_to_bytes(valid_json):
-    m = datamodels.disaster.DisasterModel.schema_serialize_from_dict(valid_json)
+def test_deserialize_to_string(valid_json):
+    m = datamodels.disaster.DisasterModel.from_dict(valid_json)
     assert isinstance(m, datamodels.disaster.DisasterModel)
-    deserialized = m.deserialize_to_bytes()
-    assert isinstance(deserialized, bytes)
+    deserialized = m.to_string()
+    assert isinstance(deserialized, str)
 
 
 def test_deserialize_to_dict(valid_json):
-    m = datamodels.disaster.DisasterModel.schema_serialize_from_dict(valid_json)
+    m = datamodels.disaster.DisasterModel.from_dict(valid_json)
     assert isinstance(m, datamodels.disaster.DisasterModel)
-    deserialized = m.deserialize_to_dict()
+    deserialized = m.to_dict()
     assert isinstance(deserialized, dict)
 
 

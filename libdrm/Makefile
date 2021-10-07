@@ -1,7 +1,7 @@
 #################################
 # Versioning
 #################################
-VERSION=1.0.0.dev24
+VERSION=1.0.0.dev33
 
 #################################
 # Install targets
@@ -33,7 +33,7 @@ pip-freeze:
 .PHONY: unittests
 unittests:
 	@echo "+ $@"
-	@pytest -v tests
+	@DISASTER_TYPE=floods pytest -v tests/
 
 
 #################################

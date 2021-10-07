@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """
 Custom Logging Class to handle console and file outputs.
 
@@ -31,8 +29,17 @@ LOG_FILE_BACKUPS = int(os.getenv("LOG_FILE_BACKUPS", 10))
 
 
 class JsonFormatter(logging.Formatter):
+
     def format(self, record):
-        return json.dumps(vars(record))
+        allowed = [
+            "msg",
+            "created",
+            "thread",
+            "threadName",
+            "process",
+            "processName",
+        ]
+        return json.dumps({k: v for k, v in vars(record).items() if str(k) in allowed})
 
 
 def console_logger(name, level: str = None):

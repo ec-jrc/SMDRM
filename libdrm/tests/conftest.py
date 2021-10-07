@@ -3,6 +3,9 @@ import pathlib
 import pytest
 import zipfile
 
+import libdrm.pipeline
+
+
 
 # set the current directory from __file__
 this_path = pathlib.Path(__file__).resolve().parent
@@ -11,7 +14,7 @@ this_path = pathlib.Path(__file__).resolve().parent
 @pytest.fixture()
 def valid_json():
     return dict(
-        id=123456789,
+        id="123456789",
         created_at="Sat May 15 08:49:13 +0000 2021",
         text="A text to be annotated with floods model",
         lang="it",
@@ -56,8 +59,39 @@ def invalid_zipfile():
     Test a bad zip file created on the fly.
     """
     tmp_zipfile = this_path / "invalid.zip"
-    with open(tmp_zipfile, "w") as not_zip_file:
-        not_zip_file.write("whatever")
+    with open(tmp_zipfile, "w") as zip_file:
+        zip_file.write("valid.json")
     yield tmp_zipfile
     # remove tmp file
     tmp_zipfile.unlink()
+
+
+@pytest.fixture()
+def valid_zipfile_invalid_json():
+    """
+    Test a bad zip file created on the fly.
+    """
+    tmp_zipfile = this_path / "valid.zip"
+    with zipfile.ZipFile(tmp_zipfile, "w") as zip_file:
+        zip_file.writestr("invalid.json", b"this is not JSON!")
+    yield tmp_zipfile
+    # remove tmp file
+    tmp_zipfile.unlink()
+
+
+@pytest.fixture()
+def valid_zipfile_invalid_json_wrong_disaster_type(invalid_bytes):
+    """
+    Test a bad zip file created on the fly.
+    """
+    tmp_zipfile = this_path / "valid.zip"
+    with zipfile.ZipFile(tmp_zipfile, "w") as zip_file:
+        zip_file.writestr("invalid.json", invalid_bytes)
+    yield tmp_zipfile
+    # remove tmp file
+    tmp_zipfile.unlink()
+
+
+@pytest.fixture()
+def json_files_gen(valid_zipfile):
+    yield libdrm.pipeline.iter_zip_file_content([valid_zipfile]*60)

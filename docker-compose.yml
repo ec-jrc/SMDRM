@@ -8,12 +8,12 @@ services:
       target: builder
     container_name: engine
     env_file:
-      - engine/.env
-    healthcheck:
-      test: python -c '''import requests; requests.get("http://localhost:5555").status_code == 200'''
-      interval: 10s
-      timeout: 10s
-      retries: 3
+      - ./engine/conf/dev.env
+#    healthcheck:
+#      test:
+#      interval: 30s
+#      timeout: 5s
+#      retries: 3
     image: engine:latest
     networks:
       - backend
@@ -22,19 +22,26 @@ services:
       - "5555:5555"
     restart: always
     volumes:
+      # path observed for new uploads
       - type: bind
-        source: ${PWD}/engine/data
-        target: /engine/data
+        source: ${PWD}/engine/uploads
+        target: /engine/uploads
+      # path of processed data points
+      - type: volume
+        source: engine_logs
+        target: /engine/logs
 
   floods:
     build:
       context: annotators/floods
       target: builder
     container_name: floods
+    env_file:
+      - ./annotators/floods/conf/dev.env
     healthcheck:
       test: python -c '''import requests; requests.get("http://localhost:5001").status_code == 200'''
-      interval: 10s
-      timeout: 10s
+      interval: 30s
+      timeout: 5s
       retries: 3
     image: floodsapi:latest
     networks:
@@ -56,8 +63,8 @@ services:
     healthcheck:
         test: ["CMD-SHELL", "curl --silent --fail localhost:9200/_cluster/health || exit 1"]
         interval: 30s
-        timeout: 30s
-        retries: 3
+        timeout: 10s
+        retries: 5
     image: docker.elastic.co/elasticsearch/elasticsearch:7.14.0
     networks:
       - elastic
@@ -78,7 +85,7 @@ services:
 
 volumes:
   es_node:
-  disaster_db:
+  engine_logs:
 
 networks:
   backend:
