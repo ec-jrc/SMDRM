@@ -10,4 +10,4 @@ echo "Notes: other extensions won't be considered."
 
 read -r -p "path: " file_to_upload
 
-cp "${file_to_upload}" "${CWD}/engine/data"
+cp "${file_to_upload}" "${CWD}/engine/uploads"
