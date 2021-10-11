@@ -85,7 +85,7 @@ def iter_json_file_content(
 
 def iter_in_batch(
     data_points: typing.Iterable[collections.OrderedDict],
-    batch_size=int(os.getenv("BATCH_ANNOTATE_SIZE", 10))
+    batch_size=int(os.getenv("BATCH_ANNOTATE_SIZE", 100))
 ) -> typing.Iterable[dict]:
     batch = []
     for data_point in data_points:
@@ -94,6 +94,11 @@ def iter_in_batch(
             yield {"batch": batch}
             # flush batch
             batch = []
+        #  Ensure to yield all data points.
+        #  Also when the their total number is
+        #  lesser that the batch_size.
+        if len(batch) > 0:
+            yield {"batch": batch}
         continue
 
 
