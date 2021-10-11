@@ -18,18 +18,17 @@ import json
 import logging.config
 import logging.handlers
 import os
-import time
+
 
 # logging config
 DATE_FORMAT = "%Y-%m-%dT%H:%M:%S%z"
 LOG_FORMAT = "[%(asctime)s] [%(name)s:%(lineno)d] [%(levelname)s]: %(message)s"
-LOGGING_LEVEL = os.getenv("LOGGING_LEVEL", logging.INFO)
+LOGGING_LEVEL = os.getenv("LOGGING_LEVEL", "INFO").upper()
 LOG_FILE_SIZE_MB = int(os.getenv("LOG_FILE_SIZE_MB", 32))
 LOG_FILE_BACKUPS = int(os.getenv("LOG_FILE_BACKUPS", 10))
 
 
 class JsonFormatter(logging.Formatter):
-
     def format(self, record):
         allowed = [
             "msg",
