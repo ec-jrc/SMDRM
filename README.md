@@ -58,7 +58,8 @@ You can verify the required data point structure in the [Data Model](#data-model
 
 ## Architecture
 
-Add diagram
+![smdrm_diagram](docs/smdrm-diagram.svg)
+*SMDRM Diagram*
 
 Add description of logical connections between microservices
 
@@ -70,7 +71,7 @@ Source [diagrams.net](https://www.diagrams.net/)
 ### Technology Stack
 
 * Python
-  * >3.7, <=3.8
+  * `>3.7,<=3.8`
 * Docker Engine
   * 20.10.9
 * Docker Compose
@@ -103,7 +104,7 @@ For detailed info about the data model, check the [DisasterModel & DisasterSchem
 
 This section describes how users should interact with the SMDRM service.
 
-> :info: INFO :info:
+> :information_source: INFO :information_source:
 > Execute the following commands from the project root directory
 
 
@@ -132,7 +133,7 @@ docker-compose up --build
 
 The flag `--build` will ensure all images are built.
 
-> :info: INFO :info:
+> :information_source: INFO :information_source:
 > Check the status of your service instance with `docker-compose ps`,
 > access logs of specific container with `docker-compose logs <container-name>`
 
@@ -150,7 +151,7 @@ cp -a <your-zip-file-path> ./engine/uploads/
 
 This will trigger the `observe()` function in the Engine service, starting the uploading process.
 
-> :info: INFO :info:
+> :information_source: INFO :information_source:
 > You can verify that data points are added to the ElasticSearch instance by means of the following HTTP request
 > [http://localhost:9200/_cat/indices?v](http://localhost:9200/_cat/indices?v)
 > Look for `docs.counts` for `smdrm-dev` index.
@@ -160,7 +161,7 @@ This will trigger the `observe()` function in the Engine service, starting the u
 
 Once the services are up and running, you can access the [Kibana UI](http://localhost:5601).
 
-> :info: INFO :info:
+> :information_source: INFO :information_source:
 > If you run the SMDRM service locally, the UI is available at you localhost on port 5601.
 
 If you access the UI for the first time, an index pattern needs to be created. Here is how:
@@ -212,5 +213,7 @@ docker-compose down -v
 
 
 ## Credits
+
+[SMDRM Diagram](#architecture) thanks to [diagrams.net](https://www.diagrams.net/)
 
 To be continued...
