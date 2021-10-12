@@ -7,10 +7,6 @@ from src import (
     text_sanitizer,
 )
 
-import libdrm.nicelogging
-
-
-console = libdrm.nicelogging.console_logger("annotators.floods.api")
 
 name = "FloodsAPI"
 app = Flask(name)
@@ -20,7 +16,6 @@ api = Api(app)
 preloaded = {}
 available_languages = annotator.FloodsAnnotator.available_languages()
 for lang in available_languages:
-    console.debug("preloading {lang} model".format(lang=lang))
     preloaded[lang] = annotator.FloodsAnnotator(lang=lang)
 
 
@@ -30,7 +25,6 @@ class FloodsAPI(Resource):
 
     def post(self):
         response = batch.batch_annotate(request.get_json(), text_sanitizer.sanitize, preloaded, available_languages)
-        console.debug(response)
         return response, 201
 
 

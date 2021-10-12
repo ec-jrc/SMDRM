@@ -1,4 +1,4 @@
-FROM dev/smdrm:latest as builder
+FROM python:3.8-slim as builder
 ENV DEBIAN_FRONTEND=noninteractive \
     LANG=C.UTF-8 \
     ROOT_DIR=/floods
@@ -6,7 +6,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
 # prepare workspace
 WORKDIR $ROOT_DIR
 COPY ./requirements.txt ./requirements.txt
-RUN python -m pip install -r requirements.txt
+RUN python3 -m pip install -U pip -r requirements.txt
 # copy resources into image
 COPY ./README.md ./README.md
 COPY ./tests ./tests
@@ -14,7 +14,7 @@ COPY ./src ./src
 COPY ./api.py ./api.py
 
 # start api
-ENTRYPOINT ["python", "api.py"]
+ENTRYPOINT ["python3", "api.py"]
 CMD []
 
 
