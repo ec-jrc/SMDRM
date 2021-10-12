@@ -8,28 +8,16 @@ services:
       target: builder
     container_name: engine
     env_file:
-      - ./engine/conf/dev.env
-#    healthcheck:
-#      test:
-#      interval: 30s
-#      timeout: 5s
-#      retries: 3
+      - "${PWD}/engine/.env"
     image: engine:latest
     networks:
-      - backend
+      - ml
       - elastic
     ports:
       - "5555:5555"
     restart: always
     volumes:
-      # path observed for new uploads
-      - type: bind
-        source: ${PWD}/engine/uploads
-        target: /engine/uploads
-      # path of processed data points
-      - type: volume
-        source: engine_logs
-        target: /engine/logs
+      - "${PWD}/engine/uploads:/engine/uploads" # path observed for new uploads
 
   floods:
     build:
@@ -37,7 +25,7 @@ services:
       target: builder
     container_name: floods
     env_file:
-      - ./annotators/floods/conf/dev.env
+      - "${PWD}/annotators/floods/.env"
     healthcheck:
       test: python -c '''import requests; requests.get("http://localhost:5001").status_code == 200'''
       interval: 30s
@@ -45,14 +33,12 @@ services:
       retries: 3
     image: floodsapi:latest
     networks:
-      - backend
+      - ml
     ports:
       - "5001:5001"
     restart: on-failure
     volumes:
-      - type: bind
-        source: ${PWD}/annotators/floods/models
-        target: /floods/models
+      - "${PWD}/annotators/floods/models:/floods/models"
 
   elasticsearch:
     container_name: elasticsearch
@@ -65,16 +51,16 @@ services:
         interval: 30s
         timeout: 10s
         retries: 5
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.14.0
+    image: docker.elastic.co/elasticsearch/elasticsearch:${ES_VERSION}
     networks:
       - elastic
     ports:
       - "9200:9200"
     volumes:
-      - es_node:/usr/share/elasticsearch/data
+      - "es_node:/usr/share/elasticsearch/data"
 
   kibana:
-    image: docker.elastic.co/kibana/kibana:7.14.0
+    image: docker.elastic.co/kibana/kibana:${ES_VERSION}
     container_name: kibana
     depends_on:
       - elasticsearch
@@ -88,7 +74,7 @@ volumes:
   engine_logs:
 
 networks:
-  backend:
+  ml:
     attachable: true
   elastic:
     driver: bridge
