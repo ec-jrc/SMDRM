@@ -9,8 +9,8 @@ venv
 .idea
 
 # libdrm
-libdrm/dist
-libdrm/build
+build/libdrm/dist
+build/libdrm/build
 
 # annotator
 annotators/floods/models/*

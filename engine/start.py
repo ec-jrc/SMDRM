@@ -76,9 +76,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Observe a defined path for user interactions."
     )
-    # wait for annotations API to be available
-    endpoint = apis.endpoints_by_disaster[disaster_type]
-    libdrm.deploy.wait_for(endpoint, max_attempts=10)
+    # wait for API availability
+    libdrm.deploy.wait_for("http://floods:5001", max_attempts=10)
     # start observing defined paths
     OBSERVING = True
     while OBSERVING:
