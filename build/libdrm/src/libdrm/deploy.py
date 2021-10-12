@@ -2,9 +2,9 @@ import requests
 import sys
 import time
 
-from libdrm import nicelogging
+import libdrm.nicelogging
 
-console = nicelogging.console_logger("libdrm.deploy")
+console = libdrm.nicelogging.console_logger("libdrm.deploy")
 
 
 def wait_for(url, freq: int = 10, max_attempts: int = 5) -> None:

@@ -1,0 +1,7 @@
+black
+marshmallow==3.13.0
+requests==2.26.0
+pylint
+pytest
+pytz==2021.1
+wheel

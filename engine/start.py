@@ -11,6 +11,7 @@ import typing
 
 import libdrm.datamodels
 import libdrm.deploy
+import libdrm.elastic
 import libdrm.nicelogging
 import libdrm.pipeline
 
@@ -40,16 +41,21 @@ def iter_annotate_batches(batches: typing.Iterable[dict]) -> typing.Iterable[dic
         yield annotated.json()
 
 
-def iter_log_batches(batches: typing.Iterable[dict]) -> None:
-    log_output = root / "logs"
-    log_output.mkdir(parents=True, exist_ok=True)
-    file_logging = libdrm.nicelogging.file_logger("annotated", log_output)
+# def iter_log_batches(batches: typing.Iterable[dict]) -> None:
+#     log_output = root / "logs"
+#     log_output.mkdir(parents=True, exist_ok=True)
+#     file_logging = libdrm.nicelogging.file_logger("annotated", log_output)
+#     for batch in batches:
+#         for data_point in batch["batch"]:
+#             # log rotate for filebeat
+#             file_logging.info(
+#                 libdrm.datamodels.disaster.DisasterModel(**data_point).to_dict()
+#             )
+
+def iter_save_batches(batches: typing.Iterable[dict]) -> None:
     for batch in batches:
-        for data_point in batch["batch"]:
-            # log rotate for filebeat
-            file_logging.info(
-                libdrm.datamodels.disaster.DisasterModel(**data_point).to_dict()
-            )
+        console.debug(batch)
+        es.bulk_insert(batch["batch"])
 
 
 def observe():
@@ -59,7 +65,7 @@ def observe():
         console.info("New files observed")
         # Docker annotator API service must run to get annotations
         libdrm.pipeline.process_uploads(
-            files, extra_steps=[iter_annotate_batches, iter_log_batches]
+            files, extra_steps=[iter_annotate_batches, iter_save_batches]
         )
         for file in files:
             file.unlink()
@@ -76,9 +82,13 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Observe a defined path for user interactions."
     )
-    # wait for annotations API to be available
-    endpoint = apis.endpoints_by_disaster[disaster_type]
-    libdrm.deploy.wait_for(endpoint, max_attempts=10)
+    # wait for API availability
+    libdrm.deploy.wait_for("http://floods:5001", max_attempts=10)
+    libdrm.deploy.wait_for("http://elasticsearch:9200", max_attempts=10)
+
+    # create elasticsearch index
+    es = libdrm.elastic.ElasticSearchClient("http://elasticsearch:9200", "smdrm-dev")
+    es.create_index()
     # start observing defined paths
     OBSERVING = True
     while OBSERVING:

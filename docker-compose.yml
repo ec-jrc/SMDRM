@@ -11,8 +11,7 @@ services:
       - "${PWD}/engine/.env"
     image: engine:latest
     networks:
-      - ml
-      - elastic
+      - backend
     ports:
       - "5555:5555"
     restart: always
@@ -33,7 +32,7 @@ services:
       retries: 3
     image: floodsapi:latest
     networks:
-      - ml
+      - backend
     ports:
       - "5001:5001"
     restart: on-failure
@@ -53,7 +52,7 @@ services:
         retries: 5
     image: docker.elastic.co/elasticsearch/elasticsearch:${ES_VERSION}
     networks:
-      - elastic
+      - backend
     ports:
       - "9200:9200"
     volumes:
@@ -65,16 +64,13 @@ services:
     depends_on:
       - elasticsearch
     networks:
-      - elastic
+      - backend
     ports:
       - "5601:5601"
 
 volumes:
   es_node:
-  engine_logs:
 
 networks:
-  ml:
+  backend:
     attachable: true
-  elastic:
-    driver: bridge
