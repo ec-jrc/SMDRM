@@ -58,7 +58,8 @@ You can verify the required data point structure in the [Data Model](#data-model
 
 ## Architecture
 
-![smdrm_diagram](docs/smdrm-diagram.svg)
+![smdrm_diagram](docs/smdrm-diagram.drawio.png)
+
 *SMDRM Diagram*
 
 Add description of logical connections between microservices
@@ -71,7 +72,7 @@ Source [diagrams.net](https://www.diagrams.net/)
 ### Technology Stack
 
 * Python
-  * `>3.7,<=3.8`
+  * \>3.7,<3.9
 * Docker Engine
   * 20.10.9
 * Docker Compose
