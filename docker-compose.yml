@@ -42,8 +42,10 @@ services:
   elasticsearch:
     container_name: elasticsearch
     environment:
+      - cluster.name=smdrm-elastic
       - discovery.type=single-node
       - bootstrap.memory_lock=true
+      - xpack.security.enabled=false
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
     healthcheck:
         test: ["CMD-SHELL", "curl --silent --fail localhost:9200/_cluster/health || exit 1"]

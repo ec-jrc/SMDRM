@@ -94,12 +94,12 @@ def iter_in_batch(
             yield {"batch": batch}
             # flush batch
             batch = []
-        #  Ensure to yield all data points.
-        #  Also when the their total number is
-        #  lesser that the batch_size.
-        if len(batch) > 0:
-            yield {"batch": batch}
         continue
+    #  Ensure to yield all data points.
+    #  Also when the their total number is
+    #  lesser that the batch_size.
+    if len(batch) > 0:
+        yield {"batch": batch}
 
 
 def process_uploads(files: typing.Iterable[pathlib.Path], extra_steps: typing.Iterable[typing.Callable] = None):
