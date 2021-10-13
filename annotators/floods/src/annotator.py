@@ -15,7 +15,7 @@ class FloodsAnnotator(object):
     """
 
     # the path to the floods models
-    MODELS_PATH = os.path.join(os.path.abspath(os.path.dirname(__file__)), "../models")
+    MODELS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "models")
 
     def __init__(self, lang: str):
         # lang
@@ -24,7 +24,7 @@ class FloodsAnnotator(object):
         self._model_id = self._get_model_id()
         # load model at init
         self._model = load_model(
-            os.path.join(self.MODELS_PATH, f"{self._model_id}.model.h5"), compile=False
+            os.path.join(self.MODELS_PATH, "models", f"{self._model_id}.model.h5"), compile=False
         )
         # load embeddings if multi lingual model is selected
         if self.is_multi_lang:
@@ -42,14 +42,14 @@ class FloodsAnnotator(object):
         else:
             # tokenizer model is available only for in-house built models
             self._tokenizer = joblib.load(
-                os.path.join(self.MODELS_PATH, f"{self._model_id}.tokenizer")
+                os.path.join(self.MODELS_PATH, "models", f"{self._model_id}.tokenizer")
             )
             self._tokenizer.oov_token = None
 
     @classmethod
     def _load_filenames_by_lang(cls):
         # load config file (language mapping)
-        _config_file = os.path.join(cls.MODELS_PATH, "current-model.json")
+        _config_file = os.path.join(cls.MODELS_PATH, "models", "current-model.json")
         if not os.path.exists(_config_file):
             raise ValueError(
                 f"Model is not initialized. {_config_file} lookup table filepath not found"

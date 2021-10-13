@@ -16,6 +16,5 @@ build/libdrm/build
 annotators/floods/models
 # engine
 engine/uploads
-engine/logs
 # var
 temp
