@@ -6,7 +6,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
 # prepare workspace
 WORKDIR $ROOT_DIR
 COPY ./requirements.txt ./requirements.txt
-RUN python3 -m pip install -U pip -r requirements.txt
+RUN python3 -m pip --no-cache-dir install -U pip -r requirements.txt
 # copy resources into image
 COPY ./README.md ./README.md
 COPY ./tests ./tests
