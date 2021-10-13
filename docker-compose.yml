@@ -23,8 +23,6 @@ services:
       context: annotators/floods
       target: builder
     container_name: floods
-    env_file:
-      - "${PWD}/annotators/floods/.env"
     healthcheck:
       test: python -c '''import requests; requests.get("http://localhost:5001").status_code == 200'''
       interval: 30s
