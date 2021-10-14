@@ -5,8 +5,39 @@ Docker service based on Python:3.8-slim image.
 It uses Machine Learning models trained on text related to flood disasters to annotate new incoming texts.
 It requires `lang` and `text` fields to be able to compute an annotation.
 
-Batch annotations are supported, and can be controlled with the `BATCH_SIZE_ANNOTATE` environment
-variable either via the Engine service or the global .env file.
+You can control the annotation batch size with `BATCH_SIZE_ANNOTATE` environment variable in the Engine .env file.
+
+## Instructions
+
+You need to download models and embeddings, then run the FloodsAPI
+
+> :information_source: The following commands are executed from the project root directory
+
+### Download
+
+```shell
+bash build/development.sh
+```
+
+Then execute the following command in the shell
+```shell
+bash annotators/floods/downloads.sh
+```
+
+The flag `--clear` deletes any models previously downloaded
+
+### Run
+
+Build and run the FloodsAPI
+```shell
+docker-compose up --build floods
+```
+
+### Test
+
+Test the API with the following synthetic data points
+
+> :information_source: Note the "batch" key in the payload.
 
 ```shell
 curl -v -X POST http://localhost:5001 \
@@ -14,7 +45,7 @@ curl -v -X POST http://localhost:5001 \
   -d '{"batch":[{"lang":"en", "text":"a flood disaster @related text. #vivo http://lucot.com"}, {"lang":"en", "text":"#hash another flood disaster related text. @Mymy"}]}'
 ```
 
-This should return the same data being sent enriched with `text_sanitized` and `annotation` fields
+This should return the same data points being sent, enriched with `text_sanitized` and `annotation` fields
 
 ```shell
 {
@@ -33,22 +64,4 @@ This should return the same data being sent enriched with `text_sanitized` and `
     }
   ]
 }
-```
-
-## Instructions
-
-For more details, check the [Makefile](Makefile).
-
-### Build
-
-```shell
-make image
-```
-
-### Download
-
-Download models and embeddings
-
-```shell
-make download-*
 ```
