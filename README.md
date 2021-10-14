@@ -128,7 +128,7 @@ If you access the UI for the first time, an index pattern needs to be created. H
 
 Use the development environment to create and test new features in a repeatable and standard manner
 ```shell
-bash build/container.sh
+bash build/development.sh
 ```
 
 > :warning: You need to run `bash build/image.sh` if you want to use that image for development.
@@ -138,7 +138,7 @@ bash build/container.sh
 
 Enter the development environment
 ```shell
-bash build/container.sh
+bash build/development.sh
 ```
 
 Run the unittests
