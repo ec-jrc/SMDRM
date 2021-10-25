@@ -1,15 +1,17 @@
 from flask import Flask, request
 from flask_restful import Resource, Api
+import logging
+import os
 
 from src import (
     annotator,
-    batch,
+    batches,
     text_sanitizer,
 )
 
 
-name = "FloodsAPI"
-app = Flask(name)
+NAME = "FloodsAPI"
+app = Flask(NAME)
 api = Api(app)
 
 # preload models at initialization
@@ -21,10 +23,25 @@ for lang in available_languages:
 
 class FloodsAPI(Resource):
     def get(self):
-        return {"api_name": name, "is_alive": True}, 200
+        response = {"api_name": NAME, "resource": "/", "is_alive": True}
+        console.debug(response)
+        return response, 200
 
     def post(self):
-        response = batch.batch_annotate(request.get_json(), text_sanitizer.sanitize, preloaded, available_languages)
+        payload = request.get_json()
+        batch = payload["batch"]
+        # group data points by language
+        by_lang = batches.data_points_by_lang(batch, available_languages)
+        # annotate batch and and merge with original batch
+        annotated_batch = batches.add_annotations_to_batch(
+            batches.annotate_batch(
+                batches.iter_array_of_data_points(by_lang),
+                text_sanitizer.sanitize,
+                preloaded,
+            ), by_lang)
+        # return payload in the same format as received i.e., {"batch": [{}, {}, ...]}
+        response = {"batch": [annotated_data_point for annotated_data_point in annotated_batch]}
+        console.info(response)
         return response, 201
 
 
@@ -38,7 +55,20 @@ if __name__ == "__main__":
     parser.add_argument("--host", default="0.0.0.0", help="The host IP address.")
     parser.add_argument("--port", default=5001, help="The host port.")
     parser.add_argument(
-        "--debug", action="store_true", default=False, help="Enable debugging."
+        "--debug",
+        action="store_true",
+        default=False,
+        help="Enable debugging. Default is %(default)s.",
     )
     args = parser.parse_args()
+
+    # setup logging
+    logging.basicConfig(
+        format="[%(asctime)s] [%(name)s:%(lineno)d] [%(levelname)s]: %(message)s",
+        datefmt="%Y-%m-%dT%H:%M:%S%z",
+        level=os.getenv("LOG_LEVEL", "INFO"),
+    )
+    console = logging.getLogger("floods.api")
+
+    # start api
     app.run(debug=args.debug, host=args.host, port=args.port)

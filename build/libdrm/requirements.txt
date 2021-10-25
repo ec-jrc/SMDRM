@@ -1,3 +1,4 @@
 marshmallow==3.13.0
+pydantic==1.8.2
 requests==2.26.0
 pytz==2021.1

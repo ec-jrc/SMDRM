@@ -1,68 +1,48 @@
 # LIBDRM
 
-Common helper modules shared by the pipeline services.
+Python based modules representing the core functionality of the SMDRM application.
 
-LIBDRM contains SMDRM project specific modules, namely:
-* datamodel
-* rabbitmq
+Currently, there are four core modules:
+* [apis.py](src/libdrm/apis.py)
+* [elastic.py](src/libdrm/elastic.py)
+* [pipeline.py](src/libdrm/pipeline.py)
+* [schemas.py](src/libdrm/schemas.py)
 
+## [Apis](src/libdrm/apis.py)
 
-## Datamodel
+This module holds information on available APIs to execute operations such as annotation and caching of data points.
 
-The SMDRM service is intended for scientists and researchers to bring raw data, and obtain an enriched product.
-Disaster type probability annotation and geo localization of events 
-that can be analysed and reported back to their customers.
+It contains a lookup table with url instructions to contact them. Finally, it implements functions to check/wait on
+their current statuses. The latter is particularly useful during SMDRM application microservice start up.
 
+## [Elastic](src/libdrm/elastic.py)
 
-Although, data can take different forms, there is a set of required fields with which we create a data model.
-A single data point, aka a disaster-related event, must have:
-* `created_at`: the date and time of occurrence of the event
-* `text`: the textual information for annotation
-* `lang`: (optional) the language of the text field
+This module contains a custom ElasticSearch Client that performs the following API operations:
+* create index template
+* create/delete index
+* add document
+* add document batch
 
-The `DisasterEventModel` Python class in `libdrm.datamodels` module structures events by enforcing a specific data model.
-Import the class in any microservice to ensure the data consistency and to enable useful class methods
-to interact with an event.
+It also contains the ElasticSearch Template Mappings definition to set the data structure of indexed data points.
 
+## [Pipeline](src/libdrm/pipeline.py)
 
-## RabbitMQ
+SMDRM Data Processing Pipeline enables the creation of ad hoc data processing pipeline 
+with regard to the task at hand using a combination of Template and Bridge Design Patterns.
 
-[RabbitMQ](https://www.rabbitmq.com/) is an open source message broker.
-SMDRM Docker microservices depends on its message queuing features to stream events from one another.
+It also defines the required fields of the Disaster (data point) Model via
+the DisasterModel Class using [Pydantinc](https://pydantic-docs.helpmanual.io/).
 
-The `libdrm.rabbitmq` module features a common [producer](bin/producer.py), and
-a [consumer](bin/consumer.py) functions that can be imported into any Docker service.
-This allows any microservice to produce and/or consume events from a specific queue.
+A custom sequence of pipeline Steps can be used to make a pipeline to process input data.
 
-### Requirements
+The most important steps include:
+* read zip files
+* read JSON files (inside the zip file)
+* validate/parse JSON file content
+* read JSON file content in batches (useful for annotation)
 
-The [pika](https://pika.readthedocs.io/en/stable/) Python library is a pure-Python implementation of the AMQP 0-9-1
-protocol, same as RabbitMQ.
+## [Schemas](src/libdrm/schemas.py)
 
-### Config
-
-There are 2 environment variables, namely `RABBITMQ_QUEUE` and `RABBITMQ_HOST` that need to be set accordingly for
-each microservice.
-
-### Run
-
-The best way to run RabbitMQ service is with Docker:
-
-```shell
-docker run -it --rm --name rabbitmq --hostname rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:3.9-management
-```
-
-> :info: INFO :info:
-> the `3.9-management` version comes with some management plugins pre-installed and it exposes a handy UI.
-> Go to the RabbitMQ [Management UI](http://localhost:15672). Typically, the UI is exposed on port 15672.
-
-### Test
-
-A test version of the RabbitMQ service should be up and running before testing begins.
-
-```shell
-make test-rabbitmq-server
-```
-
-The `make unittests` command spawns a test version of RabbitMQ service before the actual tests run.
-For more info, check the [Makefile](Makefile).
+This module uses [Marshmallow](https://marshmallow.readthedocs.io/en/stable/) data model schemas to validate
+the uploaded zip file and metadata.
+It ensures the validity of the user input data, preventing any invalid data to enter the data processing pipeline.

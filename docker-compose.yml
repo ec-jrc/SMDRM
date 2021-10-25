@@ -2,6 +2,27 @@ version: "3.7"
 
 services:
 
+  upload:
+    build:
+      context: upload
+      target: builder
+    container_name: upload
+    env_file:
+      - "${PWD}/upload/.env"
+    healthcheck:
+      test: python -c '''import requests; requests.get("http://localhost:5000").status_code == 200'''
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    image: uploadapi:latest
+    networks:
+      - backend
+    ports:
+      - "5000:5000"
+    restart: on-failure
+    volumes:
+      - "uploads:/upload/uploads"  # uploads directory
+
   engine:
     build:
       context: engine
@@ -9,14 +30,19 @@ services:
     container_name: engine
     env_file:
       - "${PWD}/engine/.env"
-    image: engine:latest
+    healthcheck:
+      test: python -c '''import requests; requests.get("http://localhost:5555").status_code == 200'''
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    image: engineapi:latest
     networks:
       - backend
     ports:
       - "5555:5555"
-    restart: always
+    restart: on-failure
     volumes:
-      - "${PWD}/engine/uploads:/engine/uploads" # path observed for new uploads
+      - "uploads:/engine/uploads"
 
   floods:
     build:
@@ -70,6 +96,7 @@ services:
 
 volumes:
   es_node:
+  uploads:
 
 networks:
   backend:

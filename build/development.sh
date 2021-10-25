@@ -8,14 +8,10 @@ set -ue
 # define project root directory from current
 CWD="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 
-# create smdrm backend network if it does not exist
-# it enables containers communications
-docker network create smdrm_backend || true
-
 # run in development mode
 docker run --rm -it \
   --name smdrm-dev \
-  --network smdrm_backend \
+  --network host \
   -v "${CWD}/..:/workspace" \
   -w /workspace \
   dev/smdrm:latest \

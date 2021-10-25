@@ -1,14 +1,9 @@
 """
 ElasticSearch Client and Index Templates
 """
-
 import json
 import typing
-
 import requests
-
-import libdrm.nicelogging
-import libdrm.deploy
 
 
 # ElasticSearch Index Templates for SMDRM Data Model
@@ -16,8 +11,20 @@ explicit_mapping = {
     "template": {
         "mappings": {
             "properties": {
-                "annotation": {
-                    "type": "float"
+                "annotations": {
+                    "type": "nested",
+                    "include_in_parent": True,
+                    "properties": {
+                        "annotation_type": {
+                           "type": "keyword"
+                        },
+                        "annotation_prob": {
+                            "type": "float"
+                        },
+                        "sanitized_text": {
+                            "type": "text"
+                        }
+                    }
                 },
                 "created_at": {
                     "type": "date",
@@ -27,20 +34,23 @@ explicit_mapping = {
                 "id": {
                     "type": "text"
                 },
-                "img": {
-                    "type": "object"
-                },
                 "lang": {
                     "type": "keyword"
                 },
                 "text": {
                     "type": "text"
                 },
-                "disaster_type": {
+                "latitude": {
+                    "type": "float"
+                },
+                "longitude": {
+                    "type": "float"
+                },
+                "place_name": {
                     "type": "keyword"
                 },
-                "text_sanitized": {
-                    "type": "text"
+                "place_type": {
+                    "type": "keyword"
                 },
                 "uploaded_at": {
                     "type": "date",
@@ -76,10 +86,6 @@ def build_template(components: list):
     }
 
 
-# console logging
-console = libdrm.nicelogging.console_logger("elastic.client")
-
-
 class ElasticSearchClient:
     """
     SMFR ElasticSearch Client to interact with the nodes.
@@ -111,8 +117,10 @@ class ElasticSearchClient:
         templates can contain a collection of component templates, as well as
         directly specify settings, mappings, and aliases.
         """
-        response = requests.put(f"{self.url}/_component_template/{component_id}", json=mapping)
-        console.debug(response.json())
+        response = requests.put(
+            "{url}/_component_template/{cid}".format(url=self.url, cid=component_id),
+            json=mapping
+        )
         return response
 
     def create_index_template(self, component_ids: typing.List[str]) -> requests.Response:
@@ -122,33 +130,26 @@ class ElasticSearchClient:
         Templates are configured prior to index creation. When an index is created - either manually or through
         indexing a document - the template settings are used as a basis for creating the index.
         """
-        console.info("Creating index template")
-        response = requests.put(f"{self.url}/_index_template/smdrm_template", json=build_template(component_ids))
-        console.debug(response.json())
-        return response
+        return requests.put(
+            "{url}/_index_template/smdrm_template".format(url=self.url),
+            json=build_template(component_ids)
+        )
 
-    def create_index(self):
+    def create_index(self) -> requests.Response:
         self.build_component_template("explicit_mapping", explicit_mapping)
         self.create_index_template(["explicit_mapping"])
-        response = requests.put(f"{self.url}/{self.index}")
-        console.debug(response.json())
-        return response
+        return requests.put("{url}/{index}".format(url=self.url, index=self.index))
 
     def delete_index(self) -> requests.Response:
-        response = requests.delete(f"{self.url}/{self.index}")
-        console.debug(response.json())
-        return response
+        return requests.delete("{url}/{index}".format(url=self.url, index=self.index))
 
     def doc_insert(self, data_point: dict) -> requests.Response:
-        console.info("Add single data point to index")
-        doc_id = data_point["id"]
-        response = requests.post(f"{self.url}/{self.index}/_doc/{doc_id}", json=data_point)
-        console.info("[{id}]: inserted".format(id=doc_id))
-        console.debug(response.json())
-        return response
+        return requests.post(
+            "{url}/{index}/_doc/{id}".format(url=self.url, index=self.index, id=data_point["id"]),
+            json=data_point
+        )
 
     def bulk_insert(self, data_points: typing.List[dict]) -> requests.Response:
-        console.info("Add multiple data points to index")
         ndjson_data = (
             "\n".join(
                 "{meta}\n{event}".format(
@@ -159,7 +160,8 @@ class ElasticSearchClient:
             )
             + "\n"
         )
-        response = requests.post(f"{self.url}/{self.index}/_bulk", headers={"Content-Type": "application/x-ndjson"}, data=ndjson_data)
-        console.info("#{} documents inserted".format(len(data_points)))
-        console.debug(response.json())
-        return response
+        return requests.post(
+            "{url}/{index}/_bulk".format(url=self.url, index=self.index),
+            headers={"Content-Type": "application/x-ndjson"},
+            data=ndjson_data
+        )

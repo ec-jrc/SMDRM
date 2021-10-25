@@ -7,12 +7,8 @@ RUN set -xe; \
     apt update && apt upgrade -y && apt clean && rm -rf /var/lib/apt/lists/*; \
     # make python virtual environment
     python3 -m venv /opt/venv; \
-    # upgrade
-    /opt/venv/bin/python3 -m pip install -U pip wheel; \
-    # install project dependencies
-    /opt/venv/bin/python3 -m pip install -r /requirements.txt; \
-    # install core libs
-    /opt/venv/bin/python3 -m pip install /libdrm
+    # upgrade, install dependencies, and core libs
+    /opt/venv/bin/python3 -m pip install -U pip wheel -r /requirements.txt /libdrm
 # update PATH with python env
 ENV PATH="/opt/venv/bin:$PATH"
 # execute this

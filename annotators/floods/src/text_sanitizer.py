@@ -1,5 +1,6 @@
 import re
 import string
+import typing
 
 
 regexp = {
@@ -18,18 +19,15 @@ regexp = {
 }
 
 
-def no_punctuation(text, punctuation=string.punctuation):
-    """
-    removing the following chars from text:
-        !"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~
+def no_punctuation(text: str, punctuation: str = string.punctuation) -> str:
+    """Remove the following chars from text:
+    !"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~
     """
     return text.translate(str.maketrans("", "", punctuation))
 
 
-def features_normalizer(text):
-    """
-    Perform Twitter text normalization.
-    """
+def features_normalizer(text: str) -> str:
+    """Twitter features normalization."""
     text = text.lstrip("RT ")
     # Ampersand
     text = regexp["ampersand"].sub(" and ", text)
@@ -54,7 +52,7 @@ def features_normalizer(text):
     return text.strip()
 
 
-def sanitize(texts: list):
+def sanitize(texts: typing.List[str]) -> typing.List[str]:
     normalized = list(map(features_normalizer, texts))
     normalized_clean = list(map(no_punctuation, normalized))
     return normalized_clean

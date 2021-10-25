@@ -15,7 +15,9 @@ class FloodsAnnotator(object):
     """
 
     # the path to the floods models
-    MODELS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "models")
+    MODELS_PATH = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)), "..", "models"
+    )
 
     def __init__(self, lang: str):
         # lang
@@ -24,7 +26,8 @@ class FloodsAnnotator(object):
         self._model_id = self._get_model_id()
         # load model at init
         self._model = load_model(
-            os.path.join(self.MODELS_PATH, "models", f"{self._model_id}.model.h5"), compile=False
+            os.path.join(self.MODELS_PATH, "models", f"{self._model_id}.model.h5"),
+            compile=False,
         )
         # load embeddings if multi lingual model is selected
         if self.is_multi_lang:

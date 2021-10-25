@@ -12,9 +12,9 @@ venv
 build/libdrm/dist
 build/libdrm/build
 
-# annotator
+# models
 annotators/floods/models
-# engine
-engine/uploads/**/*.zip
+# uploads
+uploads/*.zip
 # var
 temp

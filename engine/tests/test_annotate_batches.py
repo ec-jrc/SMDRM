@@ -4,8 +4,7 @@ import sys
 from unittest.mock import Mock
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent))
-from start import iter_annotate_batches
-from apis import api_annotate, requests
+from start import iter_annotate_batches, requests, apis_by_disaster
 
 
 def test_iter_batch_annotate_floods(monkeypatch):
@@ -27,13 +26,14 @@ def test_iter_batch_annotate_floods(monkeypatch):
         ]
         * 2
     }
-    expected = 4
+    expected_calls = 4
+    expected_url = apis_by_disaster["floods"]   # http://floods:5001/annotate
     mocked_response.json.return_value = input_batch
     monkeypatch.setattr("requests.post", mocked_response)
-    for _ in iter_annotate_batches([input_batch] * expected):
+    for _ in iter_annotate_batches([input_batch] * expected_calls):
         pass
     # as passed disaster type is floods
-    assert requests.post.call_args[0] == ("http://floods:5001/annotate",)
+    assert requests.post.call_args[0] == (expected_url,)
     # json as in requests.post call
     assert requests.post.call_args[1] == {"json": input_batch}
-    assert requests.post.call_count == expected
+    assert requests.post.call_count == expected_calls

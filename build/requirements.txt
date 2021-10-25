@@ -1,7 +1,10 @@
 black
+Flask==2.0.1
+Flask-RESTful==0.3.9
 marshmallow==3.13.0
-requests==2.26.0
+pydantic==1.8.2
 pylint
 pytest
 pytz==2021.1
+requests==2.26.0
 wheel

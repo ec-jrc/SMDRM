@@ -1,8 +1,8 @@
 # Social Media Disaster Risk Monitoring
 
-Social Media Disaster Risk Monitoring, SMDRM in short, is a Docker based microservice.
-It supports you to [prepare](#prepare), [annotate](#annotate), and [analyse](#analyse)
-[disaster](#disaster) related social media [data points](#data-point).
+Social Media Disaster Risk Monitoring, *SMDRM* in short, is a Docker based microservice application.
+It supports you to [_prepare_](#prepare), [_annotate_](#annotate), and [_analyse_](#analyse)
+[_disaster_](#disaster) related social media [_data points_](#data-point).
 
 You can upload unprocessed compressed data and obtain a new product that can be extracted, monitored,
 and/or visualized through a powerful dashboard.
@@ -15,31 +15,35 @@ and/or visualized through a powerful dashboard.
 
 *SMDRM Diagram*
 
-Add description of logical connections between microservices
-
 Source [diagrams.net](https://www.diagrams.net/)
+
+Table 1 shows the microservices the SMDRM application is made of
+
+|Name|Image|Host|Port|Responsibilities|
+|----|-----|----|----|----------------|
+|[Upload API](upload/README.md)|[_uploadapi_](build/Dockerfile)|`upload`|`5000`|Validates and caches uploaded zip files to the _uploads_ Docker Volume for other services to use it. Communicates with the Engine API when a file upload terminates|
+|[Engine API](engine/README.md)|[_engineapi_](build/Dockerfile)|`engine`|`5555`|Implements a data processing pipeline and contacts the Annotations and ElasticSearch APIs to enrich and save data points|
+|[Floods API](annotators/floods/README.md)|[_floodsapi_](annotators/floods/Dockerfile)|`floods`|`5001`|Implements Floods disaster type annotation|
+|ElasticSearch|[_elasticsearch_](docker-compose.yml)|`elasticsearch`|`9200`|Implements ElasticSearch DB for caching enriched data points|
+|Kibana|[_kibana_](docker-compose.yml)|`kibana`|`5601`|Implements Kibana UI for visualization and aggregation of enriched data points cached in ElasticSearch DB|
+
+_Table 1. SMDRM Microservices_
 
 
 ## Requirements
 
 ### Technology Stack
 
-* Python
-  * \>3.7,<3.9
-* Docker Engine
-  * 20.10.9
-* Docker Compose
-  * 1.29.1, build c34c88b2
-* ElasticSearch (DB)
-  * 7.15.0
-* Kibana (UI)
-  * 7.15.0
+* Python >3.7,<3.9
+* Docker Engine 20.10.9
+* Docker Compose 1.29.1, build c34c88b2
+* ElasticSearch (DB) & Kibana (UI) 7.15.0
 * [Machine Learning NER Algorithms](annotators/README.md)
 
 
-### Data Model
+### Data Point Model
 
-Table 1 shows the required fields and expected format
+Table 2 shows the required fields and expected format
 
 |Field|Type|Format|Description|Note|
 |-----|----|------|-----------|----|
@@ -47,12 +51,16 @@ Table 1 shows the required fields and expected format
 |`created_at`|str|`EEE LLL dd HH:mm:ss Z yyyy`|The date and time at which the data point is created|Twitter based datetime format. Elasticsearch will convert this field to a date provided that it comes in this format. Therefore, make sure you convert your equivalent `created_at` field accordingly.|
 |`lang`|str|2 character language code|`en`=English|Any language beside `en`, `es`, `de`, `fr`, `it`, `ar`, `ja`, and `pt` will be converted to `ml` (multilingual) and vectorized with Laserembeddings. For more info, check the Annotators [README.md](annotators/README.md)|
 |`text`|str| |The textual information to be annotated and/or geo located|Only textual information that fall inside this field will be considered. Therefore, make sure you sanitize your data accordingly.|
-|`disaster_type`|str|`floods`, |This field selects the specific Machine Learning model trained to annotate this type of environment disaster.|We expect the disaster type to come from you either in each data point or as a global environment variable.|
+|`annotations`|List[dict]|`{"annotations": [{"annotation_type": "string", "annotation_prob": "float", "sanitized_text": "string"}]`|The JSON response of the annotators used on the data point|Optional field. Populated by selected annotators|
+|`latitude`|float| |The place geographic latitude the data point refers to|Optional field|
+|`longitude`|float| |The place geographic longitude the data point refers to|Optional field|
+|`place_name`|str| |The place name the data point refers to|Optional field|
+|`place_type`|str| |The place type the data point refers to|Optional field|
 
-_Table 1. Data Point Model_
+_Table 2. Data Point Model_
 
 > :information_source: For detailed info about the data model,
-> check the [DisasterModel & DisasterSchema](build/libdrm/src/libdrm/datamodels/disaster.py)
+> check the [DisasterModel](build/libdrm/src/libdrm/pipeline.py)
 
 
 ## Usage
@@ -71,6 +79,9 @@ bash build/image.sh
 
 > :warning: This task required Docker Engine to be installed on you host.
 > For more info, check [https://docs.docker.com/get-docker/](https://docs.docker.com/get-docker/).
+
+The `libdrm` package contains the core functionalities that Docker Containers import to execute specific tasks.
+For more info, check the [README.md](build/libdrm/README.md)
 
 
 ### Run
@@ -150,7 +161,7 @@ python -m pytest --disable-warnings build/libdrm
 
 ### Clean Up
 
-Execute the following command to stop the service and cleanup Docker data volumes.
+Execute the following command to stop the service
 ```shell
 docker-compose down
 ```
@@ -187,7 +198,7 @@ in a data point inside.
 ### Data Point
 
 The smallest data unit. It is a JSON formatted dictionary made of a number of required fields.
-For more info, see the [Data Model](#data-model) section.
+For more info, see the [Data Point Model](#data-point-model) section.
 
 
 ### Disaster
@@ -210,4 +221,4 @@ Each upload has the following requirements:
 * at least 1 JSON file in the zip file
 * only 1 JSON formatted data point for each line in the JSON file
 
-You can verify the required data point structure in the [Data Model](#data-model) section.
+You can verify the required data point structure in the [Data Point Model](#data-point-model) section.

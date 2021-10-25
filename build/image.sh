@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -xe
+set -ue
 
 # define project root directory from current
 CWD="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"

@@ -40,7 +40,7 @@ if __name__ == "__main__":
     level = "info" if not args.debug else "debug"
     console = libdrm.nicelogging.console_logger("file_parser", level=level.upper())
     # the required fields to filter parsed lines against
-    required_fields = libdrm.datamodels.disaster.DisasterModel.get_required_fields()
+    required_fields = libdrm.datamodels.DisasterModel.get_required_fields()
     # make parsing pipeline
     parsing_pipeline = iter_lines_to_parse(iter_from_json_file(args.path))
     # save to new file (*_parsed.*) in the same directory

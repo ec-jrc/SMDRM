@@ -1,16 +1,18 @@
 FROM dev/smdrm:latest as builder
 ENV DEBIAN_FRONTEND=noninteractive \
-    ROOT_DIR=/engine
+    ROOT_DIR=/upload
 
 # prepare workspace
 WORKDIR $ROOT_DIR
 COPY ./requirements.txt ./requirements.txt
 RUN python -m pip --no-cache-dir install -r requirements.txt
 # copy app source code to container
-COPY ./tests ./tests
 COPY ./api.py ./api.py
 COPY ./README.md ./README.md
 
-# start engine
+# uploads volume
+VOLUME $ROOT_DIR/uploads
+
+# start uploader
 ENTRYPOINT ["python", "api.py"]
 CMD []
