@@ -108,8 +108,8 @@ def valid_json_bytes_iterator(valid_zipfile):
     and JSONFilesToJSONLines steps to returns batches of valid JSON bytes."""
     steps = [
         libdrm.pipeline.ZipFilesToJSONFiles(),
-        libdrm.pipeline.JSONFilesToJSONLines()
+        libdrm.pipeline.JSONFilesToJSONLines(),
     ]
     # create 25 copies of valid zipfile
-    pipeline = libdrm.pipeline.Pipeline([valid_zipfile]*25, steps)
+    pipeline = libdrm.pipeline.Pipeline([valid_zipfile] * 25, steps)
     yield pipeline.build()
