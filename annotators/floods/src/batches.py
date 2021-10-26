@@ -40,11 +40,11 @@ def add_annotations_to_batch(annotated_batch, by_lang):
         batch_by_lang = by_lang[lang]
         for index in range(len(batch_by_lang)):
             batch_data_point = batch_by_lang[index]
-            batch_data_point["annotations"] = [
+            batch_data_point["annotations"].append(
                 {
                     "annotation_type": "floods",
                     "annotation_prob": str(annotated[index]),
                     "sanitized_text": sanitized[index]
                 }
-            ]
+            )
             yield batch_data_point

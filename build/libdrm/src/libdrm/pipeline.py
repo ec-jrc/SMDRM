@@ -39,7 +39,7 @@ class DisasterModel(pydantic.BaseModel, extra=pydantic.Extra.ignore):
     text: str
     # opts
     # annotations
-    annotations: typing.Optional[list]
+    annotations: typing.Optional[list] = []
     # location based fields
     latitude: typing.Optional[float]
     longitude: typing.Optional[float]
