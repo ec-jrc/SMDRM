@@ -89,12 +89,12 @@ class JSONFilesToJSONLines(Step):
 
 @dataclass
 class JSONLinesToDataPoints(Step):
-    """Represents a Pipeline Step to iterate valid JSON bytes from JSON files."""
+    """Represents a Pipeline Step to iterate valid JSON dictionaries from JSON bytes."""
 
     # deserialize DisasterModel object may be useful for API calls
     deserialize: bool = False
 
-    def logic(self, json_lines: typing.Iterable[dict]) -> typing.Iterable[DisasterModel]:
+    def logic(self, json_lines: typing.Iterable[dict]) -> typing.Iterable[typing.Union[dict, DisasterModel]]:
         for json_line in json_lines:
             try:
                 data_point = DisasterModel(**json_line)
