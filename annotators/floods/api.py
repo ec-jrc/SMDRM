@@ -41,7 +41,7 @@ class FloodsAPI(Resource):
             ), by_lang)
         # return payload in the same format as received i.e., {"batch": [{}, {}, ...]}
         response = {"batch": [annotated_data_point for annotated_data_point in annotated_batch]}
-        console.info(response)
+        console.debug(response)
         return response, 201
 
 
