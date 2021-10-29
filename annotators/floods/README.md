@@ -5,7 +5,7 @@ Docker service based on `Python:3.8-slim` image.
 It uses Machine Learning models trained on text related to flood disasters to annotate new incoming texts.
 It requires `lang` and `text` fields to be able to compute an annotation.
 
-> :information_source: You can control the annotation batch size with the `BATCH_SIZE_ANNOTATE`
+> :information_source: You can control the annotation batch size with the `ANNOTATION_BATCH_SIZE`
 > environment variable in the Engine .env file.
 
 ## Instructions

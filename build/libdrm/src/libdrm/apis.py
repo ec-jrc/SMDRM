@@ -10,7 +10,7 @@ console = logging.getLogger("libdrm.apis")
 # dictionary key should match the libdrm.schemas.MetadataUploadSchema *_annotator properties
 APIs_lookup = {
     "elastic": "http://elasticsearch:9200",
-    # "fires_annotator": "http://fires:5002/annotate",
+    "fires_annotator": "http://fires:5002/annotate",
     "floods_annotator": "http://floods:5001/annotate",
 }
 

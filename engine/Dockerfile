@@ -1,4 +1,4 @@
-FROM dev/smdrm:latest as builder
+FROM smdrm-dev:latest as dev
 ENV DEBIAN_FRONTEND=noninteractive \
     ROOT_DIR=/engine
 

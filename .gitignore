@@ -13,8 +13,9 @@ build/libdrm/dist
 build/libdrm/build
 
 # models
-annotators/floods/models
+annotators/**/models
+annotators/fires/tmp_trainer
 # uploads
-uploads/*.zip
+*.zip
 # var
 temp

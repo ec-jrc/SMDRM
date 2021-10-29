@@ -1,15 +1,26 @@
-FROM python:3.8-slim
-# prepare workspace
-COPY ./requirements.txt /requirements.txt
-COPY ./libdrm /libdrm
-RUN set -xe; \
-    # update OS
-    apt update && apt upgrade -y && apt clean && rm -rf /var/lib/apt/lists/*; \
-    # make python virtual environment
-    python3 -m venv /opt/venv; \
-    # upgrade, install dependencies, and core libs
-    /opt/venv/bin/python3 -m pip install -U pip wheel -r /requirements.txt /libdrm
-# update PATH with python env
-ENV PATH="/opt/venv/bin:$PATH"
-# execute this
+FROM python:3.8-slim-bullseye as dev
+
+RUN python3 -m venv /smdrm \
+    && /smdrm/bin/python -m pip install --no-cache-dir -U pip setuptools wheel
+
+WORKDIR /smdrm
+COPY requirements.txt .
+COPY ./libdrm/LICENSE.txt ./libdrm/LICENSE.txt
+COPY ./libdrm/README.md ./libdrm/README.md
+COPY ./libdrm/pyproject.toml ./libdrm/pyproject.toml
+COPY ./libdrm/setup.cfg ./libdrm/setup.cfg
+COPY ./libdrm/setup.py ./libdrm/setup.py
+COPY ./libdrm/requirements.txt ./libdrm/requirements.txt
+COPY ./libdrm/tests ./libdrm/tests
+COPY ./libdrm/src ./libdrm/src
+
+RUN bin/pip install --no-cache-dir -r requirements.txt libdrm/
+
+ENV PYTHONUNBUFFERED=1 \
+    # print to stdout without buffering
+    PYTHONDONTWRITEBYTECODE=1 \
+    # don't generate *.pyc files
+    PATH="/smdrm/bin:$PATH"
+    # export the python executable
+
 CMD ["python"]

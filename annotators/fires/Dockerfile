@@ -6,13 +6,12 @@ RUN python3 -m venv /app \
 WORKDIR /app
 
 COPY requirements.txt .
-RUN bin/pip --no-cache-dir install torch==1.10.0+cpu -f https://download.pytorch.org/whl/cpu/torch_stable.html \
-    && bin/pip --no-cache-dir install -r requirements.txt
+RUN bin/pip --no-cache-dir install -r requirements.txt
 
-COPY ./README.md ./README.md
-COPY ./api.py ./api.py
-COPY ./tests ./tests
-COPY ./src ./src
+COPY README.md .
+COPY api.py .
+COPY src ./src
+COPY tests ./tests
 
 ENV DEBIAN_FRONTEND=noninteractive \
     LANG=C.UTF-8 \

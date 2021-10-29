@@ -13,6 +13,7 @@ class MetadataUploadSchema(marshmallow.Schema):
     Format: <disaster_type>_annotator
     """
     floods_annotator = marshmallow.fields.Boolean(load_default=False)
+    fires_annotator = marshmallow.fields.Boolean(load_default=False)
 
     class Meta:
         unknown = marshmallow.EXCLUDE

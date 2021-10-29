@@ -5,7 +5,7 @@ services:
   upload:
     build:
       context: upload
-      target: builder
+      target: dev
     container_name: upload
     env_file:
       - "${PWD}/upload/.env"
@@ -26,7 +26,7 @@ services:
   engine:
     build:
       context: engine
-      target: builder
+      target: dev
     container_name: engine
     env_file:
       - "${PWD}/engine/.env"
@@ -44,10 +44,29 @@ services:
     volumes:
       - "uploads:/engine/uploads"
 
+  fires:
+    build:
+      context: annotators/fires
+      target: dev
+    container_name: fires
+    healthcheck:
+      test: python -c '''import requests; requests.get("http://localhost:5002").status_code == 200'''
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    image: firesapi:latest
+    networks:
+      - backend
+    ports:
+      - "5002:5002"
+    restart: on-failure
+    volumes:
+      - "${PWD}/annotators/fires/models:/app/models"
+
   floods:
     build:
       context: annotators/floods
-      target: builder
+      target: dev
     container_name: floods
     healthcheck:
       test: python -c '''import requests; requests.get("http://localhost:5001").status_code == 200'''
@@ -61,7 +80,7 @@ services:
       - "5001:5001"
     restart: on-failure
     volumes:
-      - "${PWD}/annotators/floods/models:/floods/models"
+      - "${PWD}/annotators/floods/models:/app/models"
 
   elasticsearch:
     container_name: elasticsearch

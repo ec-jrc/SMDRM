@@ -13,8 +13,8 @@ build/libdrm/dist
 build/libdrm/build
 
 # annotator
-annotators/floods/models
+annotators/**/models
 # engine
-engine/uploads
+*.zip
 # var
 temp
