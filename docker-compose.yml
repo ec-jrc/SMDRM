@@ -5,7 +5,6 @@ services:
   upload:
     build:
       context: upload
-      target: dev
     container_name: upload
     env_file:
       - "${PWD}/upload/.env"
@@ -21,12 +20,11 @@ services:
       - "5000:5000"
     restart: on-failure
     volumes:
-      - "uploads:/upload/uploads"  # uploads directory
+      - "uploads:/upload/uploads"
 
   engine:
     build:
       context: engine
-      target: dev
     container_name: engine
     env_file:
       - "${PWD}/engine/.env"

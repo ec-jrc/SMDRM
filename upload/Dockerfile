@@ -1,18 +1,20 @@
-FROM smdrm-dev:latest as dev
-ENV DEBIAN_FRONTEND=noninteractive \
-    ROOT_DIR=/upload
+FROM python:3.8-slim-bullseye
+LABEL Author.Name="Emanuele Panizio" Author.Email="Emanuele.PANIZIO@ext.ec.europa.eu"
 
-# prepare workspace
-WORKDIR $ROOT_DIR
-COPY ./requirements.txt ./requirements.txt
-RUN python -m pip --no-cache-dir install -r requirements.txt
-# copy app source code to container
+RUN python3 -m venv /upload \
+    && /upload/bin/python -m pip install --no-cache-dir -U pip setuptools
+
+WORKDIR /upload
+COPY requirements.txt .
+RUN bin/pip install --no-cache-dir -r requirements.txt
+
 COPY ./api.py ./api.py
 COPY ./README.md ./README.md
 
-# uploads volume
-VOLUME $ROOT_DIR/uploads
+VOLUME /upload/uploads
 
-# start uploader
-ENTRYPOINT ["python", "api.py"]
-CMD []
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PATH="/upload/bin:$PATH"
+
+CMD ["python", "api.py"]

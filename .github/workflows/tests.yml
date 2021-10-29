@@ -1,0 +1,25 @@
+name: LIBDRM Tests
+
+on: push
+
+jobs:
+  build-n-test:
+    name: Build and Test LIBDRM Python Package
+    runs-on: ubuntu-18.04
+
+    steps:
+    - uses: actions/checkout@master
+    - name: Set up Python 3.8
+      uses: actions/setup-python@v1
+      with:
+        python-version: 3.8
+
+    - name: Install Dependencies
+      run: |
+        # upgrade and install test deps
+        python3 -m pip install --upgrade pip pytest
+        # install package locally for testing purposes
+        python3 -m pip install libdrm/
+
+    - name: Run Tests
+      run: python3 -m pytest -v libdrm/tests

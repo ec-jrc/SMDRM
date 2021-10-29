@@ -2,7 +2,7 @@
 
 Social Media Disaster Risk Monitoring, *SMDRM* in short, is a Docker based microservice application.
 It supports you to [_prepare_](#prepare), [_annotate_](#annotate), and [_analyse_](#analyse)
-[_disaster_](#disaster) related social media [_data points_](#data-point).
+[_disaster_](#disaster) related social media [_data points_](#input-data).
 
 You can upload unprocessed compressed data and obtain a new product that can be extracted, monitored,
 and/or visualized through a powerful dashboard.
@@ -23,6 +23,7 @@ Table 1 shows the microservices the SMDRM application is made of
 |----|-----|----|----|----------------|
 |[Upload API](upload/README.md)|[_uploadapi_](build/Dockerfile)|`upload`|`5000`|Validates and caches uploaded zip files to the _uploads_ Docker Volume for other services to use it. Communicates with the Engine API when a file upload terminates|
 |[Engine API](engine/README.md)|[_engineapi_](build/Dockerfile)|`engine`|`5555`|Implements a data processing pipeline and contacts the Annotations and ElasticSearch APIs to enrich and save data points|
+|[Fires API](annotators/fires/README.md)|[_firesapi_](annotators/fires/Dockerfile)|`fires`|`5002`|Implements Fires disaster type annotation|
 |[Floods API](annotators/floods/README.md)|[_floodsapi_](annotators/floods/Dockerfile)|`floods`|`5001`|Implements Floods disaster type annotation|
 |ElasticSearch|[_elasticsearch_](docker-compose.yml)|`elasticsearch`|`9200`|Implements ElasticSearch DB for caching enriched data points|
 |Kibana|[_kibana_](docker-compose.yml)|`kibana`|`5601`|Implements Kibana UI for visualization and aggregation of enriched data points cached in ElasticSearch DB|
@@ -41,9 +42,9 @@ _Table 1. SMDRM Microservices_
 * [Machine Learning NER Algorithms](annotators/README.md)
 
 
-### Data Point Model
+### Input Data
 
-Table 2 shows the required fields and expected format
+Table 2 shows the required fields and expected format of the input data
 
 |Field|Type|Format|Description|Note|
 |-----|----|------|-----------|----|
@@ -57,10 +58,10 @@ Table 2 shows the required fields and expected format
 |`place_name`|str| |The place name the data point refers to|Optional field|
 |`place_type`|str| |The place type the data point refers to|Optional field|
 
-_Table 2. Data Point Model_
+_Table 2. Input Data_
 
 > :information_source: For detailed info about the data model,
-> check the [DisasterModel](build/libdrm/src/libdrm/pipeline.py)
+> check the [DisasterModel](libdrm/src/libdrm/pipeline.py)
 
 
 ## Usage
@@ -69,24 +70,14 @@ This section describes how users should interact with the SMDRM service.
 
 > :information_source: Execute the following commands from the project root directory
 
-
-### Build
-
-First, you must build and add to the Docker registry the Docker base image containing the [libdrm](build/libdrm) Python core package.
-```shell
-bash build/image.sh
-```
-
-> :warning: This task required Docker Engine to be installed on you host.
-> For more info, check [https://docs.docker.com/get-docker/](https://docs.docker.com/get-docker/).
-
 The `libdrm` package contains the core functionalities that Docker Containers import to execute specific tasks.
-For more info, check the [README.md](build/libdrm/README.md)
+For more info, check the [README.md](libdrm/README.md)
 
 
-### Run
+### Build & Run
 
-Now you are ready to start the service.
+> :warning: This task required [Docker Engine](https://docs.docker.com/get-docker/),
+> and [Docker Compose](https://docs.docker.com/compose/install/) to be installed on you host.
 
 The following command uses [docker-compose.yml](docker-compose.yml) and [.env](.env) files under the hood to define
 configurations and environment variables, respectively.
@@ -100,18 +91,10 @@ The flag `--build` will ensure all images are built.
 > :information_source: Check the status of your service instance with `docker-compose ps`,
 > access logs of specific container with `docker-compose logs <container-name>`
 
-> :warning: This task required Docker Compose to be installed on you host.
-> For more info, check [https://docs.docker.com/compose/install/](https://docs.docker.com/compose/install/).
 
+### Upload Zip Files
 
-### Upload Files
-
-You can upload zip files into ./engine/uploads/
-```shell
-cp -a <your-zip-file-path> ./engine/uploads/
-```
-
-This will trigger the Engine service to start the uploading process.
+You can upload zip files using the [Upload API](upload/README.md).
 
 > :information_source: You can verify that data points are added to ElasticSearch with
 > [http://localhost:9200/_cat/indices?v](http://localhost:9200/_cat/indices?v)
@@ -137,24 +120,12 @@ If you access the UI for the first time, an index pattern needs to be created. H
 
 ### Development
 
-Use the development environment to create and test new features in a repeatable and standard manner
-```shell
-bash build/development.sh
-```
-
-> :warning: You need to run `bash build/image.sh` if you want to use that image for development.
-
+Use the [development environment](dev/README.md) to create and test new features in a repeatable and standard manner.
 
 ### Test
 
-Enter the development environment
+Enter in the [development environment](dev/README.md) and run the tests as follows
 ```shell
-bash build/development.sh
-```
-
-Run the unittests
-```shell
-# libdrm unittests example
 python -m pytest --disable-warnings build/libdrm
 ```
 
@@ -198,7 +169,7 @@ in a data point inside.
 ### Data Point
 
 The smallest data unit. It is a JSON formatted dictionary made of a number of required fields.
-For more info, see the [Data Point Model](#data-point-model) section.
+For more info, see the [Input Data](#input-data) section.
 
 
 ### Disaster
@@ -221,4 +192,4 @@ Each upload has the following requirements:
 * at least 1 JSON file in the zip file
 * only 1 JSON formatted data point for each line in the JSON file
 
-You can verify the required data point structure in the [Data Point Model](#data-point-model) section.
+You can verify the required data point structure in the [Input Data](#input-data) section.
