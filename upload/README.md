@@ -13,7 +13,7 @@ A valid candidate for upload must:
 * contain valid JSON files i.e., a valid JSON-formatted dictionary, one for each new line
 
 > :information_source: For more info, check the ZipFileUpload Marshmallow schema, and the `validate_zip_file()`
-> function in [`libdrm.schemas.ZipFileUploadSchema`](../build/libdrm/src/libdrm/schemas.py).
+> function in [`libdrm.schemas.ZipFileUploadSchema`](../libdrm/src/libdrm/schemas.py).
 
 For each uploaded zip file that passes the sanitation:
 * a reference will be cached inside the `uploads` Docker Volume to be used by the Engine API Docker service
@@ -32,7 +32,7 @@ Table 1 shows how you can utilize the metadata to enable different annotations i
 _Table 1. Upload Metadata_
 
 > :information_source: For more info, check the MetadataUpload Marshmallow schema in
-> [`libdrm.schemas.MetadataUploadSchema`](../build/libdrm/src/libdrm/schemas.py).
+> [`libdrm.schemas.MetadataUploadSchema`](../libdrm/src/libdrm/schemas.py).
 
 ## Instructions
 

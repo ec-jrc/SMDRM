@@ -29,7 +29,7 @@ docker-compose up engine
 ```
 
 During startup time, the Engine API will check on the status of all APIs it depends on included in the
-[`libdrm.apis.APIs_lookup`](../build/libdrm/src/libdrm/apis.py) dictionary lookup.
+[`libdrm.apis.APIs_lookup`](../libdrm/src/libdrm/apis.py) dictionary lookup.
 
 > :information_source: You do not directly interact with the Engine API.
 > You can do so only via the [Upload API](../upload/README.md).

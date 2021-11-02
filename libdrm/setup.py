@@ -12,7 +12,7 @@ long_description = (here / "README.md").read_text(encoding="utf-8")
 
 setuptools.setup(
     name="libdrm",
-    version="1.0.0.dev0",
+    version='0.1.2',
     description="Common helper modules shared by the pipeline services",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -25,14 +25,13 @@ setuptools.setup(
         "Topic :: Software Development :: Build Tools",
         "License :: OSI Approved :: European Union Public Licence 1.2 (EUPL 1.2)",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3 :: Only",
     ],
     package_dir={"": "src"},
     packages=setuptools.find_packages(where="src"),
-    python_requires=">=3.7, <4",
+    python_requires=">=3.6, <3.9",
     install_requires=[
         "marshmallow",
         "pydantic",

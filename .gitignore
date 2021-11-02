@@ -9,8 +9,8 @@ venv
 .idea
 
 # libdrm
-build/libdrm/dist
-build/libdrm/build
+libdrm/dist
+libdrm/build
 
 # models
 annotators/**/models

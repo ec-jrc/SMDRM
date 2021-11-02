@@ -94,8 +94,8 @@ Table 1 lists the sequence of steps to implement a new annotator API.
 |3|Create new api.py file with Flask-RestFul based API| |
 |4|Set the instructions to build a new Docker image in a new Dockerfile| |
 |5|Add new container definition in [docker-compose.yml](../docker-compose.yml) file|Make sure to use a port within the range `5001-5050`.|
-|6|Add new URL endpoint in [`libdrm.apis.APIs_lookup`](../build/libdrm/src/libdrm/apis.py)|Format: `{"<newapi>_annotator": "http://<newapi>:<port>/<resource>"}`.|
-|7|Add metadata field in [`libdrm.schemas.MetadataUploadSchema`](../build/libdrm/src/libdrm/schemas.py) Marshmallow schema|Format: `<newapi>_annotator=marshmallow.fields.Boolean(load_default=False)`<br>By default, it is set to `False` to keep annotation optional.|
+|6|Add new URL endpoint in [`libdrm.apis.APIs_lookup`](../libdrm/src/libdrm/apis.py)|Format: `{"<newapi>_annotator": "http://<newapi>:<port>/<resource>"}`.|
+|7|Add metadata field in [`libdrm.schemas.MetadataUploadSchema`](../libdrm/src/libdrm/schemas.py) Marshmallow schema|Format: `<newapi>_annotator=marshmallow.fields.Boolean(load_default=False)`<br>By default, it is set to `False` to keep annotation optional.|
 
 
 ## Troubleshooting

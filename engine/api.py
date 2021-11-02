@@ -92,9 +92,7 @@ if __name__ == "__main__":
     libdrm.apis.check_statuses()
 
     # create elasticsearch index
-    es = libdrm.elastic.ElasticSearchClient(
-        "http://elasticsearch:9200", "smdrm-{}".format(datetime.datetime.today().date().isoformat())
-    )
+    es = libdrm.elastic.ElasticSearchClient("http://elasticsearch:9200")
     es.create_index()
 
     # start api

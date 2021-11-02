@@ -8,10 +8,9 @@ set -ue
 CWD="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 # run development service
 docker run --rm -it \
-  --gpus all \
   --name smdrm-dev \
   --network host \
   -v "${CWD}/..:/workspace" \
   -w /workspace \
-  smdrm-dev:latest \
+  dev/smdrm:v1 \
   bash "$@"

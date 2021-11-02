@@ -6,7 +6,7 @@
 > We will release it soon together with an official publication.
 > 
 > If you would like to use it before the official release,
-> please contact [Valerio Lorini]((mailto:valerio.lorini@ec.europa.eu?subject=[SMDRM]%20Fires%20Annotator%20Access).
+> please contact [Valerio Lorini](mailto:valerio.lorini@ec.europa.eu?subject=[SMDRM]%20Fires%20Annotator%20Access).
 
 Docker service based on `Python:3.8-slim` image.
 

@@ -16,8 +16,9 @@ You need to download models and embeddings, then run the FloodsAPI
 
 ### Download
 
+Enable the [Development Environment](https://github.com/panc86/smdrm/blob/master/dev/README.md)
 ```shell
-bash build/development.sh
+bash dev/run.sh
 ```
 
 Then execute the following command in the shell
