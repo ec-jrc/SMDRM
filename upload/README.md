@@ -63,5 +63,17 @@ and it enables floods related annotations on the data points using the [Floods A
 
 ### Tests
 
+Initialize the test instance of the Upload API
 ```shell
+docker-compose -f ./docker-compose.test.yml up --build upload
+```
+
+Run the tests with the dedicated [tester](tests/Dockerfile) Docker image
+```shell
+docker-compose -f ./docker-compose.test.yml up --build tester
+```
+
+Clean up tests
+```shell
+docker-compose -f ./docker-compose.test.yml down -v
 ```

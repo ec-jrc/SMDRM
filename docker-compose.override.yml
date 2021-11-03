@@ -1,0 +1,22 @@
+version: "3.7"
+
+services:
+
+  upload:
+    container_name: upload
+    env_file:
+      - "${PWD}/upload/.env"
+    networks:
+      - backend
+    ports:
+      - "5000:5000"
+    restart: on-failure
+    volumes:
+      - "uploads:/upload/uploads"
+
+volumes:
+  uploads:
+
+networks:
+  backend:
+    attachable: true

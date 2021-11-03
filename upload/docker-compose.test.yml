@@ -1,0 +1,18 @@
+version: "3.7"
+
+services:
+
+  tester:
+    build: tests
+    depends_on:
+      - upload
+    image: uploadapi_tester:latest
+
+  upload:
+    build:
+      context: .
+      target: test
+    image: uploadapi:test
+    container_name: upload-test
+    ports:
+      - "15000:15000"

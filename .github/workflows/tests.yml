@@ -21,5 +21,12 @@ jobs:
         # install package locally for testing purposes
         python3 -m pip install libdrm/
 
-    - name: Run Tests
+    - name: Run LIBDRM Unit tests
       run: python3 -m pytest -v libdrm/tests
+
+    - name: Run Upload API Integration tests
+      run: |
+        # init Upload API test instances and run integration tests
+        docker-compose -f ./upload/docker-compose.test.yml up --build --exit-code-from tester
+        # clean up
+        docker-compose -f ./upload/docker-compose.test.yml down

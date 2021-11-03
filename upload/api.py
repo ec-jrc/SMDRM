@@ -62,6 +62,10 @@ class ZipFileUploaderAPI(Resource):
         f.stream.seek(0)
         f.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
 
+        if args.stand_alone:
+            # if stand alone do not contact other services
+            return {"status": "uploaded", "meta": meta, "stand_alone": True}, 201
+
         # inform Engine API of new upload
         meta["filename"] = filename
         response = requests.post(engine_endpoint, json=meta)
@@ -80,6 +84,7 @@ if __name__ == "__main__":
     parser.add_argument("--host", default="0.0.0.0", help="The host IP address. Default is %(default)s.")
     parser.add_argument("--port", default=5000, help="The host port. Default is %(default)s.")
     parser.add_argument("--debug", action="store_true", default=False, help="Enable debugging. Default is %(default)s.")
+    parser.add_argument("--stand-alone", action="store_true", default=False, help="Disable communications with other containers. Default is %(default)s.")
     args = parser.parse_args()
 
     # setup logging
@@ -92,6 +97,7 @@ if __name__ == "__main__":
     # stop log propagation
     logging.getLogger("werkzeug").propagate = False
     # wait for Engine API
-    libdrm.apis.check_status(engine_endpoint)
+    if not args.stand_alone:
+        libdrm.apis.check_status(engine_endpoint)
     # start api
     app.run(debug=args.debug, host=args.host, port=args.port)
