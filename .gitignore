@@ -16,6 +16,6 @@ libdrm/build
 annotators/**/models
 annotators/fires/tmp_trainer
 # uploads
-upload/uploads
+**/uploads
 # var
 temp

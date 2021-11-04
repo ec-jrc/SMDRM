@@ -55,3 +55,8 @@ It ensures the validity of the user input data, preventing any invalid data to e
 ## Publish
 
 For more info, check the [publish.yml](https://github.com/panc86/smdrm/blob/master/.github/workflows/publish.yml) GitHub Action.
+
+
+## Releases
+
+- 0.1.3: added pipeline step to parse legacy data points wrapped in a `tweet` field.

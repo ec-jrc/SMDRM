@@ -60,6 +60,9 @@ Table 2 shows the required fields and expected format of the input data
 
 _Table 2. Input Data_
 
+The input data, including all required fields, can also be wrapped inside a `tweet` field.
+This is an _ad hoc_ method to ingest data from a legacy product that structured it that way.
+
 > :information_source: For detailed info about the data model,
 > check the [DisasterModel](libdrm/src/libdrm/pipeline.py)
 
