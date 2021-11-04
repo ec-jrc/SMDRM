@@ -101,6 +101,43 @@ def test_JSONFilesToJSONLines_step_with_invalid_JSON_file_iterator_fixture(
         next(step.logic(invalid_json_files_iterator))
 
 
+def test_LegacyJSONLinesParser_step_with_valid_legacy_JSON_input(
+    valid_json
+):
+    """Test JSONLinesToDataPoints Pipeline Step logic with valid JSON payload wrapped as legacy data."""
+    step = libdrm.pipeline.LegacyJSONLinesParser()
+    # legacy data is the raw data point wrapped in the `tweet` field
+    legacy_data = iter([dict(tweet=valid_json)])
+    raw_json = next(step.logic(legacy_data))
+    assert raw_json == {
+        "id": "123456789",
+        "created_at": "Sat May 15 08:49:13 +0000 2021",
+        "text": "A text to be annotated with floods model",
+        "lang": "it",
+    }
+
+
+def test_LegacyJSONLinesParser_step_with_unknown_legacy_field_and_valid_JSON_input(
+    valid_json
+):
+    """Test JSONLinesToDataPoints Pipeline Step logic with unknown legacy field (wrapping legacy JSON payload).
+    It raises StopIteration because the iterator is empty.
+    The legacy_data_model_field in LegacyJSONLinesParser is not found in the JSON dictionary so it yield it as is.
+    The next step JSONLinesToDataPoints receives invalid data and skip it.
+    TIP:
+        run pytest with -v flag to see the dedicated WARNING in the Captured log call.
+    """
+    steps = [
+        libdrm.pipeline.LegacyJSONLinesParser(),
+        libdrm.pipeline.JSONLinesToDataPoints(),
+    ]
+    # legacy data is the raw data point wrapped in the `tweet` field
+    legacy_data = iter([dict(invalid_legacy_field=valid_json)])
+    pipeline = libdrm.pipeline.Pipeline(legacy_data, steps).build()
+    with pytest.raises(StopIteration):
+        next(pipeline)
+
+
 def test_JSONLinesToDataPoints_step_with_valid_JSON_lines_iterator_fixture(
     valid_json_bytes_iterator,
 ):

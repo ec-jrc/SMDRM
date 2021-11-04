@@ -1,6 +1,5 @@
-import datetime
 from flask import Flask, request
-from flask_restful import Resource, Api, abort
+from flask_restful import Resource, Api
 import os
 import typing
 
@@ -42,6 +41,7 @@ class EngineAPI(Resource):
         steps = [
             libdrm.pipeline.ZipFilesToJSONFiles(),
             libdrm.pipeline.JSONFilesToJSONLines(),
+            libdrm.pipeline.LegacyJSONLinesParser(),
             libdrm.pipeline.JSONLinesToDataPoints(deserialize=True),
             libdrm.pipeline.InBatches(batch_size=args.batch_size),
         ]

@@ -88,6 +88,21 @@ class JSONFilesToJSONLines(Step):
 
 
 @dataclass
+class LegacyJSONLinesParser(Step):
+    """Represents a Pipeline Step to parse legacy raw JSON dictionary from JSON bytes."""
+
+    # this field must contain the rew event for legacy data
+    legacy_data_model_field = "tweet"
+
+    def logic(self, json_lines: typing.Iterable[dict]) -> typing.Iterable[dict]:
+        for json_line in json_lines:
+            if self.legacy_data_model_field in json_line:
+                # extract raw json in case of legacy data
+                json_line = json_line[self.legacy_data_model_field]
+            yield json_line
+
+
+@dataclass
 class JSONLinesToDataPoints(Step):
     """Represents a Pipeline Step to iterate valid JSON dictionaries from JSON bytes."""
 
