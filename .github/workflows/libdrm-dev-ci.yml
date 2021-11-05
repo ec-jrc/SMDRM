@@ -8,7 +8,7 @@ on:
       - '!master'
     # run if changes in libdrm
     paths:
-      - 'libdrm/**.py'
+    - 'libdrm/**.py'
 
 jobs:
   libdrm-dev-ci:
@@ -41,4 +41,3 @@ jobs:
         user: __token__
         password: ${{ secrets.TESTPYPI_API_TOKEN }}
         repository_url: https://test.pypi.org/legacy/
-        packages_dir: libdrm/dist/

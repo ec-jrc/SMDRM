@@ -12,7 +12,7 @@ long_description = (here / "README.md").read_text(encoding="utf-8")
 
 setuptools.setup(
     name="libdrm",
-    version='0.1.4',
+    version='0.1.5',
     description="Common helper modules shared by the pipeline services",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -41,6 +41,6 @@ setuptools.setup(
     project_urls={
         "Bug Reports": "https://github.com/panc86/smdrm/issues",
         "Kanban": "https://github.com/panc86/smdrm/projects/1",
-        "Source": "https://github.com/panc86/smdrm/",
+        "Source": "https://github.com/panc86/smdrm",
     },
 )
