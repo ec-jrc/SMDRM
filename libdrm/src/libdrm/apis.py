@@ -43,9 +43,3 @@ def check_status(url: str = None, sleep: int = 10, attempts: int = 6) -> None:
                 sys.exit(35)
             continue
         ready = True
-
-
-def check_statuses() -> None:
-    """Check the status of all available APIs."""
-    for api, endpoint in APIs_lookup.items():
-        check_status(endpoint)

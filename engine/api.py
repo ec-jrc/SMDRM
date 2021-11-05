@@ -74,6 +74,8 @@ if __name__ == "__main__":
     parser.add_argument("--port", default=5555, help="The host port. Default is %(default)s.")
     parser.add_argument("--batch-size", default=100, help="The data points in each batch. Default is %(default)s.")
     parser.add_argument("--debug", action="store_true", default=False, help="Enable debugging. Default is %(default)s.")
+    parser.add_argument("--sleep", default=10, help="Seconds to wait to call an API. Default is %(default)s.")
+    parser.add_argument("--attempts", default=6, help="Number of attempts to call an API. Default is %(default)s.")
     args = parser.parse_args()
 
     # mounted filesystem
@@ -89,7 +91,8 @@ if __name__ == "__main__":
     logging.getLogger("werkzeug").propagate = False
 
     # check status of required APIs
-    libdrm.apis.check_statuses()
+    for api, endpoint in libdrm.apis.APIs_lookup.items():
+        libdrm.apis.check_status(endpoint, sleep=args.sleep, attempts=args.attempts)
 
     # create elasticsearch index
     es = libdrm.elastic.ElasticSearchClient("http://elasticsearch:9200")

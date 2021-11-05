@@ -85,6 +85,8 @@ if __name__ == "__main__":
     parser.add_argument("--port", default=5000, help="The host port. Default is %(default)s.")
     parser.add_argument("--debug", action="store_true", default=False, help="Enable debugging. Default is %(default)s.")
     parser.add_argument("--stand-alone", action="store_true", default=False, help="Disable communications with other containers. Default is %(default)s.")
+    parser.add_argument("--sleep", default=10, help="Seconds to wait to call an API. Default is %(default)s.")
+    parser.add_argument("--attempts", default=6, help="Number of attempts to call an API. Default is %(default)s.")
     args = parser.parse_args()
 
     # setup logging
@@ -98,6 +100,6 @@ if __name__ == "__main__":
     logging.getLogger("werkzeug").propagate = False
     # wait for Engine API
     if not args.stand_alone:
-        libdrm.apis.check_status(engine_endpoint)
+        libdrm.apis.check_status(engine_endpoint, sleep=args.sleep, attempts=args.attempts)
     # start api
     app.run(debug=args.debug, host=args.host, port=args.port)

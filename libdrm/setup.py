@@ -12,7 +12,7 @@ long_description = (here / "README.md").read_text(encoding="utf-8")
 
 setuptools.setup(
     name="libdrm",
-    version='0.1.3',
+    version='0.1.4',
     description="Common helper modules shared by the pipeline services",
     long_description=long_description,
     long_description_content_type="text/markdown",
