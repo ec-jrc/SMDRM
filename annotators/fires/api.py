@@ -78,6 +78,7 @@ if __name__ == "__main__":
         level=os.getenv("LOG_LEVEL", "INFO"),
     )
     console = logging.getLogger("fires.api")
+    logging.getLogger("werkzeug").propagate = False
 
     # start api
     app.run(debug=args.debug, host=args.host, port=args.port)
