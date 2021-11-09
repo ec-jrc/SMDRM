@@ -5,102 +5,25 @@ services:
   upload:
     build:
       context: upload
-      target: base
     image: uploadapi:latest
 
   engine:
     build:
       context: engine
-    container_name: engine
-    env_file:
-      - "${PWD}/engine/.env"
-    healthcheck:
-      test: python -c '''import requests; requests.get("http://localhost:5555").status_code == 200'''
-      interval: 30s
-      timeout: 5s
-      retries: 3
     image: engineapi:latest
-    networks:
-      - backend
-    ports:
-      - "5555:5555"
-    restart: on-failure
-    volumes:
-      - "uploads:/engine/uploads"
 
   fires:
     build:
       context: annotators/fires
-      target: dev
-    container_name: fires
-    healthcheck:
-      test: python -c '''import requests; requests.get("http://localhost:5002").status_code == 200'''
-      interval: 30s
-      timeout: 5s
-      retries: 3
     image: firesapi:latest
-    networks:
-      - backend
-    ports:
-      - "5002:5002"
-    restart: on-failure
-    volumes:
-      - "${PWD}/annotators/fires/models:/app/models"
 
   floods:
     build:
       context: annotators/floods
-      target: dev
-    container_name: floods
-    healthcheck:
-      test: python -c '''import requests; requests.get("http://localhost:5001").status_code == 200'''
-      interval: 30s
-      timeout: 5s
-      retries: 3
     image: floodsapi:latest
-    networks:
-      - backend
-    ports:
-      - "5001:5001"
-    restart: on-failure
-    volumes:
-      - "${PWD}/annotators/floods/models:/app/models"
 
   elasticsearch:
-    container_name: elasticsearch
-    environment:
-      - cluster.name=smdrm-elastic
-      - discovery.type=single-node
-      - bootstrap.memory_lock=true
-      - xpack.security.enabled=false
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-    healthcheck:
-        test: ["CMD-SHELL", "curl --silent --fail localhost:9200/_cluster/health || exit 1"]
-        interval: 30s
-        timeout: 10s
-        retries: 5
     image: docker.elastic.co/elasticsearch/elasticsearch:${ES_VERSION}
-    networks:
-      - backend
-    ports:
-      - "9200:9200"
-    volumes:
-      - "es_node:/usr/share/elasticsearch/data"
 
   kibana:
     image: docker.elastic.co/kibana/kibana:${ES_VERSION}
-    container_name: kibana
-    depends_on:
-      - elasticsearch
-    networks:
-      - backend
-    ports:
-      - "5601:5601"
-
-volumes:
-  es_node:
-  uploads:
-
-networks:
-  backend:
-    attachable: true

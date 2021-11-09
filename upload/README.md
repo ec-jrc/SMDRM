@@ -65,15 +65,18 @@ and it enables floods related annotations on the data points using the [Floods A
 
 Initialize the test instance of the Upload API
 ```shell
-docker-compose -f ./docker-compose.test.yml up --build upload
+docker-compose -f ./docker-compose.yml -f ./docker-compose.test.yml up --build upload
 ```
 
 Run the tests with the dedicated [tester](tests/Dockerfile) Docker image
 ```shell
-docker-compose -f ./docker-compose.test.yml up --build tester
+# build upload tester image
+docker build -t "uploadapi_test:v1" upload/tests/
+# run integration tests
+docker container run --rm --network smdrm_tests uploadapi_test:v1
 ```
 
 Clean up tests
 ```shell
-docker-compose -f ./docker-compose.test.yml down -v
+docker-compose -f ./docker-compose.yml -f ./docker-compose.test.yml down
 ```

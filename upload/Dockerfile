@@ -1,4 +1,4 @@
-FROM python:3.8-slim-bullseye as base
+FROM python:3.8-slim-bullseye
 LABEL Author.Name="Emanuele Panizio" \
       Author.Email="Emanuele.PANIZIO@ext.ec.europa.eu"
 
@@ -19,13 +19,3 @@ ENV PYTHONUNBUFFERED=1 \
     PATH="/upload/bin:$PATH"
 
 ENTRYPOINT ["bin/python",  "api.py"]
-
-
-FROM base as dev
-
-CMD ["--debug"]
-
-
-FROM base as test
-
-CMD ["--stand-alone", "--port=15000"]

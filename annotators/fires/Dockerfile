@@ -22,4 +22,5 @@ ENV DEBIAN_FRONTEND=noninteractive \
     PATH="/app/bin:$PATH"
     # export the python executable
 
-CMD ["python", "api.py"]
+ENTRYPOINT ["bin/python", "api.py"]
+CMD ["--help"]

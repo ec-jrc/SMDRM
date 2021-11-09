@@ -1,0 +1,17 @@
+version: "3.7"
+
+services:
+
+  upload:
+    command:
+      - "--stand-alone"
+      - "--port=15000"
+    container_name: upload-test
+    networks:
+      - tests
+    ports:
+      - "15000:15000"
+
+networks:
+  tests:
+    attachable: true

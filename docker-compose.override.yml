@@ -14,8 +14,74 @@ services:
     volumes:
       - "uploads:/upload/uploads"
 
+  engine:
+    container_name: engine
+    env_file:
+      - "${PWD}/engine/.env"
+    networks:
+      - backend
+    ports:
+      - "5555:5555"
+    restart: on-failure
+    volumes:
+      - "uploads:/engine/uploads"
+
+  fires:
+    command:
+      - "--debug"
+    container_name: fires
+    networks:
+      - backend
+    ports:
+      - "5002:5002"
+    restart: on-failure
+    volumes:
+      - "${PWD}/annotators/fires/models:/app/models"
+
+  floods:
+    command:
+      - "--debug"
+    container_name: floods
+    networks:
+      - backend
+    ports:
+      - "5001:5001"
+    restart: on-failure
+    volumes:
+      - "${PWD}/annotators/floods/models:/app/models"
+
+  elasticsearch:
+    container_name: elasticsearch
+    environment:
+      - cluster.name=smdrm-elastic
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    healthcheck:
+        test: ["CMD-SHELL", "curl --silent --fail localhost:9200/_cluster/health || exit 1"]
+        interval: 30s
+        timeout: 10s
+        retries: 5
+    networks:
+      - backend
+    ports:
+      - "9200:9200"
+    volumes:
+      - "es_node:/usr/share/elasticsearch/data"
+
+  kibana:
+    container_name: kibana
+    depends_on:
+      - elasticsearch
+    networks:
+      - backend
+    ports:
+      - "5601:5601"
+
 volumes:
   uploads:
+  es_node:
 
 networks:
   backend:
