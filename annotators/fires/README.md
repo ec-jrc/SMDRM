@@ -23,6 +23,9 @@ and `annotations` (the placeholder list to store annotation results) fields to b
 * Python 3.8
   * [pip dependencies](requirements.txt)
 
+The annotator model uses torch for preprocessing purposes.
+We install the [CPU only wheel](https://download.pytorch.org/whl/torch/) to save resources.
+
 ## Instructions
 
 You need to download the model, then run the Fires API
@@ -51,7 +54,7 @@ fires/
 
 ### Run
 
-Build and run the FloodsAPI
+Build and run the API
 ```shell
 docker-compose up --build fires
 ```
