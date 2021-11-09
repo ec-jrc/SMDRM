@@ -6,8 +6,7 @@ RUN python3 -m venv /app \
 WORKDIR /app
 
 COPY requirements.txt .
-RUN bin/pip --no-cache-dir install torch==1.10.0+cpu -f https://download.pytorch.org/whl/cpu/torch_stable.html \
-    && bin/pip --no-cache-dir install -r requirements.txt
+RUN bin/pip install --no-cache-dir -r requirements.txt
 
 COPY ./README.md ./README.md
 COPY ./api.py ./api.py
