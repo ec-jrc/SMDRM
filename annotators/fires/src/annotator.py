@@ -3,7 +3,6 @@ import torch
 from scipy.special import softmax
 
 from transformers import (
-    AutoModel,
     AutoTokenizer,
     RobertaForSequenceClassification,
     Trainer,

@@ -12,6 +12,32 @@ services:
     ports:
       - "15000:15000"
 
+  fires:
+    command:
+      - "--debug"
+      - "--port=15002"
+    container_name: fires-test
+    networks:
+      - tests
+    ports:
+      - "15002:15002"
+    restart: on-failure
+    volumes:
+      - "${PWD}/annotators/fires/models:/app/models"
+
+  floods:
+    command:
+      - "--debug"
+      - "--port=15001"
+    container_name: floods-test
+    networks:
+      - tests
+    ports:
+      - "15001:15001"
+    restart: on-failure
+    volumes:
+      - "${PWD}/annotators/floods/models:/app/models"
+
 networks:
   tests:
     attachable: true
