@@ -22,7 +22,7 @@ At the moment, `Floods` annotator algorithm is publicly available for download, 
 
 There are few algorithms under testing that will be released soon.
 These are:
-* Fires
+* [Fires](fires/README.md)
 * ImageClassification
 
 ## Add a new Annotator API
@@ -89,14 +89,47 @@ Table 1 lists the sequence of steps to implement a new annotator API.
 
 |Step|Action|Notes|
 |---:|------|-----|
-|1|Create a new directory `annotator/<newapi>/`| |
-|2|Download/Create the trained Machine Learning prediction model into `annotator/<newapi>/models/`| |
+|1|Create a new directory `annotators/<newapi>/`| |
+|2|Download/Create the trained Machine Learning prediction model into `annotators/<newapi>/models/`| |
 |3|Create new api.py file with Flask-RestFul based API| |
 |4|Set the instructions to build a new Docker image in a new Dockerfile| |
 |5|Add new container definition in [docker-compose.yml](../docker-compose.yml) file|Make sure to use a port within the range `5001-5050`.|
 |6|Add new URL endpoint in [`libdrm.apis.APIs_lookup`](../libdrm/src/libdrm/apis.py)|Format: `{"<newapi>_annotator": "http://<newapi>:<port>/<resource>"}`.|
 |7|Add metadata field in [`libdrm.schemas.MetadataUploadSchema`](../libdrm/src/libdrm/schemas.py) Marshmallow schema|Format: `<newapi>_annotator=marshmallow.fields.Boolean(load_default=False)`<br>By default, it is set to `False` to keep annotation optional.|
 
+## Performance Tests
+
+Performance tests are run against the test dataset of choice.
+To run a performance test you first need to:
+* initiate the Annotator APIs to run the test against
+* build the [test image](tests/Dockerfile)
+* run the test against a specific API
+
+> :information_source: Execute the following command from the project root directory
+
+### Initiate Annotator APIs
+
+```shell
+# initialize fires and floods annotators
+docker-compose -f docker-compose.yml -f docker-compose.tests.yml up --build floods fires
+```
+
+### Build Test Image
+
+```shell
+docker build -t annotators-perftests:v1 annotators/tests/
+```
+
+### Run Performance Test
+
+When the APIs are up and running you can trigger the performance tests for a specific API by passing its URL as argument
+of the Docker CMD
+
+For instance, let's run the performance test for Floods API using the default data
+```shell
+# floods-test is the container name where the API is available
+docker run --rm -it --network smdrm_tests annotators-perftests:v1 --url "http://floods-test:15001"
+```
 
 ## Troubleshooting
 
