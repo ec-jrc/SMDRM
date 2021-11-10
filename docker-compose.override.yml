@@ -26,6 +26,16 @@ services:
     volumes:
       - "uploads:/engine/uploads"
 
+  text-normalize:
+    command:
+      - "--debug"
+    container_name: text-normalize
+    networks:
+      - backend
+    ports:
+      - "5050:5050"
+    restart: on-failure
+
   fires:
     command:
       - "--debug"

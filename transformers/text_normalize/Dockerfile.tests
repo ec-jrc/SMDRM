@@ -1,0 +1,7 @@
+FROM python:3.8-alpine
+RUN python -m pip install --upgrade pip pytest requests
+WORKDIR /api
+COPY normalizer.py .
+COPY tests ./tests
+ENTRYPOINT ["pytest"]
+CMD ["tests/unit"]
