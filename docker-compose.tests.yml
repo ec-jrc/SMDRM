@@ -12,6 +12,17 @@ services:
     ports:
       - "15000:15000"
 
+  text-normalize:
+    command:
+      - "--debug"
+      - "--port=15050"
+    container_name: text-normalize-test
+    networks:
+      - tests
+    ports:
+      - "15050:15050"
+    restart: on-failure
+
   fires:
     command:
       - "--debug"

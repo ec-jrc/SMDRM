@@ -12,6 +12,11 @@ services:
       context: engine
     image: engineapi:latest
 
+  text-normalize:
+    build:
+      context: transformers/text_normalize
+    image: textnormalizeapi:latest
+
   fires:
     build:
       context: annotators/fires
