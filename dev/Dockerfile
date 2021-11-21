@@ -1,4 +1,4 @@
-FROM python:3.8-slim-bullseye as dev
+FROM python:3.8-slim-bullseye
 
 RUN python3 -m venv /smdrm \
     && /smdrm/bin/python -m pip install --no-cache-dir -U pip setuptools

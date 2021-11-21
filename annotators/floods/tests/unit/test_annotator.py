@@ -1,14 +1,23 @@
 import pytest
+import os
+import sys
+# this allow to import normalize.py module
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
+import annotator
 
 
-def test_get_model_id(floods_ita):
+floods_ita = annotator.FloodsAnnotator(lang="it")
+floods_ml = annotator.FloodsAnnotator(lang="ml")
+
+
+def test_get_model_id():
     """
     Test if FloodModel is initialized properly.
     """
     assert ".relevance-cnn-init.it" in floods_ita._get_model_id()
 
 
-def test_model_init_in_italian(floods_ita):
+def test_model_init_in_italian():
     """
     Test initialization of FloodModel in Italian.
     """
@@ -23,7 +32,7 @@ def test_model_init_in_italian(floods_ita):
     )
 
 
-def test_model_init_in_multilingual(floods_ml):
+def test_model_init_in_multilingual():
     """
     Test initialization of FloodModel in Multilingual.
     """
@@ -37,7 +46,7 @@ def test_model_init_in_multilingual(floods_ml):
     )
 
 
-def test_model_it_infer_on_junk(floods_ita):
+def test_model_it_infer_on_junk():
     """
     Test inference (predictions) of Italian FloodModel on junk text.
     """
@@ -46,7 +55,7 @@ def test_model_it_infer_on_junk(floods_ita):
     assert result == pytest.approx(0.007, 0.1)
 
 
-def test_model_it_infer_on_flood(floods_ita):
+def test_model_it_infer_on_flood():
     """
     Test inference (predictions) of Italian FloodModel on flood related text.
     """
@@ -57,7 +66,7 @@ def test_model_it_infer_on_flood(floods_ita):
     assert result == pytest.approx(0.44, 0.1)
 
 
-def test_model_ml_infer_on_junk(floods_ml):
+def test_model_ml_infer_on_junk():
     """
     Test inference (predictions) of Multilingual FloodModel on junk text.
     """
@@ -67,7 +76,7 @@ def test_model_ml_infer_on_junk(floods_ml):
     assert result == pytest.approx(0.011, 0.1)
 
 
-def test_model_ml_infer_on_flood(floods_ml):
+def test_model_ml_infer_on_flood():
     """
     Test inference (predictions) of Multilingual FloodModel on junk text.
     """

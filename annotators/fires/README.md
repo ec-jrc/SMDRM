@@ -8,14 +8,13 @@
 > If you would like to use it before the official release,
 > please contact [Valerio Lorini](mailto:valerio.lorini@ec.europa.eu?subject=[SMDRM]%20Fires%20Annotator%20Access).
 
-Docker service based on `Python:3.8-slim` image.
+Docker service based on [Python:3.8-slim-bullseye](https://github.com/docker-library/python/blob/9242c448c7e50d5671e53a393fc2c464683f35dd/3.8/bullseye/slim/Dockerfile) image.
 
 It uses Machine Learning models trained on text related to fire disasters to annotate new incoming texts.
 It requires `text` (the raw textual information to be annotated),
 and `annotations` (the placeholder list to store annotation results) fields to be able to compute an annotation.
 
-> :information_source: You can control the annotation batch size with the `ANNOTATION_BATCH_SIZE`
-> environment variable in the Engine .env file.
+> :information_source: the `ANNOTATION_BATCH_SIZE` environment variable updates the annotation batch size
 
 ## Requisites
 
@@ -26,13 +25,9 @@ and `annotations` (the placeholder list to store annotation results) fields to b
 The annotator model uses torch for preprocessing purposes.
 We install the [CPU only wheel](https://download.pytorch.org/whl/torch/) to save resources.
 
-## Instructions
+## Download
 
-You need to download the model, then run the Fires API
-
-> :information_source: The following commands are executed from the project root directory
-
-### Download
+You need to download the model, then run the Fires API.
 
 Use this [download link](https://drive.google.com/drive/folders/1QBiJG73kwinsuE0Lr2pqN5WeMnegKhG9?usp=sharing) to
 get the model binary files from the hosting cloud provider.
@@ -52,50 +47,87 @@ fires/
     trainer_args.bin
 ```
 
-### Run
+## Build & Run
 
 Build and run the API
+
 ```shell
+# executed from the project root directory
 docker-compose up --build fires
 ```
 
-### Tests
+## Usage
 
 Test the API with the following synthetic data points
 
-> :information_source: Note the `batch` and `annotations` fields in the payload.
-
 ```shell
-curl -v -X POST http://localhost:5002 \
+# note the `batch` and `annotations` fields in the payload
+curl "http://localhost:5002" \
   -H "Content-Type: application/json" \
-  -d '{"batch":[{"annotations":[], "text":"a fires disaster @related text. #vivo http://lucot.com"}, {"annotations":[], "text":"#hash another wild fire disaster related text. @Mymy"}]}'
+  -d '{"batch": {"texts": ["a string", "another string"]}}'
 ```
 
 This should return the batch, enriched with the annotations
 
 ```shell
 {
-  "batch": [
-    {
-      "annotations": [
-        {
-          "annotation_type": "fires",
-          "annotation_prob": 0.9998450215352932,
-          "sanitized_text": "a fires disaster USER text vivo URL"
-        }
-      ],
-      "text": "a fires disaster @related text. #vivo http://lucot.com"
-    },
-    {
-      "annotations": [
-        {
-          "annotation_type": "fires",
-          "annotation_prob": 0.8669703006744385,
-          "sanitized_text": "hash another wild fire disaster related text USER"
-        }
-      ],
-      "text": "#hash another wild fire disaster related text. @Mymy"
-    }
-  ]
+  "batch": {
+    "texts": [
+      "a string",
+      "another string",
+    ],
+    "annotation_probs": [
+      "float",
+      "float",
+    ],
+    "annotation_type": "fires",
 }
 ```
+
+Clean Up
+
+```shell
+docker container rm -f fires
+```
+
+## Tests
+
+Build the [test](Dockerfile) Docker image
+
+```shell
+cd annotators/fires && docker build --target test -t firesapi:test . && cd -
+```
+
+### Unit
+
+Run the unit tests
+
+> :warning: This task is slow due to the time to load the annotation model
+
+```shell
+cd annotators/fires && docker container run --rm -v $(pwd)/models:/app/models firesapi:test tests/unit && cd -
+```
+
+### Integration
+
+Initialize the test instance of the API
+
+```shell
+# executed from the project root directory
+docker-compose -f docker-compose.yml -f docker-compose.tests.yml up --build fires
+```
+
+Run the integration tests
+
+```shell
+# note the network flag (see docker-compose.tests.yml)
+docker container run --rm --network smdrm_tests firesapi:test tests/integration
+```
+
+Clean up
+
+```shell
+# executed from the project root directory
+docker-compose -f docker-compose.yml -f docker-compose.tests.yml down
+```
+

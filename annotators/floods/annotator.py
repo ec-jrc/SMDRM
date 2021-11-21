@@ -1,6 +1,5 @@
 import json
 import os
-
 import joblib
 import laserembeddings
 from tensorflow.keras.models import load_model
@@ -16,7 +15,7 @@ class FloodsAnnotator(object):
 
     # the path to the floods models
     MODELS_PATH = os.path.join(
-        os.path.dirname(os.path.abspath(__file__)), "..", "models"
+        os.path.dirname(os.path.abspath(__file__)), "models"
     )
 
     def __init__(self, lang: str):

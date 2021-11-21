@@ -1,4 +1,4 @@
-FROM python:3.8-slim-bullseye
+FROM python:3.8-slim-bullseye as base
 LABEL Author.Name="Emanuele Panizio" \
       Author.Email="Emanuele.PANIZIO@ext.ec.europa.eu"
 
@@ -9,9 +9,9 @@ WORKDIR /app
 COPY requirements.txt .
 RUN bin/pip install --no-cache-dir -r requirements.txt
 
-COPY README.md .
 COPY api.py .
-COPY src ./src
+COPY annotator.py .
+COPY README.md .
 
 ENV DEBIAN_FRONTEND=noninteractive \
     LANG=C.UTF-8 \
@@ -21,3 +21,13 @@ ENV DEBIAN_FRONTEND=noninteractive \
 
 ENTRYPOINT ["bin/python", "api.py"]
 CMD ["--help"]
+
+
+FROM base as test
+WORKDIR /app
+COPY --from=base /app .
+RUN python -m pip install pytest requests
+
+COPY tests ./tests
+ENTRYPOINT ["bin/pytest"]
+CMD ["tests/unit"]

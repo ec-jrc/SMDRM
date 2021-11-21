@@ -26,7 +26,7 @@ class FiresAnnotator:
     """Load Machine Learning Annotation Fires. Developed by Ivan Kitanovski."""
 
     # the path to the floods models
-    MODELS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "models")
+    MODELS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "models")
 
     def __init__(self):
         # load model at init

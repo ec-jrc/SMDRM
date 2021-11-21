@@ -17,14 +17,21 @@ services:
       context: transformers/text_normalize
     image: textnormalizeapi:latest
 
+  place-normalize:
+    build:
+      context: transformers/place_normalize
+    image: placenormalizeapi:latest
+
   fires:
     build:
       context: annotators/fires
+      target: base
     image: firesapi:latest
 
   floods:
     build:
       context: annotators/floods
+      target: base
     image: floodsapi:latest
 
   elasticsearch:

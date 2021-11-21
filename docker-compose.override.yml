@@ -30,16 +30,32 @@ services:
     command:
       - "--debug"
     container_name: text-normalize
+    environment:
+      - LOG_LEVEL
     networks:
       - backend
     ports:
       - "5050:5050"
     restart: on-failure
 
+  place-normalize:
+    command:
+      - "--debug"
+    container_name: place-normalize
+    environment:
+      - LOG_LEVEL
+    networks:
+      - backend
+    ports:
+      - "5060:5060"
+    restart: on-failure
+
   fires:
     command:
       - "--debug"
     container_name: fires
+    environment:
+      - LOG_LEVEL
     networks:
       - backend
     ports:
@@ -52,6 +68,8 @@ services:
     command:
       - "--debug"
     container_name: floods
+    environment:
+      - LOG_LEVEL
     networks:
       - backend
     ports:

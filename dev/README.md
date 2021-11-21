@@ -26,6 +26,6 @@ at runtime, in the `workspace` directory.
 
 > :warning: Be aware that any change in the filesystem of the DE will be reflected in the referenced filesystem.
 
-The DE comes with pre-installed dependencies that do NOT include the Annotators related ones.
+The DE comes with pre-installed dependencies that do NOT include those required by the SMDRM microservices.
 This is intended to reduce build time. For more info, see [requirements.txt](requirements.txt).
-You can manually install the dependencies of an annotator using the requirements.txt file in its directory inside annotators.
+You can manually install the dependencies of a service using the requirements.txt file in its directory.
