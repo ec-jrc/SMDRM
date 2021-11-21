@@ -3,6 +3,20 @@ import libdrm.datamodels
 import libdrm.nicelogging
 
 
+def full_text_from_raw_tweet(data):
+    full_text = ''
+
+    for d in (data.get('retweeted_status'), data):
+        if not d:
+            continue
+        full_text = d.get('extended_tweet', {}).get('full_text', '') or d.get('full_text', '')
+        if full_text:
+            return full_text
+    if not full_text:
+        full_text = data.get('retweeted_status', {}).get('text') or data.get('text', '')
+    return full_text
+
+
 def iter_from_json_file(path):
     with open(path) as _file:
         for json_line in _file:
