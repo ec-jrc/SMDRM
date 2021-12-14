@@ -1,41 +1,23 @@
-version: "3.7"
+version: "3.9"
 
 services:
 
-  upload:
-    build:
-      context: upload
-    image: uploadapi:latest
+  deeppavlov-gpu:
+    # official docker hub deeppavlov image
+    # https://hub.docker.com/r/deeppavlov/base-gpu
+    image: deeppavlov/base-gpu:0.15.0
 
-  engine:
-    build:
-      context: engine
-    image: engineapi:latest
-
-  text-normalize:
-    build:
-      context: transformers/text_normalize
-    image: textnormalizeapi:latest
-
-  place-normalize:
-    build:
-      context: transformers/place_normalize
-    image: placenormalizeapi:latest
-
-  fires:
-    build:
-      context: annotators/fires
-      target: base
-    image: firesapi:latest
+  deeppavlov-cpu:
+    # official docker hub deeppavlov image
+    # https://hub.docker.com/r/deeppavlov/base-cpu
+    image: deeppavlov/base-cpu:0.15.0
+    #build: ./annotators/deeppavlov/
+    #image: jrc/deeppavlov:0.1.0
 
   floods:
-    build:
-      context: annotators/floods
-      target: base
-    image: floodsapi:latest
+    build: ./annotators/floods/
+    image: jrc/floods_base
 
-  elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:${ES_VERSION}
-
-  kibana:
-    image: docker.elastic.co/kibana/kibana:${ES_VERSION}
+  fires:
+    build: ./annotators/fires/
+    image: jrc/fires

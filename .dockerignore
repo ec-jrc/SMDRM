@@ -1,20 +1,27 @@
-# python
-venv
+# Python
 .pytest_cache
 **/__pycache__
 *.pyc
 *.egg-info
+*.ipynb_checkpoints
 
-# pycharm
-.idea
+# Config
+*.env
 
-# libdrm
-build/libdrm/dist
-build/libdrm/build
+# Development
+nbs
 
-# annotator
-annotators/**/models
-# engine
-*.zip
-# var
-temp
+# Tasks
+**/build
+**/dist
+
+# Annotators
+**/models
+**/tmp_trainer
+**/instance
+
+# Data
+data
+
+# sys
+.Trash*

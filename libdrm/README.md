@@ -1,25 +1,73 @@
-# LIBDRM Package
+# Libdrm
 
-Python based modules representing the core functionality of the SMDRM application.
+[Python:3.9-slim](https://hub.docker.com/layers/python/library/python/3.9-slim/images/sha256-37865527b7c16f5bb5d7c5501b9d686a672e956b0826aa07f5195a46ef903ba6?context=explore) (debian) based image.
 
-Currently, there are four core modules:
-* [apis.py](#APIs)
-* [elastic.py](#elastic)
-* [pipeline.py](#pipeline)
-* [schemas.py](#schemas)
+It represents the Python core functionality required by the various tasks in the SMDRM Pipeline.
 
-For more info, go to the [source code](https://github.com/panc86/smdrm/tree/master/libdrm) on GitHub.
+For more details, go to the [source code](https://github.com/panc86/smdrm/tree/master/libdrm) on GitHub.
+
+> :bangbang: execute all bash commands from project root directory
+
+## Build
+
+```shell
+# By default, build the base image
+./libdrm/build.sh
+```
+
+For more details, check the [Dockerfile](Dockerfile).
+
+
+## Development
+
+Build a Jupyter Notebook development environment using the `dev` stage.
+
+```shell
+bash $(pwd)/libdrm/build.sh dev
+```
+
+Mount your data, and the directory with the source code under development.
+Changes to the source code will be applied to the source code in the container
+without need to restart.
+
+```shell
+docker run -it --rm \
+  -e JUPYTER_TOKEN=docker \
+  --network host \
+  # add data
+  --volume $(pwd)/data:/opt/smdrm/data \
+  # code changes without container restart
+  --volume $(pwd)/libdrm:/opt/smdrm/libdrm \
+  # keep track of development history
+  --volume $(pwd)/nbs:/opt/smdrm/nbs \
+  jrc/smdrm_dev
+```
+
+> :bangbang: DO NOT forget to rebuild the `jrc/smdrm_dev`
+
+## Tests
+
+Run the unittests
+
+```shell
+./libdrm/build.sh test
+./libdrm/test.sh
+```
 
 ## Modules
 
-### APIs
+### Common
 
-This module holds information on available APIs to execute operations such as annotation and caching of data points.
+Usable by all tasks
 
-It contains a lookup table with url instructions to contact them. Finally, it implements functions to check/wait on
-their current statuses. The latter is particularly useful during SMDRM application microservice start up.
+### Datamodels
 
-### Elastic
+Consistent structure of input/output data
+
+* `DataPointModel`
+* `ZipFileModel`
+
+<!-- ### Elastic
 
 This module contains a custom ElasticSearch Client that performs the following API operations:
 * create index template
@@ -27,36 +75,21 @@ This module contains a custom ElasticSearch Client that performs the following A
 * add document
 * add document batch
 
-It also contains the ElasticSearch Template Mappings definition to set the data structure of indexed data points.
+It also contains the ElasticSearch Template Mappings definition to set the data structure of indexed data points. -->
 
-### Pipeline
+### Pipelines
 
-SMDRM Data Processing Pipeline enables the creation of ad hoc data processing pipeline 
-with regard to the task at hand using a combination of Template and Bridge Design Patterns.
+Pipeline Class creates ad hoc data processing pipeline using generators and OOP.
 
 It also defines the required fields of the Disaster (data point) Model via
-the DisasterModel Class using [Pydantinc](https://pydantic-docs.helpmanual.io/).
-
-A custom sequence of pipeline Steps can be used to make a pipeline to process input data.
-
-The most important steps include:
-* read zip files
-* read JSON files (inside the zip file)
-* validate/parse JSON file content
-* read JSON file content in batches (useful for annotation)
-
-### Schemas
-
-This module uses [Marshmallow](https://marshmallow.readthedocs.io/en/stable/) data model schemas to validate
-the uploaded zip file and metadata.
-It ensures the validity of the user input data, preventing any invalid data to enter the data processing pipeline.
+the `DisasterModel` Class using [Pydantinc](https://pydantic-docs.helpmanual.io/).
 
 
 ## Publish
 
-For more info, check the [publish.yml](https://github.com/panc86/smdrm/blob/master/.github/workflows/publish.yml) GitHub Action.
+GitHub Action.
 
 
 ## Releases
 
-- 0.1.3: added pipeline step to parse legacy data points wrapped in a `tweet` field.
+- VERSION: comment.

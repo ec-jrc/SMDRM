@@ -2,37 +2,6 @@ version: "3.7"
 
 services:
 
-  upload:
-    command:
-      - "--port=15000"
-    container_name: upload-test
-    networks:
-      - tests
-    ports:
-      - "15000:15000"
-
-  text-normalize:
-    command:
-      - "--debug"
-      - "--port=15050"
-    container_name: text-normalize-test
-    networks:
-      - tests
-    ports:
-      - "15050:15050"
-    restart: on-failure
-
-  place-normalize:
-    command:
-      - "--debug"
-      - "--port=15060"
-    container_name: place-normalize-test
-    networks:
-      - tests
-    ports:
-      - "15060:15060"
-    restart: on-failure
-
   fires:
     command:
       - "--port=15002"
@@ -56,20 +25,6 @@ services:
     restart: on-failure
     volumes:
       - "${PWD}/annotators/floods/models:/app/models"
-
-  elasticsearch:
-    container_name: elasticsearch-test
-    networks:
-      - tests
-    ports:
-      - "19200:19200"
-
-  kibana:
-    container_name: kibana-test
-    networks:
-      - tests
-    ports:
-      - "15601:15601"
 
 networks:
   tests:

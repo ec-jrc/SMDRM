@@ -1,116 +1,59 @@
-version: "3.7"
+version: "3.9"
 
 services:
 
-  upload:
-    container_name: upload
-    env_file:
-      - "${PWD}/upload/.env"
+  deeppavlov-cpu:
+    environment:
+      - CONFIG=ner_ontonotes_bert_mult
+    healthcheck:
+      test: python -c "import requests; requests.post('http://localhost:5000/probe', json={}).json() == ['Test passed']"
     networks:
-      - backend
+      - annotators
     ports:
       - "5000:5000"
     restart: on-failure
     volumes:
-      - "uploads:/upload/uploads"
+      - "deeppavlov:/root/.deeppavlov"
 
-  engine:
-    container_name: engine
-    env_file:
-      - "${PWD}/engine/.env"
+  deeppavlov-gpu:
+    environment:
+      - CONFIG=ner_ontonotes_bert_mult
+    healthcheck:
+      test: python -c "import requests; requests.post('http://localhost:5000/probe', json={}).json() == ['Test passed']"
     networks:
-      - backend
+      - annotators
     ports:
-      - "5555:5555"
+      - "5000:5000"
+    restart: on-failure
+    runtime: "nvidia"
+    volumes:
+      - "deeppavlov:/root/.deeppavlov"
+
+  floods:
+    env_file:
+      - ./annotators/floods/.env
+    command: flask run --host=0.0.0.0 --port=5001
+    networks:
+      - annotators
+    ports:
+      - "5001:5001"
     restart: on-failure
     volumes:
-      - "uploads:/engine/uploads"
-
-  text-normalize:
-    command:
-      - "--debug"
-    container_name: text-normalize
-    environment:
-      - LOG_LEVEL
-    networks:
-      - backend
-    ports:
-      - "5050:5050"
-    restart: on-failure
-
-  place-normalize:
-    command:
-      - "--debug"
-    container_name: place-normalize
-    environment:
-      - LOG_LEVEL
-    networks:
-      - backend
-    ports:
-      - "5060:5060"
-    restart: on-failure
+      - "floods:/opt/floods/models"
 
   fires:
-    command:
-      - "--debug"
-    container_name: fires
-    environment:
-      - LOG_LEVEL
     networks:
-      - backend
+      - annotators
     ports:
       - "5002:5002"
     restart: on-failure
     volumes:
       - "${PWD}/annotators/fires/models:/app/models"
 
-  floods:
-    command:
-      - "--debug"
-    container_name: floods
-    environment:
-      - LOG_LEVEL
-    networks:
-      - backend
-    ports:
-      - "5001:5001"
-    restart: on-failure
-    volumes:
-      - "${PWD}/annotators/floods/models:/app/models"
-
-  elasticsearch:
-    container_name: elasticsearch
-    environment:
-      - cluster.name=smdrm-elastic
-      - discovery.type=single-node
-      - bootstrap.memory_lock=true
-      - xpack.security.enabled=false
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-    healthcheck:
-        test: ["CMD-SHELL", "curl --silent --fail localhost:9200/_cluster/health || exit 1"]
-        interval: 30s
-        timeout: 10s
-        retries: 5
-    networks:
-      - backend
-    ports:
-      - "9200:9200"
-    volumes:
-      - "es_node:/usr/share/elasticsearch/data"
-
-  kibana:
-    container_name: kibana
-    depends_on:
-      - elasticsearch
-    networks:
-      - backend
-    ports:
-      - "5601:5601"
+networks:
+  annotators:
+    attachable: true
 
 volumes:
-  uploads:
-  es_node:
-
-networks:
-  backend:
-    attachable: true
+  deeppavlov:
+  floods:

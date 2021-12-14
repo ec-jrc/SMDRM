@@ -1,9 +1,0 @@
-# build
-build
-twine
-wheel
-
-# dev
-black
-pylint
-pytest
