@@ -1,76 +1,97 @@
 # Floods API
 
-Docker service based on [Python:3.8-slim-bullseye](https://github.com/docker-library/python/blob/9242c448c7e50d5671e53a393fc2c464683f35dd/3.8/bullseye/slim/Dockerfile) image.
+[Python:3.8-slim] based Docker image provides a REST API to call pre-trained
+Named Entity Recognition Machine Learning annotators.
+We used `Floods` disaster related multilingual texts as training data to annotate
+new incoming texts.
 
-It uses Machine Learning models trained on text related to flood disasters to annotate new incoming texts.
-It requires `lang` and `text` fields to be able to compute an annotation.
+It requires `lang` and `texts` fields to be able to compute a correct annotation.
 
-> :information_source: the `ANNOTATION_BATCH_SIZE` environment variable updates the annotation batch size.
+Sources:
+* [github.com](https://github.com/panc86/production-flask-app-setup)
+* [towardsdatascience.com](https://towardsdatascience.com/how-to-set-up-a-production-grade-flask-application-using-application-factory-pattern-and-celery-90281349fb7a)
+"""
 
 ## Requirements
 
 * Python 3.8
-  * [pip dependencies](requirements.txt)
+  * keras==2.6.0
+  * tensorflow==2.6.0
+  * laserembeddings==1.1.2
+  * https://download.pytorch.org/whl/cpu/torch-1.10.0%2Bcpu-cp38-cp38-linux_x86_64.whl
 
-The annotator model uses torch for preprocessing purposes.
-We install the [CPU only wheel](https://download.pytorch.org/whl/torch/) to save resources.
+The Floods annotator uses those libraries as backend for preprocessing purposes.
+We install [Torch CPU only wheel](https://download.pytorch.org/whl/torch/) to save resources.
 
-## Download
+> Tensorflow logs
+disabled with `TF_CPP_MIN_LOG_LEVEL`
+0 = all messages are logged (default behavior)
+1 = INFO messages are not printed
+2 = INFO and WARNING messages are not printed
+3 = INFO, WARNING, and ERROR messages are not printed
 
-Enable the [Development Environment](https://github.com/panc86/smdrm/blob/master/dev/README.md)
+## Build
+
 ```shell
-bash dev/run.sh
+docker-compose build floods
 ```
 
-Then execute the following command in the shell
+## Run
+
 ```shell
-bash annotators/floods/downloads.sh
+docker-compose up floods
 ```
 
-The flag `--clear` deletes any models previously downloaded
+or
 
-## Build & Run
-
-Build and run the FloodsAPI
 ```shell
-docker-compose up --build floods
+docker run -it --rm \
+  --env-file $(pwd)/annotators/floods/.env \
+  -p 5001:5001 \
+  jrc/floods_base \
+  flask run --host=0.0.0.0 --port=5001
+```
+
+## Develop
+
+```shell
+docker container run --rm -it \
+  -p 5001:5001 \
+  -v $(pwd)/annotators/floods:/opt/floods \
+  -v floods_volume:/opt/floods/models \
+  jrc/floods_base \
+  /bin/bash
 ```
 
 ## Usage
 
 Test the API with the following synthetic data points
 
-> :information_source: Note the "batch" key in the payload.
+```shell
+curl http://localhost:5001/model/test
+
+# Response
+# {
+#   "test": "passed"
+# }
+```
+
+> :information_source:
+> Note the `texts` key in the payload, and `en` (lang ISO code) in the URL.
 
 ```shell
-curl "http://localhost:5001" \
+curl X POST http://localhost:5001/model/annotate/en \
   -H "Content-Type: application/json" \
-  -d '{"batch": {"lang": "en", "texts": ["a flood disaster text url","another flood disaster text url"]}}'
-```
+  -d '{"texts": ["a flood disaster text url","another flood disaster text url"]}'
 
-This should return the same data points being sent, enriched with `text_sanitized` and `annotation` fields
-
-```shell
-{
-  "batch": {
-    "lang": "en",
-    "texts": [
-      "a flood disaster text url",
-      "another flood disaster text url",
-    ],
-    "annotation_probs": [
-      "0.022930",
-      "0.006453",
-    ],
-    "annotation_type": "fires",
-}
-```
-
-Clean Up
-
-```shell
-# stop with `CTRL+C`.
-docker container rm -f floods
+# Response
+# {
+#   "disaster_type": "floods",
+#   "floods_proba": [
+#     "0.022930",
+#     "0.006453"
+#   ]
+# }
 ```
 
 ## Tests

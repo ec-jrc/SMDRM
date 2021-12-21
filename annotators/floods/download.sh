@@ -2,21 +2,13 @@
 
 set -ue
 
+# laserembeddings is required
+# pip install laserembeddings
+
 # define project root directory from current
 CWD="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
-
-local_dir="${CWD}/models"
-clean=${1}
-
-# install dependencies
-apt update && apt install git -y
-python -m pip install laserembeddings
-
-
-if [ "${clean}" == "--clean" ]; then
-  # if clean, remove existing repo
-  rm -r "${local_dir}"
-fi
+local_dir=${1:-"${CWD}/models"}
+echo "downloading models into $local_dir..."
 
 # make dir if cleaned or does not exist
 mkdir -p "${local_dir}" && cd "${local_dir}"
@@ -35,5 +27,6 @@ git pull --depth=1 origin master
 
 # download embeddings
 if [ ! -d "${local_dir}/embeddings/" ]; then
+  echo "download embeddings"
   mkdir -p "${local_dir}/embeddings" && python -m laserembeddings download-models "${local_dir}/embeddings"
 fi
