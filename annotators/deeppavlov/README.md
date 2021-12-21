@@ -26,7 +26,7 @@ docker-compose up --build deeppavlov
 ## Usage
 
 ```shell
-curl -X POST http://127.0.0.1:5000/model \
+curl -X POST http://localhost:5000/model \
   -H 'Content-Type: application/json' \
   -d '{"x": ["Un texte d`information sur Rio de Janeiro, écrit à Paris."]}'
 ```

@@ -17,7 +17,14 @@ api = Api(app)
 model = deeppavlov.build_model(deeppavlov.configs.ner.ner_ontonotes_bert_mult, download=False)
 
 
-class DeepPavlovAPI(Resource):
+class DeepPavlovStatus(Resource):
+    """API status."""
+
+    def get(self):
+        return {"is_alive": True}, 200
+
+
+class DeepPavlovModel(Resource):
     """
     A custom API hosting a ready-to-use instance of the DeepPavlov
     Named Entity Recongnition AI framework.
@@ -32,29 +39,27 @@ class DeepPavlovAPI(Resource):
         http://docs.deeppavlov.ai/en/master/features/models/ner.html#ner-task.
     """
 
-    def get(self):
-        return {"is_alive": True}, 200
-
     def post(self):
         """
         Input: {"texts": t.List[str]}
         Ouptut: {"tags": tags_ext, "tokens": texts_tokens}
         """
-        texts = request.json.get("texts", None)
+        texts = request.json.get("x", None)
         if not texts:
             msg = "Missing input texts."
             console.error(msg)
             abort(400, message=msg)
 
         # run NER model against texts
-        tokenized_texts, tags = model(texts)
-        response = {"tags": tags, "tokenized_texts": tokenized_texts}
-        console.debug(response)
-        return response, 201
+        y_hat = model(texts)
+        console.debug(y_hat)
+        return y_hat, 201
 
 
 # add API resources
-api.add_resource(DeepPavlovAPI, "/")
+api.add_resource(DeepPavlovStatus, "/status")
+api.add_resource(DeepPavlovModel, "/model")
+#api.add_resource(DeepPavlovProbe, "/test")
 
 
 if __name__ == "__main__":
@@ -66,17 +71,13 @@ if __name__ == "__main__":
         DeepPavlov Named Entity Recongnition AI framework."""
     )
     parser.add_argument("--host", default="0.0.0.0", help="The host IP address. Default is %(default)s.")
-    parser.add_argument("--port", default=4000, help="The host port. Default is %(default)s.")
+    parser.add_argument("--port", default=5000, help="The host port. Default is %(default)s.")
     parser.add_argument("--debug", action="store_true", default=False, help="Enable debugging. Default is %(default)s.")
     args = parser.parse_args()
 
     # setup logging
-    logging.basicConfig(
-        format="[%(asctime)s] [%(name)s:%(lineno)d] [%(levelname)s]: %(message)s",
-        datefmt="%Y-%m-%dT%H:%M:%S%z",
-        level=os.getenv("LOG_LEVEL", "INFO")
-    )
-    console = logging.getLogger("deeppavlov.api")
+    logging.basicConfig(level="DEBUG" if args.debug else "INFO")
+    console = logging.getLogger("deeppavlov")
     logging.getLogger("werkzeug").propagate = False
 
     # start api
