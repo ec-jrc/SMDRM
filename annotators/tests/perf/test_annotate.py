@@ -1,3 +1,4 @@
+import glog
 import logging
 import os
 import json
@@ -32,8 +33,8 @@ if __name__ == "__main__":
     console = logging.getLogger("annotators.perftests")
 
     @log_execution(console)
-    def run_perftest():
-        zip_file = ZipFileModel(os.path.join(root_dir, "cid_1210_5k_ext.zip"))
+    def run_perftest(path):
+        zip_file = ZipFileModel(path)
         console.debug("Is valid zip file? {}".format(zip_file.is_valid()))
         url = args.annotator_url
         for index, batch in enumerate(iter_in_batches(zip_file.iter_jsonl(), batch_size=args.batch_size)):
@@ -44,4 +45,9 @@ if __name__ == "__main__":
 
     console.info("Running performance test")
     console.debug("config={}".format(vars(args)))
-    run_perftest()
+
+    # get filepaths
+    paths = glob.iglob(os.path.join(root_dir, 'data/*.zip'))
+    for path in paths:
+        console.info("processing {}".format(path))
+        run_perftest(path)

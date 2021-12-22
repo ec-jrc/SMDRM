@@ -6,7 +6,7 @@ RUN pip install --upgrade pip requests
 
 WORKDIR /perftests
 COPY test_annotate.py .
-COPY cid_1210_5k_ext.zip .
+COPY data data
 
 ENTRYPOINT ["python", "test_annotate.py"]
 CMD ["--help"]

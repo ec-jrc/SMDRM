@@ -11,7 +11,6 @@ import logging
 from logging.config import dictConfig
 import os
 from flask import Flask, render_template
-#from celery import Celery
 from config import Config
 
 
@@ -36,8 +35,6 @@ dictConfig({
 # using root logger to merge flask and gunicorn logs
 logger = logging.getLogger()
 
-### Instantiate Celery ###
-#celery = Celery(__name__, broker=Config.CELERY_BROKER_URL, result_backend=Config.RESULT_BACKEND)  # NEW!!!!!
 
 ### Application Factory ###
 def create_app():
@@ -48,14 +45,11 @@ def create_app():
     CONFIG_TYPE = os.getenv('CONFIG_TYPE', default='config.DevelopmentConfig')
     app.config.from_object(CONFIG_TYPE)
 
-    # Configure celery
-    #celery.conf.update(app.config)
-
     # Register blueprints
     register_blueprints(app)
 
     # Initialize flask extension objects
-    #initialize_extensions(app)
+    initialize_extensions(app)
 
     # Configure logging
     configure_logrotate(app)
@@ -75,8 +69,8 @@ def register_blueprints(app):
     app.register_blueprint(info_blueprint)
 
 
-# def initialize_extensions(app):
-#     mail.init_app(app)
+def initialize_extensions(app):
+    pass
 
 
 def register_error_handlers(app):

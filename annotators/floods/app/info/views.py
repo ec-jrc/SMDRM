@@ -15,6 +15,4 @@ def index():
 
 @info_blueprint.route('/status', methods=['GET'])
 def status():
-    response = {"is_alive": True}
-    logger.debug(response)
-    return response, 200
+    return jsonify("ready"), 200

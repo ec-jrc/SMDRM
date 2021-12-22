@@ -14,10 +14,14 @@ from .transformations import (
     apply_transformations,
 )
 
+# setup logging
+logging.basicConfig(level=logging.INFO)
+console = logging.getLogger(__name__)
+
 
 @click.command()
 @click.argument("input_path", type=click.Path(exists=True, file_okay=True, dir_okay=False, resolve_path=True))
-@click.option("--output-path", type=click.Path(exists=False, file_okay=True, dir_okay=False, resolve_path=True))
+@click.option("--output-path", type=click.Path(exists=False, file_okay=True, dir_okay=False, resolve_path=True), help="The path to which you want to save the task output.")
 @click.option("--batch-size", type=click.INT, default=100, help="The size of each batch in which a file is split.")
 @click.option("--debug", is_flag=True, default=False, help="Enables debugging mode.")
 def cli(input_path, output_path, batch_size, debug):
@@ -27,18 +31,13 @@ def cli(input_path, output_path, batch_size, debug):
     Arguments\n
       input_path: The path from which you want to get input data,\n
 
-    Options\n
-      --output-path: The path to which you want to save the task output.\n
-      --batch-size: bla,\n
-      --debug: bla.
-
     Exit Codes\n
       1: Invalid zip file,\n
 
     """
-    # setup logging
-    logging.basicConfig(level="DEBUG" if debug else "INFO")
-    console = logging.getLogger(__name__)
+
+    if debug:
+        console.setLevel(logging.DEBUG)
 
     # input path validation
     zip_file = ZipFileModel(input_path)

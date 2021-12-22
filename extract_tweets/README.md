@@ -19,8 +19,8 @@ For more details, check the [Dockerfile](Dockerfile).
 ## Run
 
 ```shell
-# mount zip file data into the container to run the task
-docker container run --rm -v ./host/data:/data jrc/extract_tweets_base
+# add your input data in the data/ directory
+docker container run --rm -v $(pwd)/data:/data jrc/extract_tweets_base
 ```
 
 ## Develop

@@ -1,8 +1,7 @@
 import logging
-from flask import render_template, request, abort, current_app
+from flask import render_template, request, abort, current_app, jsonify
 from . import annotate_blueprint
 from .annotator import init_annotators
-#from .tasks import annotate_batch
 
 # setup logger
 logger = logging.getLogger()
@@ -12,6 +11,24 @@ annotators = init_annotators()
 languages = [lang for lang in annotators]
 # log available languages
 logger.info("annotation offered in {}".format(languages))
+
+
+@annotate_blueprint.route('/languages', methods=['GET'])
+def get_languages():
+    """Get languages available for annotation."""
+    return jsonify(languages), 200
+
+
+@annotate_blueprint.route('/test', methods=['GET'])
+def test_model():
+    """Test annotation."""
+    result = "failed"
+    test_annotator = annotators["en"]
+    proba = test_annotator.infer(["string"])
+    if proba:
+        result = "passed"
+    logger.debug(result)
+    return jsonify(result), 200
 
 
 @annotate_blueprint.route('/annotate/<string:lang>', methods=['POST'])
@@ -32,29 +49,7 @@ def annotate(lang):
     # select annotator with lang field and infer probability scores
     annotator = annotators[lang]
     proba = annotator.infer(texts)
-    # add scores to payload as valid JSON format
-    response = {
-            "floods_proba": ["{:.6f}".format(round(p, 6)) for p in proba],
-            "disaster_type": "floods",
-        }
+    # return scores as valid JSON format
+    response = jsonify(["{:.6f}".format(round(p, 6)) for p in proba])
     logger.debug(response)
     return response, 201
-
-
-# # Annotate using Celery? tasks processing queue
-# @annotate_blueprint.route('/model', methods=['POST'])
-# def annotate():
-#     annotate_batch.apply_async(args=[batch])
-#     return {}, 200
-
-
-@annotate_blueprint.route('/test', methods=['GET'])
-def test():
-    """Test annotation."""
-    response = {"test": "failed"}
-    test_annotator = annotators["en"]
-    proba = test_annotator.infer(["string"])
-    if proba:
-        response["test"] = "passed"
-    logger.debug(response)
-    return response, 200

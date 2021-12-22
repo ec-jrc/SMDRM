@@ -1,23 +1,17 @@
-# Transform Tweets
+# Annotate Tweets
 
-Transform data point `text` field.
+Annotate `text` data with Named Entity Recognition algorithms.
 
-## Transformations
-
-* mentions
-* URLs
-* hashtags
-* punctuation
-* white spaces
-* new lines
-* dates
+Executes
+* ...
+* ...
 
 > :bangbang: execute all bash commands from project root directory
 
 ## Build
 
 ```shell
-./transform_tweets/build.sh
+./annotate_tweets/build.sh
 ```
 
 For more details, check the [Dockerfile](Dockerfile).
@@ -26,7 +20,7 @@ For more details, check the [Dockerfile](Dockerfile).
 
 ```shell
 # add your input data in the data/ directory
-docker container run --rm -v $(pwd)/data:/data jrc/transform_tweets_base
+docker container run --rm -v $(pwd)/data:/data jrc/floods_annotate_base
 ```
 
 ## Develop
@@ -42,5 +36,5 @@ You can develop in a standardized environment using Jupyter Notebook.
 Run the unittests
 
 ```shell
-./transform_tweets/build.sh test && ./transform_tweets/test.sh
+./floods_annotate/build.sh test && ./floods_annotate/test.sh
 ```
