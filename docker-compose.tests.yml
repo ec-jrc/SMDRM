@@ -1,18 +1,6 @@
-version: "3.7"
+version: "3.9"
 
 services:
-
-  fires:
-    command:
-      - "--port=15002"
-    container_name: fires-test
-    networks:
-      - tests
-    ports:
-      - "15002:15002"
-    restart: on-failure
-    volumes:
-      - "${PWD}/annotators/fires/models:/app/models"
 
   floods:
     command:

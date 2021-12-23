@@ -3,7 +3,7 @@
 set -ue
 
 # build SMDRM ETL images
-ENV=${1:-prod}
+ENV=${1:-base}
 
 # base image with libdrm core module
 bash $(pwd)/libdrm/build.sh $ENV

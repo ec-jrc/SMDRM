@@ -1,6 +1,5 @@
-# Libdrm
+# LibDRM
 
-[Python:3.8-slim]() (debian) based image.
 It holds the core functionality required by SMDRM Pipeline tasks.
 
 For more details, go to the [source code](https://github.com/panc86/smdrm/tree/master/libdrm) on GitHub.
@@ -16,13 +15,12 @@ For more details, go to the [source code](https://github.com/panc86/smdrm/tree/m
 
 For more details, check the [Dockerfile](Dockerfile).
 
-
 ## Development
 
 Build a Jupyter Notebook development environment using the `dev` stage.
 
 ```shell
-bash $(pwd)/libdrm/build.sh dev
+./libdrm/build.sh dev
 ```
 
 Mount your data, and the directory with the source code under development.
@@ -49,8 +47,7 @@ docker run -it --rm \
 Run the unittests
 
 ```shell
-./libdrm/build.sh test
-./libdrm/test.sh
+./libdrm/build.sh test && ./libdrm/test.sh
 ```
 
 ## Modules
@@ -66,7 +63,7 @@ Consistent structure of input/output data
 * `DataPointModel`
 * `ZipFileModel`
 
-<!-- ### Elastic
+### Elastic
 
 This module contains a custom ElasticSearch Client that performs the following API operations:
 * create index template
@@ -74,7 +71,7 @@ This module contains a custom ElasticSearch Client that performs the following A
 * add document
 * add document batch
 
-It also contains the ElasticSearch Template Mappings definition to set the data structure of indexed data points. -->
+It also contains the ElasticSearch Template Mappings definition to set the data structure of indexed data points.
 
 ### Pipelines
 
@@ -83,11 +80,9 @@ Pipeline Class creates ad hoc data processing pipeline using generators and OOP.
 It also defines the required fields of the Disaster (data point) Model via
 the `DisasterModel` Class using [Pydantinc](https://pydantic-docs.helpmanual.io/).
 
-
 ## Publish
 
 GitHub Action.
-
 
 ## Releases
 

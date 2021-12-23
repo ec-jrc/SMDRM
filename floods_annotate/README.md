@@ -1,10 +1,16 @@
-# Annotate Tweets
+# Floods Annotate
 
-Annotate `text` data with Named Entity Recognition algorithms.
+Annotate `text` data with the Floods Named Entity Recognition annotator.
+
+The annotator is trained to recognize floods related texts in a limited number
+of languages.
+
+It is accessible via HTTP REST API request. The expected input data is a batch
+of texts of a single language.
 
 Executes
-* ...
-* ...
+* group batch by language
+* HTTP call to Floods Annotator API
 
 > :bangbang: execute all bash commands from project root directory
 

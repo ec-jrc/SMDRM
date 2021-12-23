@@ -17,7 +17,3 @@ services:
   floods:
     build: ./annotators/floods/
     image: jrc/floods_base
-
-  fires:
-    build: ./annotators/fires/
-    image: jrc/fires

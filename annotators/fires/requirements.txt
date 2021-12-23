@@ -1,6 +1,0 @@
-Flask==2.0.1
-Flask-RESTful==0.3.9
-scipy==1.7.1
-transformers==3.5.1
-# pytorch cpu only to save resources wheel (GPU is useful during training)
-https://download.pytorch.org/whl/cpu/torch-1.7.0%2Bcpu-cp38-cp38-linux_x86_64.whl
