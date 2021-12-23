@@ -12,8 +12,11 @@ services:
       - "15001:15001"
     restart: on-failure
     volumes:
-      - "${PWD}/annotators/floods/models:/app/models"
+      - "floods:/opt/floods/models"
 
 networks:
   tests:
     attachable: true
+
+volumes:
+  floods:
