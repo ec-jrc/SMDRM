@@ -1,44 +1,9 @@
-version: "3.7"
+version: "3.9"
 
 services:
 
-  upload:
-    command:
-      - "--stand-alone"
-      - "--port=15000"
-    container_name: upload-test
-    networks:
-      - tests
-    ports:
-      - "15000:15000"
-
-  text-normalize:
-    command:
-      - "--debug"
-      - "--port=15050"
-    container_name: text-normalize-test
-    networks:
-      - tests
-    ports:
-      - "15050:15050"
-    restart: on-failure
-
-  fires:
-    command:
-      - "--debug"
-      - "--port=15002"
-    container_name: fires-test
-    networks:
-      - tests
-    ports:
-      - "15002:15002"
-    restart: on-failure
-    volumes:
-      - "${PWD}/annotators/fires/models:/app/models"
-
   floods:
     command:
-      - "--debug"
       - "--port=15001"
     container_name: floods-test
     networks:

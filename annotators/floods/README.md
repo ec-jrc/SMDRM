@@ -1,89 +1,134 @@
 # Floods API
 
-Docker service based on `Python:3.8-slim` image.
+[Python:3.8-slim] based Docker image provides a REST API to call pre-trained
+Named Entity Recognition Machine Learning annotators.
+We used `Floods` disaster related multilingual texts as training data to annotate
+new incoming texts.
 
-It uses Machine Learning models trained on text related to flood disasters to annotate new incoming texts.
-It requires `lang` and `text` fields to be able to compute an annotation.
+It requires `lang` and `texts` fields to be able to compute a correct annotation.
 
-> :information_source: You can control the annotation batch size with the `ANNOTATION_BATCH_SIZE`
-> environment variable in the Engine .env file.
+Sources:
+* [github.com](https://github.com/panc86/production-flask-app-setup)
+* [towardsdatascience.com](https://towardsdatascience.com/how-to-set-up-a-production-grade-flask-application-using-application-factory-pattern-and-celery-90281349fb7a)
+"""
 
-## Instructions
+## Requirements
 
-You need to download models and embeddings, then run the FloodsAPI
+* Python 3.8
+  * keras==2.6.0
+  * tensorflow==2.6.0
+  * laserembeddings==1.1.2
+  * https://download.pytorch.org/whl/cpu/torch-1.10.0%2Bcpu-cp38-cp38-linux_x86_64.whl
 
-> :information_source: The following commands are executed from the project root directory
+The Floods annotator uses those libraries as backend for preprocessing purposes.
+We install [Torch CPU only wheel](https://download.pytorch.org/whl/torch/) to save resources.
 
-### Download
+> Tensorflow logs
+disabled with `TF_CPP_MIN_LOG_LEVEL`
+0 = all messages are logged (default behavior)
+1 = INFO messages are not printed
+2 = INFO and WARNING messages are not printed
+3 = INFO, WARNING, and ERROR messages are not printed
 
-Enable the [Development Environment](https://github.com/panc86/smdrm/blob/master/dev/README.md)
+## Build
+
 ```shell
-bash dev/run.sh
+docker-compose build floods
 ```
 
-Then execute the following command in the shell
+## Run
+
 ```shell
-bash annotators/floods/downloads.sh
+docker-compose up floods
 ```
 
-The flag `--clear` deletes any models previously downloaded
+or
 
-### Run
-
-Build and run the FloodsAPI
 ```shell
-docker-compose up --build floods
+docker run -it --rm \
+  --env-file $(pwd)/annotators/floods/.env \
+  -p 5001:5001 \
+  jrc/floods_base \
+  flask run --host=0.0.0.0 --port=5001
 ```
 
-### Test
+## Develop
+
+```shell
+docker container run --rm -it \
+  -p 5001:5001 \
+  -v $(pwd)/annotators/floods:/opt/floods \
+  -v floods_volume:/opt/floods/models \
+  jrc/floods_base \
+  /bin/bash
+```
+
+## Usage
 
 Test the API with the following synthetic data points
 
-> :information_source: Note the "batch" key in the payload.
+```shell
+curl http://localhost:5001/model/test
+
+# Response
+# {
+#   "test": "passed"
+# }
+```
+
+> :information_source:
+> Note the `texts` key in the payload, and `en` (lang ISO code) in the URL.
 
 ```shell
-curl -v -X POST http://localhost:5001 \
+curl X POST http://localhost:5001/model/annotate/en \
   -H "Content-Type: application/json" \
-  -d '{"batch":[{"lang":"en", "text":"a flood disaster @related text. #vivo http://lucot.com"}, {"lang":"en", "text":"#hash another flood disaster related text. @Mymy"}]}'
+  -d '{"texts": ["a flood disaster text url","another flood disaster text url"]}'
+
+# Response
+# {
+#   "disaster_type": "floods",
+#   "floods_proba": [
+#     "0.022930",
+#     "0.006453"
+#   ]
+# }
 ```
 
-This should return the same data points being sent, enriched with `text_sanitized` and `annotation` fields
+## Tests
+
+Build the [test](Dockerfile) Docker image
 
 ```shell
-{
-  "batch": [
-    {
-      "lang": "en",
-      "text": "a flood disaster @related text. #vivo http://lucot.com",
-      "annotations": [
-        {
-          "annotation_type": "floods",
-          "annotation_prob": "0.00017365074",
-          "sanitized_text": "a flood disaster USER text vivo URL"
-        }
-      ]
-    },
-    {
-      "lang": "en",
-      "text": "#hash another flood disaster related text. @Mymy",
-      "annotations": [
-        {
-          "annotation_type": "floods",
-          "annotation_prob": "0.009030139",
-          "sanitized_text": "hash another flood disaster related text USER"
-        }
-      ]
-    }
-  ]
-}
+cd annotators/floods && docker build --target test -t floodsapi:test . && cd -
 ```
 
-### Clean Up
+### Unit
 
-You can stop a running instance of the Floods API simply with `CTRL+C`.
-
-Execute the following command to remove the service
+Run the unit tests
 
 ```shell
-docker container rm -f floods
+cd annotators/floods && docker container run --rm -v $(pwd)/models:/app/models floodsapi:test tests/unit && cd -
+```
+
+### Integration
+
+Initialize the test instance of the API
+
+```shell
+# executed from the project root directory
+docker-compose -f docker-compose.yml -f docker-compose.tests.yml up --build floods
+```
+
+Run the integration tests
+
+```shell
+# note the network flag (see docker-compose.tests.yml)
+docker container run --rm --network smdrm_tests floodsapi:test tests/integration
+```
+
+Clean up
+
+```shell
+# executed from the project root directory
+docker-compose -f docker-compose.yml -f docker-compose.tests.yml down
 ```

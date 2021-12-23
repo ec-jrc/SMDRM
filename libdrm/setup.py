@@ -1,20 +1,20 @@
-"""
-SMDRM LIBDRM setup module.
-"""
+"""SMDRM LIBDRM setup module."""
+
+import os
+from setuptools import find_packages, setup
 
 
-import setuptools
-import pathlib
+def get_version():
+    root = os.path.dirname(os.path.abspath(__file__))
+    with open(os.path.join(root, "VERSION.txt")) as v:
+        version = v.read()
+        return version
 
-here = pathlib.Path(__file__).parent.resolve()
-long_description = (here / "README.md").read_text(encoding="utf-8")
 
-
-setuptools.setup(
+setup(
     name="libdrm",
-    version='0.1.5',
+    version=get_version(),
     description="Common helper modules shared by the pipeline services",
-    long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/panc86/smdrm",
     author="Emanuele Panizio",
@@ -30,13 +30,10 @@ setuptools.setup(
         "Programming Language :: Python :: 3 :: Only",
     ],
     package_dir={"": "src"},
-    packages=setuptools.find_packages(where="src"),
-    python_requires=">=3.6, <3.9",
+    packages=find_packages(where="src"),
+    python_requires=">3.7, <3.10",
     install_requires=[
-        "marshmallow",
-        "pydantic",
-        "pytz",
-        "requests",
+        "pydantic~=1.8",
     ],
     project_urls={
         "Bug Reports": "https://github.com/panc86/smdrm/issues",

@@ -1,21 +1,29 @@
 # Python
-venv
 .pytest_cache
 **/__pycache__
 *.pyc
 *.egg-info
+*.ipynb_checkpoints
 
-# pycharm
-.idea
+# Config
+*.env
 
-# libdrm
-libdrm/dist
-libdrm/build
+# Development
+nbs/*
+!nbs/.gitkeep
 
-# models
-annotators/**/models
-annotators/fires/tmp_trainer
-# uploads
-**/uploads
-# var
-temp
+# Tasks
+**/build
+**/dist
+
+# Annotators
+**/models
+**/tmp_trainer
+**/instance
+
+# Data
+data/*
+!data/.gitkeep
+
+# sys
+.Trash*
