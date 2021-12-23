@@ -14,8 +14,8 @@ class DataPointModel(pydantic.BaseModel, extra=pydantic.Extra.ignore):
     text: str
     # enriched fields
     # optional because generated at runtime @ transform_tweets
-    text_clean: t.Optional[str] = ""
-    places: t.Optional[list] = []
+    text_clean: t.Optional[str] = None
+    places: t.Optional[list] = None
 
 
 class ZipFileModel:

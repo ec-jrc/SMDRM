@@ -9,7 +9,7 @@
 *.env
 
 # Development
-nbs
+/nbs/**
 
 # Tasks
 **/build
@@ -21,7 +21,7 @@ nbs
 **/instance
 
 # Data
-data
+/data/**
 
 # sys
 .Trash*

@@ -9,7 +9,8 @@
 *.env
 
 # Development
-nbs
+nbs/*
+!nbs/.gitkeep
 
 # Tasks
 **/build
@@ -21,7 +22,8 @@ nbs
 **/instance
 
 # Data
-data
+data/*
+!data/.gitkeep
 
 # sys
 .Trash*

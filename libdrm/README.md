@@ -1,8 +1,7 @@
 # Libdrm
 
-[Python:3.9-slim](https://hub.docker.com/layers/python/library/python/3.9-slim/images/sha256-37865527b7c16f5bb5d7c5501b9d686a672e956b0826aa07f5195a46ef903ba6?context=explore) (debian) based image.
-
-It represents the Python core functionality required by the various tasks in the SMDRM Pipeline.
+[Python:3.8-slim]() (debian) based image.
+It holds the core functionality required by SMDRM Pipeline tasks.
 
 For more details, go to the [source code](https://github.com/panc86/smdrm/tree/master/libdrm) on GitHub.
 
@@ -92,4 +91,8 @@ GitHub Action.
 
 ## Releases
 
-- VERSION: comment.
+- **0.1.7**
+  Optional fields `text_clean`, and `places` in `DataPointModel` class set to `None`.
+  This allows failure when those fields are screened under certain conditions.
+  For instance, `cnn_texts = g.text_clean.values.tolist()` in
+  _floods_annotate/src/floods_annotate.py_
