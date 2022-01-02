@@ -86,6 +86,9 @@ GitHub Action.
 
 ## Releases
 
+- **0.1.8**
+  `ZipFileModel.cache()` method now expects a generator of NDJSON batches.
+
 - **0.1.7**
   Optional fields `text_clean`, and `places` in `DataPointModel` class set to `None`.
   This allows failure when those fields are screened under certain conditions.

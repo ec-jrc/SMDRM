@@ -117,7 +117,7 @@ def cli(input_path, output_path, batch_size, debug):
             for annotated in annotate_language_groups(groups):
                 console.debug(annotated)
                 n_out += len(annotated)
-                yield annotated.to_json(orient="records", force_ascii=False)
+                yield annotated.to_json(orient="records", force_ascii=False, lines=True)
 
         # metrics
         console.info("input   = {}".format(n_in))
@@ -127,7 +127,7 @@ def cli(input_path, output_path, batch_size, debug):
     # cache pipeline output
     if not output_path:
         output_path = input_path.replace(".zip", "_ann.zip")
-    zip_file.cache(output_path, gen_data(), batch_size=batch_size)
+    zip_file.cache(output_path, gen_data())
 
 
 if __name__ == "__main__":
