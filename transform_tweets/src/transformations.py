@@ -11,6 +11,7 @@ import typing
 development = bool(int(os.getenv("DEVELOPMENT", 0)))
 # typing
 pandas_series = pandas.core.series.Series
+pandas_df = pandas.core.frame.DataFrame
 
 
 def tag_with_mult_bert(texts: list) -> requests.Response:
@@ -57,10 +58,10 @@ def extract_place_candidates(y_hat: typing.List[list], allowed_tags: typing.List
     return places
 
 
-def normalize_places(r: pandas_series) -> pandas_series:
+def normalize_places(s: pandas_series) -> pandas_series:
     """Normalize identified place candidates with common _loc_ tag."""
-    t = r.text
-    p = r.places
+    t = s.text
+    p = s.places
     if not p:
         return t
     # replace place candidates in text with _LOC_
@@ -68,6 +69,12 @@ def normalize_places(r: pandas_series) -> pandas_series:
         for name in names:
             t = t.replace(name, "_loc_")
     return t
+
+
+def get_duplicate_mask(batch_df: pandas_df) -> pandas_series:
+    """Boolean mask of duplicates within this batch."""
+    mask = batch_df.duplicated(subset="text", keep='first')
+    return mask
 
 
 # non natural language compiled regex

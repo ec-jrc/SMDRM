@@ -1,8 +1,9 @@
 import click
 import logging
 import os
+import pandas
+import typing
 import sys
-import typing as t
 
 from libdrm.datamodels import ZipFileModel
 from libdrm.common import iter_in_batches
@@ -11,6 +12,7 @@ from .transformations import (
     tag_with_mult_bert,
     extract_place_candidates,
     normalize_places,
+    get_duplicate_mask,
     apply_transformations,
 )
 
@@ -60,23 +62,36 @@ def cli(input_path, output_path, batch_size, debug):
         for batch in iter_in_batches(zip_file.iter_jsonl(), batch_size=batch_size):
             n_batches += 1
             n_in += len(batch)
-            # isolate texts
-            texts = [datapoint["text"] for datapoint in batch]
-            # # deeppavlov model output: tagged and tokenized sentences
-            y_hat = tag_with_mult_bert(texts)
-            # places
+
+            # pandas dataframe makes data transformation easier
+            batch_df = pandas.DataFrame(batch)
+            # get boolean mask of duplicated datapoints
+            dupmask = get_duplicate_mask(batch_df)
+
+            # reduce deeppavlov payload size by removing duplicates
+            unique_datapoints = batch_df[~dupmask]
+            # tag texts with DeepPavlov (multilingual BERT) NER model
+            y_hat = tag_with_mult_bert(list(unique_datapoints.text))
+            # get place candidates using allowed tags
             places = extract_place_candidates(y_hat, allowed_tags)
-            # normalize places found in texts
-            normalized = normalize_places(texts, places)
-            # update datapoint in batch
-            for datapoint, ntext, pnames in zip(batch, normalized, places):
-                # apply natural text transformations
-                # store in batch (required by Annotation steps)
-                datapoint["text_clean"] = apply_transformations(ntext)
-                # store places in batch (required by Geocode step)
-                datapoint["places"] = pnames
-                yield datapoint
-                n_out += 1
+
+            # extend unique datapoints with places candidates (required by Geocode steps)
+            unique_datapoints_index = unique_datapoints.index
+            unique_datapoints.loc[unique_datapoints_index, "places"] = [tagged for index, tagged in places.items()]
+            # remove place candidates from text
+            unique_datapoints.loc[unique_datapoints_index, "text_clean"] = unique_datapoints.apply(normalize_places, axis=1)
+            # apply natural text transformations on place-free text (required by Annotation steps)
+            unique_datapoints.loc[unique_datapoints_index, "text_clean"] = unique_datapoints.text_clean.apply(apply_transformations)
+
+            # merge transformed unique datapoints onto duplicates
+            # drop target columns to avoid pandas suffix patching (i.e. <col>_x, <col>_y)
+            duplicates = batch_df[dupmask].drop(columns=["places", "text_clean"])
+            enriched_duplicates = duplicates.merge(unique_datapoints[["places", "text", "text_clean"]], on="text")
+            batch_transformed = pandas.concat([unique_datapoints, duplicates]).reset_index(drop=True)
+            # ndjson batch
+            n_out += len(batch_transformed)
+            yield batch_transformed.to_json(orient="records", force_ascii=False, lines=True)
+
         # metrics
         console.info("input   = {}".format(n_in))
         console.info("output  = {}".format(n_out))
@@ -85,7 +100,7 @@ def cli(input_path, output_path, batch_size, debug):
     # cache pipeline output
     if not output_path:
         output_path = input_path.replace(".zip", "_tra.zip")
-    zip_file.cache(output_path, gen_data(), batch_size=batch_size)
+    zip_file.cache(output_path, gen_data())
 
 
 if __name__ == "__main__":

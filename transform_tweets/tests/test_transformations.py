@@ -9,6 +9,7 @@ from src import transformations
 texts = [
     "Un texte d`information sur Rio de Janeiro, écrit à Paris.",
     "a text in english without place candidates.",
+    "ed uno in italiano da Roccacannuccia nella pianura pontina",
     "ed uno in italiano da Roccacannuccia nella pianura pontina"
 ]
 
@@ -26,6 +27,10 @@ y_hat = [
         ["ed", "uno", "in", "italiano", "da", "Roccacannuccia", "nella", "pianura", "pontina"],
         ["O", "B-CARDINAL", "O", "B-LANGUAGE", "O", "B-LOC", "I-LOC", "I-LOC", "I-LOC"],
     ],
+    [
+        ["ed", "uno", "in", "italiano", "da", "Roccacannuccia", "nella", "pianura", "pontina"],
+        ["O", "B-CARDINAL", "O", "B-LANGUAGE", "O", "B-LOC", "I-LOC", "I-LOC", "I-LOC"],
+    ],
 ]
 
 # deeppavlov place related tags
@@ -36,7 +41,12 @@ expected_place_candidates = {
     0: {'GPE': ['Rio de Janeiro', 'Paris']},
     1: {},
     2: {'LOC': ['Roccacannuccia nella pianura pontina']},
+    3: {'LOC': ['Roccacannuccia nella pianura pontina']},
 }
+
+# test dataframe
+places = [tagged for index, tagged in expected_place_candidates.items()]
+test_df = pandas.DataFrame(zip(texts, places), columns=["text", "places"])
 
 
 # custom class to be the mock return value
@@ -71,15 +81,20 @@ def test_extract_place_candidates():
 
 def test_normalize_places():
     """Test if normalize_places returns the normalized texts i.e. _loc_ tag for each recognized place candidate."""
-    places = [tagged for index, tagged in expected_place_candidates.items()]
-    df = pandas.DataFrame(zip(texts, places), columns=["text", "places"])
-    result = df.apply(transformations.normalize_places, axis=1)
+    result = test_df.apply(transformations.normalize_places, axis=1)
     expected = [
         'Un texte d`information sur _loc_, écrit à _loc_.',
         'a text in english without place candidates.',
-        'ed uno in italiano da _loc_'
+        'ed uno in italiano da _loc_',
+        'ed uno in italiano da _loc_',
     ]
     assert list(result) == expected
+
+
+def test_get_duplicate_mask():
+    """Test if last item of duplicates_mask is True."""
+    mask = transformations.get_duplicate_mask(test_df)
+    assert mask.iloc[-1]
 
 
 def test_apply_transformations():
