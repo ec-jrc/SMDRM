@@ -1,4 +1,5 @@
 import os
+import pandas
 import requests
 import sys
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
@@ -27,7 +28,15 @@ y_hat = [
     ],
 ]
 
+# deeppavlov place related tags
 allowed_tags = ["B-GPE", "I-GPE", "B-FAC", "I-FAC", "B-LOC", "I-LOC"]
+
+# expected place candidate extraction output
+expected_place_candidates = {
+    0: {'GPE': ['Rio de Janeiro', 'Paris']},
+    1: {},
+    2: {'LOC': ['Roccacannuccia nella pianura pontina']},
+}
 
 
 # custom class to be the mock return value
@@ -56,21 +65,21 @@ def test_tag_with_mult_bert(monkeypatch):
 
 def test_extract_place_candidates():
     """Test if extract_place_candidates returns the correct places wrt the allowed tags for each texts."""
-    expected = [["Rio de Janeiro", "Paris"], [], ["Roccacannuccia nella pianura pontina"]]
-    places = transformations.extract_place_candidates(y_hat, allowed_tags)
-    assert places == expected
+    place_candidates = transformations.extract_place_candidates(y_hat, allowed_tags)
+    assert place_candidates == expected_place_candidates
 
 
 def test_normalize_places():
     """Test if normalize_places returns the normalized texts i.e. _loc_ tag for each recognized place candidate."""
-    places = transformations.extract_place_candidates(y_hat, allowed_tags)
-    result = list(transformations.normalize_places(texts, places))
+    places = [tagged for index, tagged in expected_place_candidates.items()]
+    df = pandas.DataFrame(zip(texts, places), columns=["text", "places"])
+    result = df.apply(transformations.normalize_places, axis=1)
     expected = [
         'Un texte d`information sur _loc_, écrit à _loc_.',
         'a text in english without place candidates.',
         'ed uno in italiano da _loc_'
     ]
-    assert result == expected
+    assert list(result) == expected
 
 
 def test_apply_transformations():

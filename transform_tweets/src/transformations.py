@@ -1,13 +1,16 @@
 import os
 import re
 import json
+import pandas
 import string
 import requests
-import typing as t
+import typing
 
 
 # development flag
 development = bool(int(os.getenv("DEVELOPMENT", 0)))
+# typing
+pandas_series = pandas.core.series.Series
 
 
 def tag_with_mult_bert(texts: list) -> requests.Response:
@@ -24,42 +27,47 @@ def tag_with_mult_bert(texts: list) -> requests.Response:
     return r.json()
 
 
-def extract_place_candidates(ner_output: t.List[list], allowed_tags: t.List[str]) -> t.List[list]:
+def extract_place_candidates(y_hat: typing.List[list], allowed_tags: typing.List[str]) -> dict:
     """Extract place candidates given a set of tags allowed by the user."""
-    places = []
-    for row in (list(zip(tokens, tags)) for tokens, tags in ner_output):
-        subset = []
-        place_candidate = ""
-        for token, tag in row:
-            # skip unwanted tags
-            if tag not in allowed_tags:
-                # leaves us with B-, and I- for all allowed tags
-                continue
+
+    places = dict()
+    for index, (tokens, tags) in enumerate(y_hat):
+        places[index] = dict()
+        for tag_id, tag in enumerate(tags):
+            # place candidate always begin with B-<tag>
             if "B-" in tag:
-                if place_candidate:
-                    # when a new B-egin occurs in the same row
-                    # place candidate is not empty
-                    # so cache the current place candidate in subset
-                    subset.append(place_candidate)
-                # first token is always a B-egin tag
-                place_candidate = token
-                continue
-            # subsequent allowed tags are I-inside tags
-            place_candidate += " "+token
-        # append any residual place candidate
-        if place_candidate:
-            subset.append(place_candidate)
-        places.append(subset)
+                _, tag_root = tag.split("-")
+
+                # create a dictionary for this tag
+                if tag in allowed_tags and tag_root not in places[index]:
+                    places[index][tag_root] = []
+
+                # rebuild the place candidate using I-inside tags
+                subset = []
+                future_tags = tags[tag_id:]
+                for ftid, future_tag in enumerate(future_tags, start=tag_id):
+                    # break place candidate rebuilding when an unknown tag is reached
+                    if future_tag not in allowed_tags:
+                        break
+                    subset.append(tokens[ftid])
+
+                # subset exists if place candidates are found
+                if subset:
+                    places[index][tag_root].append(" ".join(subset))
     return places
 
 
-def normalize_places(texts: t.List[str], places: t.List[list]) -> t.Iterable[str]:
-    for text, place in zip(texts, places):
-        tmp = text
-        if place:
-            for name in place:
-                tmp = tmp.replace(name, "_LOC_")
-        yield tmp
+def normalize_places(r: pandas_series) -> pandas_series:
+    """Normalize identified place candidates with common _loc_ tag."""
+    t = r.text
+    p = r.places
+    if not p:
+        return t
+    # replace place candidates in text with _LOC_
+    for tag, names in p.items():
+        for name in names:
+            t = t.replace(name, "_loc_")
+    return t
 
 
 # non natural language compiled regex
