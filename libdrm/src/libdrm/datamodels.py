@@ -46,24 +46,7 @@ class ZipFileModel:
                 # empty dict at failure
                 yield dict()
 
-    def cache(self, output_path: str, json_gen: t.Iterable[dict], batch_size: int = 1000) -> None:
-        """Cache the output of each task into a zip file.
-        Creates a json file for each batch of data points."""
-
+    def cache(self, output_path: str, jsonl_batch_gen: t.Iterable[str]) -> None:
         with zipfile.ZipFile(output_path, "w") as zf:
-            batch = ""
-            batch_id = 0
-            batch_size_track = 0
-            for jsonl in json_gen:
-                # to string
-                batch += json.dumps(jsonl, ensure_ascii=False) + "\n"
-                batch_size_track += 1
-                if batch_size_track == batch_size:
-                    batch_id += 1
-                    zf.writestr("{}.ndjson".format(batch_id), batch)
-                    # flush progress
-                    batch = ""
-                    batch_size_track = 0
-            if batch:
-                batch_id += 1
-                zf.writestr("{}.ndjson".format(batch_id), batch)
+            for batch_id, batch_jsonl in enumerate(jsonl_batch_gen, start=1):
+                zf.writestr("{}.ndjson".format(batch_id), batch_jsonl)

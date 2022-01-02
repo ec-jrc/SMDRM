@@ -44,3 +44,12 @@ Run the unittests
 ```shell
 ./transform_tweets/build.sh test && ./transform_tweets/test.sh
 ```
+
+## Releases
+
+- **0.1.1**
+  Transformation does not takes into account batch duplicates when sending texts
+  to DeepPavlov REST API. This is intended to improve task performance.
+
+- **0.1.0**
+  First Release

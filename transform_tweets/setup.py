@@ -17,6 +17,7 @@ setup(
     install_requires=[
         'Click~=8.0',
         'requests~=2.26',
+        'pandas~=1.3',
     ],
     entry_points={
         'console_scripts': [
