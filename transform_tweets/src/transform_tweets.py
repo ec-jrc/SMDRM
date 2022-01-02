@@ -68,6 +68,11 @@ def cli(input_path, output_path, batch_size, debug):
             # get boolean mask of duplicated datapoints
             dupmask = get_duplicate_mask(batch_df)
 
+            # duplication stats
+            abs_dup = dupmask.sum()
+            dup_ratio = abs_dup / n_in
+            console.debug("batch #{} duplication ratio {:.4f} ({}/{})".format(n_batches, dup_ratio, abs_dup, n_in))
+
             # reduce deeppavlov payload size by removing duplicates
             unique_datapoints = batch_df[~dupmask]
             # tag texts with DeepPavlov (multilingual BERT) NER model
