@@ -27,7 +27,18 @@ docker container run --rm -v $(pwd)/data:/data jrc/extract_tweets_base
 
 ## Develop
 
-You can develop in a standardized environment using Jupyter Notebook.
+You can develop in a standardized environment by mounting this directory
+to the project $SMDRM_HOME directory
+
+```shell
+docker container run -it --rm \
+  -v $(pwd)/data:/data \
+  -v $(pwd)/extract_tweets:/opt/smdrm \
+  jrc/extract_tweets_base \
+  /bin/bash
+```
+
+Or, project wide using Jupyter Notebook
 
 ```shell
 ./start_dev.sh
@@ -35,6 +46,19 @@ You can develop in a standardized environment using Jupyter Notebook.
 
 ## Tests
 
+Build the Docker image for testing
+
 ```shell
-./extract_tweets/build.sh test && ./extract_tweets/test.sh
+./extract_tweets/build.sh test
 ```
+
+Run the unittests
+
+```shell
+docker container run -it --rm jrc/extract_tweets_test tests/unit
+```
+
+## Releases
+
+- **0.1.0**
+  First Release

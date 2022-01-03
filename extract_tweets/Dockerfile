@@ -1,24 +1,14 @@
 FROM jrc/smdrm_base as base
 # SMDRM_HOME=/opt/smdrm
 
-# set the working directory
-WORKDIR $SMDRM_HOME/extract_tweets
+# install packages
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+# copy source code
 COPY VERSION.txt .
-COPY setup.py .
-COPY src src
-
-# become root to install the package
-USER root
-
-# install package from source
-RUN pip install .
-
-# login as unpriviledged user as per Docker Best Practices
-USER smdrm
-
+COPY extract_tweets.py .
 # task entrypoint
-ENTRYPOINT ["extract_tweets"]
-CMD ["--help"]
+CMD ["python", "extract_tweets.py", "--help"]
 
 
 # Testing stage
