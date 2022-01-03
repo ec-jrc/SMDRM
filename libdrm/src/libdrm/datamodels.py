@@ -47,6 +47,13 @@ class ZipFileModel:
                 yield dict()
 
     def cache(self, output_path: str, jsonl_batch_gen: t.Iterable[str]) -> None:
+        """Cache processed NDJSON batches to zip file and collect metrics."""
+        metrics = dict(lines=0, batches=0)
         with zipfile.ZipFile(output_path, "w") as zf:
             for batch_id, batch_jsonl in enumerate(jsonl_batch_gen, start=1):
+                # update counters
+                metrics["batches"] += 1
+                metrics["lines"] += batch_jsonl.count("\n")
+                # write ndjson batch to zip file
                 zf.writestr("{}.ndjson".format(batch_id), batch_jsonl)
+        return metrics

@@ -1,9 +1,28 @@
+import os
 import functools
 import time
-import typing as t
+import typing
 
 
-def iter_in_batches(generator: t.Iterable, batch_size: int = 1000) -> t.Iterable[list]:
+def get_version(path: str):
+    """Get version from a given text file.
+    File content should be a single line with the version number e.g. 1.0.0"""
+    with open(path_arg(path)) as v:
+        return v.read()
+
+
+def path_arg(path: str) -> str:
+    """Custom path argument parser."""
+    if not os.path.exists(path):
+        console.error("Path not found.")
+        sys.exit(11)
+    if os.path.isdir(path):
+        console.error("Path is a directory, but a zip file is expected.")
+        sys.exit(12)
+    return os.path.abspath(path)
+
+
+def iter_in_batches(generator: typing.Iterable, batch_size: int = 1000) -> typing.Iterable[list]:
     """Iterate a given generator in batches.
     Indicated for resources expensive tasks such as Annotations, and Geocoding."""
     batch = []
@@ -20,12 +39,7 @@ def iter_in_batches(generator: t.Iterable, batch_size: int = 1000) -> t.Iterable
 
 
 def log_execution(logger):
-    """
-    Parent function to catch the __name__ argument passed as name.
-    Log elapsed time for successful execution or Exception for failure.
-    :return
-    """
-
+    """Log elapsed time for successful execution, or Exception for failure for a decodated function."""
     def log(f):
         @functools.wraps(f)
         def wrapper(*args, **kwargs):
@@ -38,7 +52,5 @@ def log_execution(logger):
                 return result
             except Exception as e:
                 logger.exception(f'Exception in {f.__name__}(): {str(e)}')
-
         return wrapper
-
     return log
