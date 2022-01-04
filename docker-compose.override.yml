@@ -7,6 +7,7 @@ services:
       - CONFIG=ner_ontonotes_bert_mult
     healthcheck:
       test: python -c "import requests; requests.post('http://localhost:5000/probe', json={}).json() == ['Test passed']"
+    hostname: deeppavlov
     networks:
       - annotators
     ports:
@@ -20,6 +21,7 @@ services:
       - CONFIG=ner_ontonotes_bert_mult
     healthcheck:
       test: python -c "import requests; requests.post('http://localhost:5000/probe', json={}).json() == ['Test passed']"
+    hostname: deeppavlov
     networks:
       - annotators
     ports:

@@ -6,7 +6,7 @@ set -ue
 CWD="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)"
 
 # environment
-ENV=${1:-'base'}
+ENV="${1:-$ENV}"
 
 # docker tag
 IMAGE="jrc/transform_tweets"

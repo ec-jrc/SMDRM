@@ -1,9 +1,6 @@
-import os
 import pandas
 import requests
-import sys
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
-from src import transformations
+from tests.conftest import transformations, transform_tweets
 
 
 texts = [
