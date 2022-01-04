@@ -11,6 +11,7 @@ bash $(pwd)/libdrm/build.sh $ENV
 # tasks
 bash $(pwd)/extract_tweets/build.sh $ENV
 bash $(pwd)/transform_tweets/build.sh $ENV
+bash $(pwd)/floods_annotate/build.sh $ENV
 
 # annotation plugins
 #docker-compose up --build
