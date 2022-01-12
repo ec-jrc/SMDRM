@@ -25,5 +25,9 @@ nbs/*
 data/*
 !data/.gitkeep
 
+# Temp files
+tools/places/temp/*
+!tools/places/temp/.gitkeep
+
 # sys
 .Trash*
