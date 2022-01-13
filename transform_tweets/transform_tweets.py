@@ -21,7 +21,9 @@ console = logging.getLogger("transform_tweets")
 
 
 def make_ndjson_batches(
-    zip_file: typing.Type[ZipFileModel], batch_size: int = 1000
+        zip_file: typing.Type[ZipFileModel],
+        allowed_tags: typing.List[str],
+        batch_size: int = 1000,
 ) -> typing.Iterable[str]:
     """Iterate NDJSON batches from a generator of JSON datapoints.
     It implements an ad hoc logic to tag unique datapoint only,
@@ -87,7 +89,7 @@ def run(args):
     console.info("Allowed NER tags={}".format(allowed_tags))
 
     # ad hoc logic to transform unique datapoint only and update their duplicates
-    ndjson_batches = make_ndjson_batches(zip_file, batch_size=args.batch_size)
+    ndjson_batches = make_ndjson_batches(zip_file, allowed_tags, batch_size=args.batch_size)
 
     # cache
     metrics = zip_file.cache(args.output_path, ndjson_batches)
