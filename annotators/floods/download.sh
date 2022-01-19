@@ -14,7 +14,7 @@ echo "downloading models into $local_dir..."
 mkdir -p "${local_dir}" && cd "${local_dir}"
 
 # initialize repo if does not exist
-if [ ! -f "${local_dir}/.git" ]; then
+if [ ! -d "${local_dir}/.git" ]; then
   git init
   git remote add origin "https://smdrm_operational:QLQd74k98kW@bitbucket.org/lorinivalerio/smfr_models_data.git"
   git config core.sparseCheckout true
