@@ -21,7 +21,7 @@ class DeepPavlovStatus(Resource):
     """API status."""
 
     def get(self):
-        return {"is_alive": True}, 200
+        return jsonify("ready"), 200
 
 
 class DeepPavlovProbe(Resource):
@@ -30,9 +30,9 @@ class DeepPavlovProbe(Resource):
     def post(self):
         try:
             y_hat = model(["string"])
-            return jsonify(['Test passed'])
+            return jsonify("passed"), 200
         except:
-            return jsonify(['Test failed'])
+            return jsonify("failed"), 200
 
 
 class DeepPavlovModel(Resource):
@@ -55,7 +55,7 @@ class DeepPavlovModel(Resource):
         Input: {"texts": t.List[str]}
         Ouptut: {"tags": tags_ext, "tokens": texts_tokens}
         """
-        texts = request.json.get("x", None)
+        texts = request.json.get("texts", None)
         if not texts:
             msg = "Missing input texts."
             console.error(msg)
@@ -70,7 +70,7 @@ class DeepPavlovModel(Resource):
 # add API resources
 api.add_resource(DeepPavlovStatus, "/status")
 api.add_resource(DeepPavlovModel, "/model")
-api.add_resource(DeepPavlovProbe, "/probe")
+api.add_resource(DeepPavlovProbe, "/test")
 
 
 if __name__ == "__main__":
@@ -93,3 +93,4 @@ if __name__ == "__main__":
 
     # start api
     app.run(debug=args.debug, host=args.host, port=args.port)
+

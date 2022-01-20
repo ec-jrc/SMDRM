@@ -1,10 +1,17 @@
-FROM python:3.8-slim as base
+ARG DOCKER_HUB="index.docker.io"
+FROM ${DOCKER_HUB}/python:3.8-slim as builder
 LABEL Author.Name="Emanuele Panizio" \
       Author.Email="Emanuele.PANIZIO@ext.ec.europa.eu"
+
+# build env varibles
+ARG http_proxy
+ARG https_proxy
+ENV http_proxy=$http_proxy https_proxy=$https_proxy
 
 ARG FLOODS_HOME=/opt/floods
 ARG MODELS_DIR=$FLOODS_HOME/models
 
+# runtime env variavles
 ENV CUDA_VISIBLE_DEVICES=0 \
     DEBIAN_FRONTEND=noninteractive \
     LANG=C.UTF-8 \
@@ -15,14 +22,13 @@ ENV CUDA_VISIBLE_DEVICES=0 \
     FLOODS_HOME=$FLOODS_HOME \
     MODELS_DIR=$MODELS_DIR
 
+# install build deps
 RUN apt update \
     && apt install -y \
       git; \
     rm -rf /var/lib/apt/lists/*; \
     pip install --upgrade pip setuptools wheel; \
     useradd -ms /bin/bash -d $FLOODS_HOME floods
-
-EXPOSE $FLOODS_APP_PORT
 
 # set the working directory
 WORKDIR $FLOODS_HOME
@@ -52,11 +58,17 @@ RUN chown -R floods: $FLOODS_HOME
 USER floods
 
 
-# production image
-FROM base as prod
+# Development stage
+FROM builder as dev
+CMD flask run --host=${FLOODS_HOST} --port=${FLOODS_PORT}
+
+
+# Production stage
+FROM builder as prod
 CMD gunicorn wsgi:app \
-      --log-level=${LOG_LEVEL:-"INFO"} \
-      --bind=${FLOODS_HOST:-''}:${FLOODS_PORT:-5001} \
+      --log-level=${LOG_LEVEL} \
+      --bind=${FLOODS_HOST}:${FLOODS_PORT} \
       --workers=2 \
       --threads=4 \
       --name floods
+

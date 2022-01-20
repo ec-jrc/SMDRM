@@ -1,18 +1,28 @@
-FROM python:3.7-slim
+ARG DOCKER_HUB="index.docker.io"
+FROM ${DOCKER_HUB}/python:3.7-slim as builder
 LABEL Author.Name="Emanuele Panizio" \
       Author.Email="Emanuele.PANIZIO@ext.ec.europa.eu"
 
+# build env variables
+ARG http_proxy
+ARG https_proxy
+ENV http_proxy=$http_proxy https_proxy=$https_proxy
+
+ARG DEEPPAVLOV_HOME=/opt/deeppavlov
+ARG DEEPPAVLOV_CONFIG=ner_ontonotes_bert_mult
+
+# runtime env variables
 ENV CUDA_VISIBLE_DEVICES=0 \
     DEBIAN_FRONTEND=noninteractive \
     LANG=C.UTF-8 \
     PIP_NO_CACHE_DIR=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    HOST="0.0.0.0" \
-    PORT=5000 \
     TF_CPP_MIN_LOG_LEVEL=2 \
-    DEEPPAVLOV_HOME=/opt/deeppavlov
+    DEEPPAVLOV_HOME=$DEEPPAVLOV_HOME \
+    DEEPPAVLOV_CONFIG=$DEEPPAVLOV_CONFIG
 
+# install build deps
 RUN apt update \
     && apt install -y \
       gcc \
@@ -33,8 +43,8 @@ VOLUME $DEEPPAVLOV_HOME/.deeppavlov
 COPY download.py .
 COPY requirements.txt .
 RUN pip install -r requirements.txt \
-    && python -m deeppavlov install squad_bert \
-    && python download.py
+    && python -m deeppavlov install $DEEPPAVLOV_CONFIG; \
+    HOME=$DEEPPAVLOV_HOME python download.py
 COPY api.py .
 
 # install package from source
@@ -43,4 +53,8 @@ RUN chown -R deeppavlov: $DEEPPAVLOV_HOME
 # login as unpriviledged user as per Docker Best Practices
 USER deeppavlov
 
-CMD python api.py --host=$HOST --port=$PORT
+
+# Development stage
+FROM builder as dev
+CMD python api.py --host=$DEEPPAVLOV_HOST --port=$DEEPPAVLOV_PORT
+

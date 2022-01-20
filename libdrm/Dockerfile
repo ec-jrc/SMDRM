@@ -1,8 +1,13 @@
-FROM python:3.8-slim as base
-# to serve as base image for extract and transform tweet services
+ARG DOCKER_HUB="index.docker.io"
+FROM ${DOCKER_HUB}/python:3.8-slim as builder
 
+# to serve as base image for extract and transform tweet services
 LABEL Author.Name="Emanuele Panizio" \
       Author.Email="Emanuele.PANIZIO@ext.ec.europa.eu"
+
+ARG http_proxy
+ARG https_proxy
+ENV http_proxy=$http_proxy https_proxy=$https_proxy
 
 ENV DEBIAN_FRONTEND=noninteractive \
     LANG=C.UTF-8 \
@@ -34,9 +39,12 @@ RUN pip install ./libdrm \
 # login as unpriviledged user as per Docker Best Practices
 USER smdrm
 
+# default command
+CMD ["python"]
+
 
 # Development stage
-FROM base as dev
+FROM builder as dev
 RUN pip install jupyter
 ENV JUPYTER_TOKEN='changeme' \
     DEVELOPMENT=1
@@ -45,8 +53,9 @@ CMD jupyter-notebook --no-browser --ip=0.0.0.0 --port=8888
 
 
 # Testing stage
-FROM base as test
+FROM builder as test
 RUN pip install pytest
 COPY tests tests
 ENTRYPOINT ["pytest"]
 CMD ["--help"]
+

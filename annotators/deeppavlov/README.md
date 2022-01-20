@@ -1,8 +1,10 @@
 # [DeepPavlov](http://docs.deeppavlov.ai/en/master/index.html) API
 
-A ready-to-use REST API instance of the DeepPavlov Named Entity Recongnition
+A REST API instance of the DeepPavlov Named Entity Recongnition
 AI framework. It is an external plugin to tag input texts.
-Source [Docker Hub](https://hub.docker.com/r/deeppavlov/base-cpu).
+
+A dockerized version is also available on
+[Docker Hub](https://hub.docker.com/r/deeppavlov/base-cpu).
 
 For more details, check the
 [Integrations](http://docs.deeppavlov.ai/en/master/integrations/rest_api.html)
@@ -10,7 +12,12 @@ section in the Official Documentation, and the
 [GitHub](https://github.com/deepmipt/stand_kubernetes_cluster/tree/master/utils/dp_base)
 page.
 
-Requires:
+## Swagger
+
+Access the Swagger Docs @ http://localhost:5000
+
+## Requirements
+
 * Docker ~= 20
 * docker-compose
 * [ner_ontonotes_bert_mult](https://github.com/deepmipt/DeepPavlov/blob/0.17.1/deeppavlov/configs/ner/ner_ontonotes_bert_mult.json)
@@ -19,8 +26,26 @@ Requires:
 
 ## Build
 
+Export `ENV` varible to build the image for that environment 
+
 ```shell
-docker-compose up --build deeppavlov
+./build_task.sh annotators/deeppavlov
+```
+
+## Run
+
+```shell
+docker-compose up -d deeppavlov
+```
+
+or as an isolated service for development purpose
+
+```shell
+docker container run --rm -it \
+  --env-file $(pwd)/annotators/deeppavlov/.env \
+  -v smdrm_deeppavlov:/opt/deeppavlov/.deeppavlov \
+  smdrm/annotators/deeppavlov \
+  bash
 ```
 
 ## Usage
@@ -28,22 +53,14 @@ docker-compose up --build deeppavlov
 ```shell
 curl -X POST http://localhost:5000/model \
   -H 'Content-Type: application/json' \
-  -d '{"x": ["Un texte d`information sur Rio de Janeiro, écrit à Paris."]}'
+  -d '{"texts": ["Un texte d`information sur Rio de Janeiro, écrit à Paris."]}'
 ```
 
 ## Tests
 
 ```shell
-curl -X 'POST' \
-  'http://localhost:5000/probe' \
-  -H 'accept: application/json' \
-  -H 'Content-Type: application/json' \
-  -d '{"x": ["test"]}'
+curl -X POST http://localhost:5000/test
 ```
 
-Should return `["Test passed"]` if REST API service is healthy.
+Should return `"passed"` if REST API service is healthy, or `"failed"`.
 
-
-## Swagger
-
-Access the Swagger Docs @ http://localhost:5000
