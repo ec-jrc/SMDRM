@@ -1,5 +1,5 @@
 import deeppavlov
-from flask import Flask, request
+from flask import Flask, request, jsonify
 from flask_restful import Resource, Api, abort
 import os
 import tensorflow
@@ -22,6 +22,17 @@ class DeepPavlovStatus(Resource):
 
     def get(self):
         return {"is_alive": True}, 200
+
+
+class DeepPavlovProbe(Resource):
+    """API test."""
+
+    def post(self):
+        try:
+            y_hat = model(["string"])
+            return jsonify(['Test passed'])
+        except:
+            return jsonify(['Test failed'])
 
 
 class DeepPavlovModel(Resource):
@@ -59,7 +70,7 @@ class DeepPavlovModel(Resource):
 # add API resources
 api.add_resource(DeepPavlovStatus, "/status")
 api.add_resource(DeepPavlovModel, "/model")
-#api.add_resource(DeepPavlovProbe, "/test")
+api.add_resource(DeepPavlovProbe, "/probe")
 
 
 if __name__ == "__main__":
