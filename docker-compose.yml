@@ -2,18 +2,37 @@ version: "3.9"
 
 services:
 
-  deeppavlov-gpu:
-    # official docker hub deeppavlov image
-    # https://hub.docker.com/r/deeppavlov/base-gpu
-    image: deeppavlov/base-gpu:0.15.0
-
-  deeppavlov-cpu:
-    # official docker hub deeppavlov image
-    # https://hub.docker.com/r/deeppavlov/base-cpu
-    image: deeppavlov/base-cpu:0.15.0
-    #build: ./annotators/deeppavlov/
-    #image: jrc/deeppavlov:0.1.0
+  deeppavlov:
+    env_file:
+      - ./annotators/deeppavlov/.env
+    image: smdrm/annotators/deeppavlov
+    hostname: deeppavlov
+    networks:
+      - annotators
+    ports:
+      - "5000:5000"
+    restart: on-failure
+    volumes:
+      - "deeppavlov:/opt/deeppavlov/.deeppavlov"
 
   floods:
-    build: ./annotators/floods/
-    image: jrc/floods_base
+    env_file:
+      - ./annotators/floods/.env
+    image: smdrm/annotators/floods
+    hostname: floods
+    networks:
+      - annotators
+    ports:
+      - "5010:5000"
+    restart: on-failure
+    volumes:
+      - "floods:/opt/floods/models"
+
+networks:
+  annotators:
+    attachable: true
+
+volumes:
+  deeppavlov:
+  floods:
+

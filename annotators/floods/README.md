@@ -32,8 +32,10 @@ disabled with `TF_CPP_MIN_LOG_LEVEL`
 
 ## Build
 
+Export `ENV` varible to build the image for that environment
+
 ```shell
-docker-compose build floods
+./build_task.sh annotators/floods
 ```
 
 ## Run
@@ -42,25 +44,15 @@ docker-compose build floods
 docker-compose up floods
 ```
 
-or
-
-```shell
-docker run -it --rm \
-  --env-file $(pwd)/annotators/floods/.env \
-  -p 5001:5001 \
-  jrc/floods_base \
-  flask run --host=0.0.0.0 --port=5001
-```
-
 ## Develop
 
 ```shell
 docker container run --rm -it \
-  -p 5001:5001 \
-  -v $(pwd)/annotators/floods:/opt/floods \
-  -v floods_volume:/opt/floods/models \
-  jrc/floods_base \
-  /bin/bash
+    -p 5010:5000 \
+    --env-file $(pwd)/annotators/floods/.env \
+    --network smdrm_annotators \
+    -v smdrm_floods:/opt/floods/models \
+    jrc/annotators/floods_<ENV>:<VERSION>
 ```
 
 ## Usage
@@ -68,7 +60,7 @@ docker container run --rm -it \
 Test the API with the following synthetic data points
 
 ```shell
-curl http://localhost:5001/model/test
+_HOST=0.0.0.0curl http://localhost:5010/model/test
 
 # Response
 # {
@@ -99,7 +91,7 @@ curl X POST http://localhost:5001/model/annotate/en \
 Build the [test](Dockerfile) Docker image
 
 ```shell
-cd annotators/floods && docker build --target test -t floodsapi:test . && cd -
+ENV=test ./build_task.sh floods
 ```
 
 ### Unit
@@ -107,7 +99,7 @@ cd annotators/floods && docker build --target test -t floodsapi:test . && cd -
 Run the unit tests
 
 ```shell
-cd annotators/floods && docker container run --rm -v $(pwd)/models:/app/models floodsapi:test tests/unit && cd -
+docker-compose -f docker-compose.test.yml up
 ```
 
 ### Integration

@@ -5,12 +5,14 @@ set -ue
 # current directory from any $pwd
 CWD="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)"
 
-# build
-bash $CWD/libdrm/build.sh dev
+# choose dev image version
+VERSION=${1:-latest}
+
 # run
-docker run -it --rm \
+docker container run -it --rm \
   -e JUPYTER_TOKEN=docker \
   --network host \
   --volume $CWD:/opt/smdrm/ws \
   --workdir /opt/smdrm/ws \
-  jrc/smdrm_dev
+  smdrm/libdrm:${VERSION}
+

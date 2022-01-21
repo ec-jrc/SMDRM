@@ -5,6 +5,9 @@
 *.egg-info
 *.ipynb_checkpoints
 
+# Docker
+docker-compose.*
+
 # Config
 *.env
 
