@@ -8,7 +8,7 @@ import typing
 
 
 # development flag
-development = bool(int(os.getenv("DEVELOPMENT", 0)))
+development = os.getenv("ENV", default="dev") == "dev"
 # typing
 pandas_series = pandas.core.series.Series
 pandas_df = pandas.core.frame.DataFrame
@@ -22,8 +22,9 @@ def tag_with_mult_bert(texts: list) -> requests.Response:
     }
     # set url wrt the environment
     host = "localhost" if development else "deeppavlov"
-    url = "http://{host}:5000/model".format(host=host)
-    data = json.dumps({"x": texts})
+    port = 5000
+    url = "http://{host}:{port}/model".format(host=host, port=port)
+    data = json.dumps({"texts": texts})
     r = requests.post(url, headers=headers, data=data)
     return r.json()
 
@@ -31,44 +32,49 @@ def tag_with_mult_bert(texts: list) -> requests.Response:
 def extract_place_candidates(y_hat: typing.List[list], allowed_tags: typing.List[str]) -> dict:
     """Extract place candidates given a set of tags allowed by the user."""
 
-    places = dict()
-    for index, (tokens, tags) in enumerate(y_hat):
-        places[index] = dict()
-        for tag_id, tag in enumerate(tags):
-            # place candidate always begin with B-<tag>
+    place_candidates = list()
+    tokens, tags = y_hat
+
+    for index in range(len(tags)):
+        candidates = dict()
+        curr_tags = tags[index]
+        curr_tokens = tokens[index]
+
+        for tag_id, tag in enumerate(curr_tags):
+
+            # place candidates always begin with B-<tag>
             if "B-" in tag:
-                _, tag_root = tag.split("-")
+                _, tag_type = tag.split("-")
 
                 # create a dictionary for this tag
-                if tag in allowed_tags and tag_root not in places[index]:
-                    places[index][tag_root] = []
+                if tag in allowed_tags and tag_type not in candidates:
+                    candidates[tag_type] = list()
 
                 # rebuild the place candidate using I-inside tags
+                # that come after the current B-<tag>
                 subset = []
-                future_tags = tags[tag_id:]
+                future_tags = curr_tags[tag_id:]
                 for ftid, future_tag in enumerate(future_tags, start=tag_id):
                     # break place candidate rebuilding when an unknown tag is reached
                     if future_tag not in allowed_tags:
                         break
-                    subset.append(tokens[ftid])
+                    subset.append(curr_tokens[ftid])
 
                 # subset exists if place candidates are found
                 if subset:
-                    places[index][tag_root].append(" ".join(subset))
-    return places
+                    candidates[tag_type].append(" ".join(subset))
+        place_candidates.append({"candidates": candidates or None})
+    return place_candidates
 
 
-def normalize_places(s: pandas_series) -> pandas_series:
+def normalize_places(text: str, place_candidates: dict) -> str:
     """Normalize identified place candidates with common _loc_ tag."""
-    t = s.text
-    p = s.places
-    if not p:
-        return t
-    # replace place candidates in text with _LOC_
-    for tag, names in p.items():
+    if not place_candidates:
+        return text
+    for tag, names in place_candidates.items():
         for name in names:
-            t = t.replace(name, "_loc_")
-    return t
+            text = text.replace(name, "_loc_")
+    return text
 
 
 def get_duplicate_mask(batch_df: pandas_df) -> pandas_series:

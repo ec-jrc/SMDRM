@@ -67,7 +67,8 @@ def annotate_language_groups(groups: pandas_groupby) -> typing.Iterable[dict]:
         # get texts of same language as list
         texts = get_cnn_texts_from_group(g)
         # annotate texts by language and add to the group
-        g["floods_proba"] = annotate(texts, lang)
+        scores = get_annotation_scores(texts, lang)
+        g["annotation"] = [dict(floods=score) for score in scores]
         # return annotated group
         yield g
 

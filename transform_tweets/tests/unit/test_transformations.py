@@ -14,18 +14,14 @@ texts = [
 y_hat = [
     [
         ["Un", "texte", "d", "`", "information", "sur", "Rio", "de", "Janeiro", ",", "\u00e9crit", "\u00e0", "Paris", "."],
-        ["O", "O", "O", "O", "O", "O", "B-GPE", "I-GPE", "I-GPE", "O", "O", "O", "B-GPE", "O"],
-    ],
-    [
         ["a", "text", "in", "english", "without", "place", "candidates", "."],
+        ["ed", "uno", "in", "italiano", "da", "Roccacannuccia", "nella", "pianura", "pontina"],
+        ["ed", "uno", "in", "italiano", "da", "Roccacannuccia", "nella", "pianura", "pontina"],
+    ],
+    [
+        ["O", "O", "O", "O", "O", "O", "B-GPE", "I-GPE", "I-GPE", "O", "O", "O", "B-GPE", "O"],
         ["O", "O", "O", "B-LANGUAGE", "O", "O", "O", "O"],
-    ],
-    [
-        ["ed", "uno", "in", "italiano", "da", "Roccacannuccia", "nella", "pianura", "pontina"],
         ["O", "B-CARDINAL", "O", "B-LANGUAGE", "O", "B-LOC", "I-LOC", "I-LOC", "I-LOC"],
-    ],
-    [
-        ["ed", "uno", "in", "italiano", "da", "Roccacannuccia", "nella", "pianura", "pontina"],
         ["O", "B-CARDINAL", "O", "B-LANGUAGE", "O", "B-LOC", "I-LOC", "I-LOC", "I-LOC"],
     ],
 ]
@@ -34,17 +30,15 @@ y_hat = [
 allowed_tags = ["B-GPE", "I-GPE", "B-FAC", "I-FAC", "B-LOC", "I-LOC"]
 
 # expected place candidate extraction output
-expected_place_candidates = {
-    0: {'GPE': ['Rio de Janeiro', 'Paris']},
-    1: {},
-    2: {'LOC': ['Roccacannuccia nella pianura pontina']},
-    3: {'LOC': ['Roccacannuccia nella pianura pontina']},
-}
+expected_place_candidates = [
+    {"candidates": {'GPE': ['Rio de Janeiro', 'Paris']}},
+    {"candidates": None},
+    {"candidates": {'LOC': ['Roccacannuccia nella pianura pontina']}},
+    {"candidates": {'LOC': ['Roccacannuccia nella pianura pontina']}},
+]
 
 # test dataframe
-places = [tagged for index, tagged in expected_place_candidates.items()]
-test_df = pandas.DataFrame(zip(texts, places), columns=["text", "places"])
-
+test_df = pandas.DataFrame(zip(texts, expected_place_candidates), columns=["text", "place"])
 
 # custom class to be the mock return value
 # will override the requests.Response returned from requests.post
@@ -78,14 +72,8 @@ def test_extract_place_candidates():
 
 def test_normalize_places():
     """Test if normalize_places returns the normalized texts i.e. _loc_ tag for each recognized place candidate."""
-    result = test_df.apply(transformations.normalize_places, axis=1)
-    expected = [
-        'Un texte d`information sur _loc_, écrit à _loc_.',
-        'a text in english without place candidates.',
-        'ed uno in italiano da _loc_',
-        'ed uno in italiano da _loc_',
-    ]
-    assert list(result) == expected
+    result = transformations.normalize_places(texts[0], expected_place_candidates[0]["candidates"])
+    assert result == 'Un texte d`information sur _loc_, écrit à _loc_.'
 
 
 def test_get_duplicate_mask():

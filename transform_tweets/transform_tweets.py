@@ -46,20 +46,20 @@ def make_ndjson_batches(
         # tag texts with DeepPavlov (multilingual BERT) NER model
         y_hat = tag_with_mult_bert(list(unique_datapoints.text))
         # get place candidates using allowed tags
-        places = extract_place_candidates(y_hat, allowed_tags)
+        place_candidates = extract_place_candidates(y_hat, allowed_tags)
 
         # extend unique datapoints with places candidates (required by Geocode steps)
         unique_datapoints_index = unique_datapoints.index
-        unique_datapoints.loc[unique_datapoints_index, "places"] = [tagged for index, tagged in places.items()]
+        unique_datapoints.loc[unique_datapoints_index, "place"] = place_candidates
         # remove place candidates from text
-        unique_datapoints.loc[unique_datapoints_index, "text_clean"] = unique_datapoints.apply(normalize_places, axis=1)
+        unique_datapoints.loc[unique_datapoints_index, "text_clean"] = unique_datapoints.apply(lambda row: normalize_places(row.text, row.place["candidates"]), axis=1)
         # apply natural text transformations on place-free text (required by Annotation steps)
         unique_datapoints.loc[unique_datapoints_index, "text_clean"] = unique_datapoints.text_clean.apply(apply_transformations)
 
         # merge transformed unique datapoints onto duplicates
         # drop target columns to avoid pandas suffix patching (i.e. <col>_x, <col>_y)
-        duplicates = batch_df[dupmask].drop(columns=["places", "text_clean"])
-        enriched_duplicates = duplicates.merge(unique_datapoints[["places", "text", "text_clean"]], on="text")
+        duplicates = batch_df[dupmask].drop(columns=["place", "text_clean"])
+        enriched_duplicates = duplicates.merge(unique_datapoints[["place", "text", "text_clean"]], on="text")
         batch_transformed = pandas.concat([unique_datapoints, duplicates]).reset_index(drop=True)
         # ndjson batch
         yield batch_transformed.to_json(orient="records", force_ascii=False, lines=True)

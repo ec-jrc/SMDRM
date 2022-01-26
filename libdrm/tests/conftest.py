@@ -38,4 +38,4 @@ def invalid_raw_input():
 def enriched_input():
     """`enriched_input` is the `valid_raw_input` that passed convert step.
     DataPointModel expects a filename as required field."""
-    return b'{"id": "1", "created_at": "date", "lang": "id", "text": "text", "text_clean": null, "places": null}'
+    return b'{"id": "1", "created_at": "date", "lang": "id", "text": "text", "text_clean": null, "place": null, "annotation": null}'
