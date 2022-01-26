@@ -20,7 +20,8 @@ ENV CUDA_VISIBLE_DEVICES=0 \
     PYTHONUNBUFFERED=1 \
     TF_CPP_MIN_LOG_LEVEL=2 \
     FLOODS_HOME=$FLOODS_HOME \
-    MODELS_DIR=$MODELS_DIR
+    MODELS_DIR=$MODELS_DIR \
+    PATH=$PATH:$FLOODS_HOME/.local/bin
 
 # install build deps
 RUN apt update \
@@ -60,7 +61,15 @@ USER floods
 
 # Development stage
 FROM builder as dev
-CMD flask run --host=${FLOODS_HOST} --port=${FLOODS_PORT}
+CMD flask run --host=0.0.0.0 
+
+
+# Testing stage
+FROM builder as test
+RUN pip install pytest
+COPY tests tests
+ENTRYPOINT ["pytest"]
+CMD ["--help"]
 
 
 # Production stage

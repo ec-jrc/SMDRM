@@ -16,8 +16,11 @@ Executes
 
 ## Build
 
+Make sure to select the intended environment with ENV variable in [.env](../.env).
+
+
 ```shell
-./annotate_tweets/build.sh
+./build_task.sh floods_annotate
 ```
 
 For more details, check the [Dockerfile](Dockerfile).
@@ -26,20 +29,19 @@ For more details, check the [Dockerfile](Dockerfile).
 
 ```shell
 # add your input data in the data/ directory
-docker container run --rm -v $(pwd)/data:/data jrc/floods_annotate_base
+docker container run --rm -it -v $(pwd)/data:/data smdrm/floods_annotate
 ```
 
 ## Develop
 
 You can develop in a standardized environment by mounting this directory
-to the project $SMDRM_HOME directory
+to the project directory /opt/smdrm inside the container.
 
 ```shell
-docker container run -it --rm \
+docker container run --rm -it \
   -v $(pwd)/data:/data \
-  -v $(pwd)/floods_annotate:/opt/smdrm \
-  jrc/floods_annotate_base \
-  /bin/bash
+  -v $(pwd)/floods_annotate:/opt/smdrm/floods_annotate \
+  smdrm/floods_annotate
 ```
 
 Or, project wide using Jupyter Notebook
@@ -53,13 +55,14 @@ Or, project wide using Jupyter Notebook
 Build the Docker image for testing
 
 ```shell
-./floods_annotate/build.sh test
+# ENV=test in .env
+./build_task.sh floods_annotate
 ```
 
 Run the unittests
 
 ```shell
-docker container run -it --rm jrc/floods_annotate_test tests/unit
+docker container run --rm -it smdrm/floods_annotate tests/unit
 ```
 
 ## Releases
@@ -71,3 +74,4 @@ docker container run -it --rm jrc/floods_annotate_test tests/unit
 
 - **0.1.0**
   First Release
+

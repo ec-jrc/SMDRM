@@ -47,12 +47,8 @@ docker-compose up floods
 ## Develop
 
 ```shell
-docker container run --rm -it \
-    -p 5010:5000 \
-    --env-file $(pwd)/annotators/floods/.env \
-    --network smdrm_annotators \
-    -v smdrm_floods:/opt/floods/models \
-    jrc/annotators/floods_<ENV>:<VERSION>
+# add /bin/bash to enter the container shell
+docker container run --rm -it -v $(pwd)/annotators/floods:/opt/floods smdrm/annotators/floods
 ```
 
 ## Usage
@@ -60,38 +56,33 @@ docker container run --rm -it \
 Test the API with the following synthetic data points
 
 ```shell
-_HOST=0.0.0.0curl http://localhost:5010/model/test
+# from host network
+curl http://localhost:5010/model/test
 
 # Response
-# {
-#   "test": "passed"
-# }
+# "passed"
 ```
 
 > :information_source:
 > Note the `texts` key in the payload, and `en` (lang ISO code) in the URL.
 
 ```shell
-curl X POST http://localhost:5001/model/annotate/en \
+# from host network
+curl http://localhost:5010/model/annotate/en \
   -H "Content-Type: application/json" \
   -d '{"texts": ["a flood disaster text url","another flood disaster text url"]}'
 
 # Response
-# {
-#   "disaster_type": "floods",
-#   "floods_proba": [
-#     "0.022930",
-#     "0.006453"
-#   ]
-# }
+# ["0.022930","0.006453"]
 ```
 
 ## Tests
 
-Build the [test](Dockerfile) Docker image
+Build the Docker image for testing
 
 ```shell
-ENV=test ./build_task.sh floods
+# ENV=test in .env
+./build_task.sh annotators/floods
 ```
 
 ### Unit
@@ -99,7 +90,7 @@ ENV=test ./build_task.sh floods
 Run the unit tests
 
 ```shell
-docker-compose -f docker-compose.test.yml up
+docker container run --rm -it smdrm/annotators/floods tests/unit
 ```
 
 ### Integration
@@ -107,20 +98,10 @@ docker-compose -f docker-compose.test.yml up
 Initialize the test instance of the API
 
 ```shell
-# executed from the project root directory
-docker-compose -f docker-compose.yml -f docker-compose.tests.yml up --build floods
 ```
 
 Run the integration tests
 
 ```shell
-# note the network flag (see docker-compose.tests.yml)
-docker container run --rm --network smdrm_tests floodsapi:test tests/integration
 ```
 
-Clean up
-
-```shell
-# executed from the project root directory
-docker-compose -f docker-compose.yml -f docker-compose.tests.yml down
-```

@@ -56,5 +56,13 @@ USER deeppavlov
 
 # Development stage
 FROM builder as dev
-CMD python api.py --host=$DEEPPAVLOV_HOST --port=$DEEPPAVLOV_PORT
+CMD python api.py --debug
+
+
+# Testing stage
+FROM builder as test
+RUN pip install pytest
+COPY tests tests
+ENTRYPOINT ["pytest"]
+CMD ["--help"]
 

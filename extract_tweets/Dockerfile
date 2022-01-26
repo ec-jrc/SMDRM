@@ -13,7 +13,7 @@ COPY extract_tweets.py .
 
 # Development stage
 FROM builder as dev
-CMD ["python", "extract_tweets.py", "--help"]
+CMD ["/bin/bash"]
 
 
 # Testing stage
@@ -22,4 +22,9 @@ RUN pip install pytest
 COPY tests tests
 ENTRYPOINT ["pytest"]
 CMD ["--help"]
+
+
+# Staging stage
+FROM builder as stg
+CMD ["python", "extract_tweets.py", "--help"]
 

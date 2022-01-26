@@ -26,8 +26,10 @@ Python 3.8
 
 ## Build
 
+Make sure to select the intended environment with ENV variable in [.env](../.env).
+
 ```shell
-./geocode_tweets/build.sh base
+./build_task.sh geocode_tweets
 ```
 
 For more details, check the [Dockerfile](Dockerfile).
@@ -36,20 +38,19 @@ For more details, check the [Dockerfile](Dockerfile).
 
 ```shell
 # add your input data in the data/ directory
-docker container run --rm -v $(pwd)/data:/data jrc/geocode_tweets_base
+docker container run --rm -it -v $(pwd)/data:/data smdrm/geocode_tweets
 ```
 
 ## Develop
 
 You can develop in a standardized environment by mounting this directory
-to the project $SMDRM_HOME directory
+to the project directory /opt/smdrm inside the container.
 
 ```shell
-docker container run -it --rm \
+docker container run --rm -it \
   -v $(pwd)/data:/data \
   -v $(pwd)/geocode_tweets:/opt/smdrm/geocode_tweets \
-  jrc/geocode_tweets_base \
-  /bin/bash
+  smdrm/geocode_tweets
 ```
 
 Or, project wide using Jupyter Notebook
@@ -63,13 +64,14 @@ Or, project wide using Jupyter Notebook
 Build the Docker image for testing
 
 ```shell
-./geocode_tweets/build.sh test
+# ENV=test in .env
+./build_task.sh geocode_tweets
 ```
 
 Run the unittests
 
 ```shell
-docker container run -it --rm jrc/geocode_tweets_test tests/unit
+docker container run --rm -it smdrm/geocode_tweets tests/unit
 ```
 
 ## Releases
