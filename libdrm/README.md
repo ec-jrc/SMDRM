@@ -86,6 +86,10 @@ GitHub Action.
 
 ## Releases
 
+- **0.1.9**
+  Remove hardcoded metrics generation from `ZipFileModel.cache()` method.
+  It is now task responsibility to include them in the pipeline steps.  
+
 - **0.1.8**
   `ZipFileModel.cache()` method now expects a generator of NDJSON batches.
 

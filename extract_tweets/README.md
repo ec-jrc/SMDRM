@@ -60,5 +60,8 @@ docker container run -it --rm jrc/extract_tweets_test tests/unit
 
 ## Releases
 
+- **0.1.1**
+  Code refactory to use clearer pipeline step approach.
+
 - **0.1.0**
   First Release
