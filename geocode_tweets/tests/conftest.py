@@ -15,8 +15,11 @@ def datapoint_without_place():
         "created_at": "Mon Jan 20 02:44:02 +0000 2020",
         "lang": "es",
         "text": "Los pasajes más bonitos de Barcelona https://t.co/vycifpLVWy",
+        "annotation": {
+            "floods": "0.1"
+            },
         "text_clean": "los pasajes más bonitos de    _urlincl_ _locincl_",
-        "places": {},
+        "place": None,
     }
 
 
@@ -28,8 +31,15 @@ def datapoint_with_gpe():
         "created_at": "Mon Jan 20 02:44:02 +0000 2020",
         "lang": "es",
         "text": "Los pasajes más bonitos de Barcelona https://t.co/vycifpLVWy",
+        "annotation": {
+            "floods": "0.1"
+            },
         "text_clean": "los pasajes más bonitos de    _urlincl_ _locincl_",
-        "places": {"GPE": ["Barcelona"]},
+        "place": {
+            "candidates": {
+                "GPE": ["Barcelona"],
+            }
+        },
     }
 
 
@@ -41,10 +51,15 @@ def datapoint_with_ambiguous_gpe():
         "created_at": "Mon Jan 20 02:44:02 +0000 2020",
         "lang": "es",
         "text": "As of 6PM Tuesday, we are forecasting flooding at the following locations: Potomac River at Alexandria Potomac River at Georgetown/Wisconsin Ave Please monitor the latest forecasts from https://t.co/47CQ6yEqJn https://t.co/ODq4I1d0KN",
+        "annotation": {
+            "floods": "0.1"
+            },
         "text_clean": "as of tuesday we are forecasting flooding at the following locations  at alexandria  at wisconsin ave please monitor the latest forecasts from    _urlincl_ _locincl_",
-        "places": {
-            "LOC": ["Potomac River", "Potomac River"],
-            "GPE": ["Alexandria Potomac River", "Georgetown"],
+        "place": {
+            "candidates": {
+                "LOC": ["Potomac River", "Potomac River"],
+                "GPE": ["Alexandria Potomac River", "Georgetown"],
+            },
         },
     }
 

@@ -38,6 +38,7 @@ For more details, check the [Dockerfile](Dockerfile).
 
 ```shell
 # add your input data in the data/ directory
+# add --network host if ENV=dev
 docker container run --rm -it -v $(pwd)/data:/data smdrm/geocode_tweets
 ```
 
@@ -48,6 +49,7 @@ to the project directory /opt/smdrm inside the container.
 
 ```shell
 docker container run --rm -it \
+  --network host \
   -v $(pwd)/data:/data \
   -v $(pwd)/geocode_tweets:/opt/smdrm/geocode_tweets \
   smdrm/geocode_tweets

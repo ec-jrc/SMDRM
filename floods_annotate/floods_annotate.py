@@ -5,49 +5,46 @@ import requests
 import sys
 import typing
 
-from libdrm.datamodels import DataPointModel, ZipFileModel
 from libdrm.common import iter_in_batches, get_version, path_arg, log_execution
-
+from libdrm.datamodels import DataPointModel, ZipFileModel
+from libdrm.pipelines import Pipeline
 
 # setup logging
 logging.basicConfig(level=logging.INFO)
 console = logging.getLogger("floods_annotate")
 
 # development flag
-development = bool(int(os.getenv("DEVELOPMENT", 0)))
+development = os.getenv("ENV", default="dev") == "dev"
 
 # build floods url
 host = "localhost" if development else "floods"
-port = 5001
+port = 5010
 base_url = "http://{host}:{port}".format(host=host, port=port)
 
 # typing
 pandas_groupby = pandas.core.groupby.generic.DataFrameGroupBy
 
 
-def get_languages() -> requests.Response:
+def get_languages() -> typing.List[str]:
     """Floods Named Entity Recognition REST API call to get the list of languages enabled for annotation."""
     url = base_url+"/model/languages"
     r = requests.get(url)
     return r.json()
 
 
-def annotate(texts: list, lang: str) -> requests.Response:
+def get_annotation_scores(texts: list, lang: str) -> typing.List[str]:
     """Floods Named Entity Recognition REST API call to annotate a list of texts."""
     url = base_url+"/model/annotate/"+lang
     r = requests.post(url, json={"texts": texts})
     return r.json()
 
 
-def group_batch_by_language(batch: typing.List[dict], languages: typing.List[str]) -> pandas_groupby:
-    # transform to DataFrame
-    batch_df = pandas.DataFrame(batch)
+def group_batch_by_language(datapoints_batch: pandas.DataFrame, languages: typing.List[str]) -> pandas_groupby:
     # a temp field with a normalized version of the lang field
     # as we developed a multilingual embeddings, we can vectorize any language if comes as "ml"
-    lang_tmp = batch_df.lang.apply(lambda lang: lang if lang in languages else "ml")
+    lang_tmp = datapoints_batch.lang.apply(lambda lang: lang if lang in languages else "ml")
     # group df by (normalized) language
-    groups = batch_df.groupby(lang_tmp)
-    return groups
+    return datapoints_batch.groupby(lang_tmp)
 
 
 def get_cnn_texts_from_group(g: pandas.DataFrame) -> typing.List[str]:
@@ -73,21 +70,46 @@ def annotate_language_groups(groups: pandas_groupby) -> typing.Iterable[dict]:
         yield g
 
 
-def make_ndjson_batches(
-    zip_file: typing.Type[ZipFileModel], batch_size: int = 1000
-) -> typing.Iterable[str]:
-    """Iterate NDJSON batches from a generator of JSON datapoints.
-    It implements an ad hoc logic to annotate datapoints grouped by language."""
+def convert_to_dataframe(datapoints_batches: typing.Iterable[list]) -> typing.Iterable[pandas.DataFrame]:
+    """Converts datapoints batches i.e. list of JSON into Pandas DataFrame."""
+    for datapoints_batch in datapoints_batches:
+        yield pandas.DataFrame(datapoints_batch)
+
+
+def task_metrics(datapoints_batches: typing.Iterable[pandas.DataFrame]) -> typing.Iterable[pandas.DataFrame]:
+    """Compute task metrics."""
+    batches=0
+    annotated=0
+    for datapoints_batch in datapoints_batches:
+        batches += 1
+        annotated += len(datapoints_batch)
+        yield datapoints_batch
+    console.info(dict(batches=batches, annotated=annotated))
+
+
+def log_datapoints(datapoints_batches: typing.Iterable[pandas.DataFrame]) -> typing.Iterable[pandas.DataFrame]:
+    """Log datapoints to console."""
+    for batch_id, datapoints_batch in enumerate(datapoints_batches, start=1):
+        console.debug("processing datapoints batch ID #{}... Below, a sample of 5.".format(batch_id))
+        console.debug(datapoints_batch.head(5))
+        yield datapoints_batch
+
+
+def annotate_batches(datapoints_batches: typing.Iterable[pandas.DataFrame]) -> typing.Iterable[pandas.DataFrame]:
+    """Annotate datapoints batches dataframe by language group."""
     # api call to get the list of annotation-ready languages
     languages = get_languages()
 
-    for batch in iter_in_batches(zip_file.iter_jsonl(), batch_size=batch_size):
+    for datapoints_batch in datapoints_batches:
         # make groups of texts by language
-        groups = group_batch_by_language(batch, languages)
+        groups = group_batch_by_language(datapoints_batch, languages)
         # iter annotate groups
-        for annotated in annotate_language_groups(groups):
-            console.debug(annotated)
-            yield annotated.to_json(orient="records", force_ascii=False, lines=True)
+        yield from annotate_language_groups(groups)
+
+
+def make_ndjson_batches(datapoints_batches: typing.Iterable[pandas.DataFrame]) -> typing.Iterable[pandas.DataFrame]:
+    for datapoints_batch in datapoints_batches:
+        yield datapoints_batch.to_json(orient="records", force_ascii=False, lines=True)
 
 
 @log_execution(console)
@@ -107,12 +129,21 @@ def run(args):
         console.error("Not a valid zip file.")
         sys.exit(13)
 
-    # ad hoc logic to annotate datapoints grouped by language
-    ndjson_batches = make_ndjson_batches(zip_file, batch_size=args.batch_size)
+    # build annotation pipeline
+    annotate_pipeline = Pipeline()
+    annotate_pipeline.add(iter_in_batches, dict(batch_size=args.batch_size))
+    annotate_pipeline.add(convert_to_dataframe)
+    annotate_pipeline.add(annotate_batches)
+    annotate_pipeline.add(task_metrics)
+    annotate_pipeline.add(log_datapoints)
+    annotate_pipeline.add(make_ndjson_batches)
+
+    # execute pipeline on raw datapoints
+    datapoints = zip_file.iter_jsonl()
+    annotated_datapoints = annotate_pipeline.execute(datapoints)
 
     # cache
-    metrics = zip_file.cache(args.output_path, ndjson_batches)
-    console.info(metrics)
+    zip_file.cache(args.output_path, annotated_datapoints)
 
 
 if __name__ == "__main__":

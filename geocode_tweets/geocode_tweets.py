@@ -7,6 +7,7 @@ import typing
 
 from libdrm.datamodels import DataPointModel, ZipFileModel
 from libdrm.common import iter_in_batches, get_version, path_arg, log_execution
+from libdrm.pipelines import Pipeline
 
 # setup logging
 logging.basicConfig(level=logging.INFO)
@@ -53,11 +54,10 @@ def filter_places_by_region_id(
     places_df: pandas.DataFrame,
 ) -> pandas.DataFrame:
     # filter only places of interest (wrt the region associated with the collection)
-    # fillna("") replace NaN missing attributes with empty strings to avoid failures
-    this_place_df = places_df[places_df.region_id == region_id].fillna("")
-    if this_place_df.empty:
+    filtered_places_df = places_df[places_df.region_id == region_id]
+    if filtered_places_df.empty:
         raise ValueError("Region ID must exists in the Global Locations dataset.")
-    return this_place_df
+    return filtered_places_df
 
 
 def make_place_reference_key(places_df: pandas.DataFrame) -> pandas.Series:
@@ -100,12 +100,23 @@ def get_bbox_centroid(bbox: str) -> tuple:
     return y, x
 
 
+def get_gpes(datapoint: dict) -> list:
+    """Get Geo Political Entities from place candidates if any."""
+    gpes=None
+    try:
+        gpes = datapoint["place"]["candidates"]["GPE"]
+    except TypeError as te:
+        console.warning(te)
+    finally:
+        return gpes
+
+
 def geocode(
     gpes: typing.List[str],
     region_id: int,
     places_df: pandas.DataFrame,
 ) -> typing.Type[Place]:
-    # return the first GPE (place candidate) that matches global places filtered by region ID
+    """Return the first GPE (place candidate) that matches Global Places filtered by region ID."""
 
     # make reference keywords key to evaluate it contains a given gpe
     ref_keywords = make_place_reference_key(places_df)
@@ -162,38 +173,51 @@ def geocode(
             console.warning("not possible")
 
 
-def gen_geocoded_datapoints(
-    zip_file: typing.Type[ZipFileModel],
+def geocode_datapoints_with_gpes(
+    datapoints: typing.Iterable[dict],
     region_id: int,
     places_df: pandas.DataFrame,
 ) -> typing.Iterable[dict]:
     """Generate geocoded datapoints to be writte to file"""
-    for jsonl in zip_file.iter_jsonl():
-        console.debug("geocoding datapoint #{}".format(jsonl["id"]))
+    for datapoint in datapoints:
+        # get gpes from place field
+        gpes = get_gpes(datapoint)
+        if gpes:
+            place_meta = geocode(gpes, region_id, places_df)
+            if place_meta:
+                datapoint["place"].update(place_meta)
 
-        # get place candidates
-        place_candidates = jsonl["places"]
+        yield datapoint
 
-        # exlude datapoints without place candidates
-        if not place_candidates or "GPE" not in place_candidates:
-            console.debug("Missing GPEs")
-            yield jsonl
-            continue
 
-        # get Geo Political Entities
-        gpes = place_candidates["GPE"]
-        # build place metadata
-        place = geocode(gpes, region_id, places_df)
-        jsonl["place"] = place
-        yield jsonl
+def task_metrics(datapoints: typing.Iterable[dict]) -> typing.Iterable[dict]:
+    """Collect task metrics."""
+    total=0
+    with_gpe=0
+    geolocated=0
+    for datapoint in datapoints:
+        total += 1
+        if get_gpes(datapoint):
+            with_gpe += 1
+        if "region_id" in datapoint["place"]:
+            geolocated += 1
+        yield datapoint
+    console.info(dict(total=total, with_gpe=with_gpe, geolocated=geolocated))
+
+
+def log_datapoints(datapoints: typing.Iterable[dict]) -> typing.Iterable[dict]:
+    """Log processed datapoints."""
+    for datapoint in datapoints:
+        console.debug(datapoint)
+        yield datapoint
 
 
 def make_ndjson_batches(
-    parsed_json_gen: typing.Iterable[dict],
+    datapoints: typing.Iterable[dict],
     batch_size: int = 1000,
 ) -> typing.Iterable[str]:
     """Iterate NDJSON batches from a generator of JSON datapoints."""
-    for batch in iter_in_batches(parsed_json_gen, batch_size=batch_size):
+    for batch in iter_in_batches(datapoints, batch_size=batch_size):
         yield "".join(
             [json.dumps(datapoint, ensure_ascii=False) + "\n" for datapoint in batch]
         )
@@ -204,6 +228,9 @@ def run(args):
     console.info("opts={}...".format(vars(args)))
     if args.debug:
         console.setLevel(logging.DEBUG)
+
+    if not args.region_id:
+        console.warning("Without region ID the quality of geocode is substantially lower.")
 
     # make output path
     if not args.output_path:
@@ -218,18 +245,26 @@ def run(args):
 
     # load global places dataset
     places_df = load_global_places()
+    # replace NaN with empty string
+    places_df.fillna("", inplace=True)
 
-    # filter only places of interest wrt the region associated to the collection
-    this_place_df = filter_places_by_region_id(args.region_id, places_df)
+    if args.region_id:
+        # filter only places of interest wrt the region associated to the collection
+        places_df = filter_places_by_region_id(args.region_id, places_df)
 
-    # extract/parse/model raw data
-    ndjson_batches = make_ndjson_batches(
-        gen_geocoded_datapoints(zip_file, args.region_id, this_place_df),
-        batch_size=args.batch_size,
-    )
+    # build geocode pipeline
+    geocode_pipeline = Pipeline()
+    geocode_pipeline.add(geocode_datapoints_with_gpes, dict(region_id=args.region_id, places_df=places_df))
+    geocode_pipeline.add(task_metrics)
+    geocode_pipeline.add(log_datapoints)
+    geocode_pipeline.add(make_ndjson_batches)
+
+    # execute pipeline on annotated datapoints
+    datapoints = zip_file.iter_jsonl()
+    geocoded_datapoints = geocode_pipeline.execute(datapoints)
+
     # cache
-    metrics = zip_file.cache(args.output_path, ndjson_batches)
-    console.info(metrics)
+    zip_file.cache(args.output_path, geocoded_datapoints)
 
 
 if __name__ == "__main__":
@@ -265,7 +300,7 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--region-id",
-        required=True,
+        required=False,
         type=int,
         help="The region ID that triggered the task.",
     )

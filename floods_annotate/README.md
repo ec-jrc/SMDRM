@@ -29,6 +29,7 @@ For more details, check the [Dockerfile](Dockerfile).
 
 ```shell
 # add your input data in the data/ directory
+# add --network host if ENV=dev
 docker container run --rm -it -v $(pwd)/data:/data smdrm/floods_annotate
 ```
 
@@ -39,6 +40,7 @@ to the project directory /opt/smdrm inside the container.
 
 ```shell
 docker container run --rm -it \
+  --network host \
   -v $(pwd)/data:/data \
   -v $(pwd)/floods_annotate:/opt/smdrm/floods_annotate \
   smdrm/floods_annotate

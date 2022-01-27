@@ -92,7 +92,6 @@ def build_datamodel(datapoints: typing.Iterable[dict]) -> typing.Iterable[dict]:
         yield datamodel.dict()
 
 
-
 def task_metrics(datapoints: typing.Iterable[dict]) -> typing.Iterable[dict]:
     """Compute task metrics."""
     extracted=0
