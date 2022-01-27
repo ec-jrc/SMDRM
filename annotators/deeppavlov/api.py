@@ -21,7 +21,7 @@ class DeepPavlovStatus(Resource):
     """API status."""
 
     def get(self):
-        return jsonify("ready"), 200
+        return {"ready": True}
 
 
 class DeepPavlovProbe(Resource):
@@ -30,9 +30,9 @@ class DeepPavlovProbe(Resource):
     def post(self):
         try:
             y_hat = model(["string"])
-            return jsonify("passed"), 200
+            return {"test": "passed"}
         except:
-            return jsonify("failed"), 200
+            return {"test": "failed"}
 
 
 class DeepPavlovModel(Resource):
