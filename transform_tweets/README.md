@@ -28,6 +28,7 @@ For more details, check the [Dockerfile](Dockerfile).
 
 ```shell
 # add your input data in the data/ directory
+# add --network host if ENV=dev
 docker container run --rm -it -v $(pwd)/data:/data smdrm/transform_tweets
 ```
 
@@ -38,6 +39,7 @@ to the project directory /opt/smdrm inside the container.
 
 ```shell
 docker container run --rm -it \
+  --network host \
   -v $(pwd)/data:/data \
   -v $(pwd)/transform_tweets:/opt/smdrm/transform_tweets \
   smdrm/transform_tweets
@@ -65,6 +67,10 @@ docker container run --rm -it smdrm/transform_tweets tests/unit
 ```
 
 ## Releases
+
+- **0.1.4**
+  Code refactoring that leverages the Pipe and Filter design pattern.
+  Transformation steps are now organized into an ad hoc pipeline.
 
 - **0.1.3**
   Place candidate extraction and output datamodel refactoring.

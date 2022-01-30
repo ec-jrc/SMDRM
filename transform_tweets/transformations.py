@@ -77,12 +77,6 @@ def normalize_places(text: str, place_candidates: dict) -> str:
     return text
 
 
-def get_duplicate_mask(batch_df: pandas_df) -> pandas_series:
-    """Boolean mask of duplicates within this batch."""
-    mask = batch_df.duplicated(subset="text", keep='first')
-    return mask
-
-
 # non natural language compiled regex
 ampersand = re.compile(r'\s+&amp;?\s+')
 user_mentions = re.compile(r'@[A-Za-z0-9_]+\b')
