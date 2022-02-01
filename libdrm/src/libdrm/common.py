@@ -14,11 +14,9 @@ def get_version(path: str):
 def path_arg(path: str) -> str:
     """Custom path argument parser."""
     if not os.path.exists(path):
-        console.error("Path not found.")
-        sys.exit(11)
+        raise FileNotFoundError("Path not found.")
     if os.path.isdir(path):
-        console.error("Path is a directory, but a zip file is expected.")
-        sys.exit(12)
+        raise ValueError("Path is a directory, but a zip file is expected.")
     return os.path.abspath(path)
 
 

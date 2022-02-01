@@ -175,7 +175,6 @@ if __name__ == "__main__":
     parser.add_argument(
         "--output-path",
         default=False,
-        type=path_arg,
         help="The path to which you want to save the task output.",
     )
     parser.add_argument(
