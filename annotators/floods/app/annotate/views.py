@@ -34,8 +34,8 @@ def test_model():
 @annotate_blueprint.route('/annotate/<string:lang>', methods=['POST'])
 def annotate(lang):
     """Annotate batch of texts of a specific language.
-    Input: {"texts": t.List[str]}
-    Ouptut: {"floods_proba": probas, "lang": lang}
+    Input: {"texts": typing.List[str]}
+    Ouptut: typing.List[str]
     """
     if lang not in languages:
         current_app.logger.warning("Unkwnon language ISO code. Use `ml` to enable a multilingual annotation.")
@@ -53,3 +53,4 @@ def annotate(lang):
     response = jsonify(["{:.6f}".format(round(p, 6)) for p in proba])
     logger.debug(response)
     return response, 201
+

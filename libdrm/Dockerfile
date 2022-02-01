@@ -46,8 +46,7 @@ CMD ["python"]
 # Development stage
 FROM builder as dev
 RUN pip install jupyter
-ENV JUPYTER_TOKEN='changeme' \
-    DEVELOPMENT=1
+ENV JUPYTER_TOKEN=changeme
 EXPOSE 8888
 CMD jupyter-notebook --no-browser --ip=0.0.0.0 --port=8888
 

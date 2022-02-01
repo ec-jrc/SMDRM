@@ -8,19 +8,22 @@ For more details, go to the [source code](https://github.com/panc86/smdrm/tree/m
 
 ## Build
 
+Make sure to select the intended environment with ENV variable in [.env](../.env).
+
 ```shell
-# By default, build the base image
-./libdrm/build.sh
+./build_task.sh libdrm
 ```
 
 For more details, check the [Dockerfile](Dockerfile).
 
 ## Development
 
-Build a Jupyter Notebook development environment using the `dev` stage.
+Build a Jupyter Notebook development environment using the `ENV=dev`
+environment variable in .env.
 
 ```shell
-./libdrm/build.sh dev
+# ENV=dev in .env
+./build_task.sh libdrm
 ```
 
 Mount your data, and the directory with the source code under development.
@@ -28,26 +31,15 @@ Changes to the source code will be applied to the source code in the container
 without need to restart.
 
 ```shell
-docker run -it --rm \
-  -e JUPYTER_TOKEN=docker \
-  --network host \
-  # add data
-  --volume $(pwd)/data:/opt/smdrm/data \
-  # code changes without container restart
-  --volume $(pwd)/libdrm:/opt/smdrm/libdrm \
-  # keep track of development history
-  --volume $(pwd)/nbs:/opt/smdrm/nbs \
-  jrc/smdrm_dev
+./start_dev.sh
 ```
-
-> :bangbang: DO NOT forget to rebuild the `jrc/smdrm_dev`
 
 ## Tests
 
 Run the unittests
 
 ```shell
-./libdrm/build.sh test && ./libdrm/test.sh
+docker container run -it --rm smdrm/libdrm tests/unit
 ```
 
 ## Modules
@@ -85,6 +77,11 @@ the `DisasterModel` Class using [Pydantinc](https://pydantic-docs.helpmanual.io/
 GitHub Action.
 
 ## Releases
+
+- **0.1.10**
+  New DataPointModel data structure:
+   * include legacy fields
+   * better field naming
 
 - **0.1.9**
   Remove hardcoded metrics generation from `ZipFileModel.cache()` method.

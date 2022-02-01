@@ -1,5 +1,7 @@
-FROM jrc/smdrm_base as base
+FROM smdrm/libdrm as builder
+
 # SMDRM_HOME=/opt/smdrm
+WORKDIR $SMDRM_HOME/transform_tweets
 
 # install packages
 COPY requirements.txt .
@@ -8,13 +10,22 @@ RUN pip install -r requirements.txt
 COPY VERSION.txt .
 COPY transformations.py .
 COPY transform_tweets.py .
-# task entrypoint
-CMD ["python", "transform_tweets.py", "--help"]
+
+
+# Development stage
+FROM builder as dev
+CMD ["/bin/bash"]
 
 
 # Testing stage
-FROM base as test
+FROM builder as test
 RUN pip install pytest
 COPY tests tests
 ENTRYPOINT ["pytest"]
 CMD ["--help"]
+
+
+# Staging stage
+FROM builder as stg
+CMD ["python", "transform_tweets.py", "--help"]
+

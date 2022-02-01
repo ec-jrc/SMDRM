@@ -16,8 +16,10 @@ Transform data point `text` field.
 
 ## Build
 
+Make sure to select the intended environment with ENV variable in [.env](../.env).
+
 ```shell
-./transform_tweets/build.sh
+./build_task.sh transform_tweets
 ```
 
 For more details, check the [Dockerfile](Dockerfile).
@@ -26,20 +28,21 @@ For more details, check the [Dockerfile](Dockerfile).
 
 ```shell
 # add your input data in the data/ directory
-docker container run --rm -v $(pwd)/data:/data jrc/transform_tweets_base
+# add --network host if ENV=dev
+docker container run --rm -it -v $(pwd)/data:/data smdrm/transform_tweets
 ```
 
 ## Develop
 
 You can develop in a standardized environment by mounting this directory
-to the project $SMDRM_HOME directory
+to the project directory /opt/smdrm inside the container.
 
 ```shell
-docker container run -it --rm \
+docker container run --rm -it \
+  --network host \
   -v $(pwd)/data:/data \
-  -v $(pwd)/transform_tweets:/opt/smdrm \
-  jrc/transform_tweets_base \
-  /bin/bash
+  -v $(pwd)/transform_tweets:/opt/smdrm/transform_tweets \
+  smdrm/transform_tweets
 ```
 
 Or, project wide using Jupyter Notebook
@@ -53,16 +56,24 @@ Or, project wide using Jupyter Notebook
 Build the Docker image for testing
 
 ```shell
-./transform_tweets/build.sh test
+# ENV=test in .env
+./build_task.sh transform_tweets
 ```
 
 Run the unittests
 
 ```shell
-docker container run -it --rm jrc/transform_tweets_test tests/unit
+docker container run --rm -it smdrm/transform_tweets tests/unit
 ```
 
 ## Releases
+
+- **0.1.4**
+  Code refactoring that leverages the Pipe and Filter design pattern.
+  Transformation steps are now organized into an ad hoc pipeline.
+
+- **0.1.3**
+  Place candidate extraction and output datamodel refactoring.
 
 - **0.1.2**
   Removed Click Python package dependency. This makes Docker image creation
@@ -75,3 +86,4 @@ docker container run -it --rm jrc/transform_tweets_test tests/unit
 
 - **0.1.0**
   First Release
+

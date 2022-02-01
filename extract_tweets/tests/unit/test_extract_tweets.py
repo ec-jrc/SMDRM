@@ -37,7 +37,7 @@ def test_build_datamodel(valid_datapoint):
     g = extract_tweets.build_datamodel(datapoints)
     for res in g:
         assert isinstance(res, dict)
-        assert res == {'id': 1, 'created_at': 'datetime', 'lang': 'ml', 'text': 'a text from valid datapoint', 'text_clean': None, 'places': None}
+        assert res == {'id': 1, 'created_at': 'datetime', 'lang': 'ml', 'text': 'a text from valid datapoint', 'annotation': None, 'text_clean': None, 'place': None}
 
 
 def test_make_ndjson_batches(valid_datapoint):

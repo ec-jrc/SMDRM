@@ -6,12 +6,12 @@ import sys
 
 from libdrm.datamodels import ZipFileModel
 from libdrm.common import iter_in_batches, get_version, path_arg, log_execution
+from libdrm.pipelines import Pipeline
 
 from transformations import (
     tag_with_mult_bert,
     extract_place_candidates,
     normalize_places,
-    get_duplicate_mask,
     apply_transformations,
 )
 
@@ -20,49 +20,77 @@ logging.basicConfig(level=logging.INFO)
 console = logging.getLogger("transform_tweets")
 
 
-def make_ndjson_batches(
-        zip_file: typing.Type[ZipFileModel],
+def convert_to_dataframe(datapoints_batches: typing.Iterable[list]) -> typing.Iterable[pandas.DataFrame]:
+    """Converts datapoints batches i.e. list of JSON into Pandas DataFrame."""
+    for datapoints_batch in datapoints_batches:
+        yield pandas.DataFrame(datapoints_batch)
+
+
+def get_duplicates_filter(batch_df: pandas.DataFrame) -> pandas.Series:
+    """Get boolean mask of duplicated datapoints."""
+    return batch_df.duplicated(subset="text", keep='first')
+
+
+def merge_duplicates_on_transformed(unique_transformed, duplicates):
+    """Merge transformed unique datapoints onto duplicates.
+    Drop target columns to avoid pandas suffix patching (i.e. <col>_x, <col>_y)."""
+    enriched_duplicates = duplicates.drop(columns=["place", "text_clean"]).merge(unique_transformed[["place", "text", "text_clean"]], on="text")
+    return pandas.concat([unique_transformed, enriched_duplicates]).reset_index(drop=True)
+
+
+def transform_datapoints(
+        datapoints_batches: typing.Iterable[pandas.DataFrame],
         allowed_tags: typing.List[str],
-        batch_size: int = 1000,
-) -> typing.Iterable[str]:
-    """Iterate NDJSON batches from a generator of JSON datapoints.
-    It implements an ad hoc logic to tag unique datapoint only,
-     and update their duplicates."""
-    for batch_id, batch in enumerate(iter_in_batches(zip_file.iter_jsonl(), batch_size=batch_size)):
-        # pandas dataframe makes data transformation easier
-        batch_df = pandas.DataFrame(batch)
-        # get boolean mask of duplicated datapoints
-        dupmask = get_duplicate_mask(batch_df)
+) -> typing.Iterable[pandas.DataFrame]:
+    for batch_id, batch_df in enumerate(datapoints_batches, start=1):
 
-        # duplication stats
-        abs_dup = dupmask.sum()
-        # last batch may be smaller than batch_size
-        this_batch_size = len(dupmask)
-        dup_ratio = abs_dup / this_batch_size
-        console.debug("batch #{} duplication ratio {:.4f} ({}/{})".format(batch_id, dup_ratio, abs_dup, this_batch_size))
+        # find duplicated datapoints in batch
+        duplicates = get_duplicates_filter(batch_df)
+        console.debug("duplication ratio {:.4f}".format(duplicates.sum() / len(duplicates)))
 
-        # reduce deeppavlov payload size by removing duplicates
-        unique_datapoints = batch_df[~dupmask]
+        # split batch into unique and duplicated datapoints
+        # only unique datapoints are tagged with the NER algorithm
+        unique_datapoints = batch_df[~duplicates].copy()
+        duplicated_datapoints = batch_df[duplicates].copy() 
+
         # tag texts with DeepPavlov (multilingual BERT) NER model
         y_hat = tag_with_mult_bert(list(unique_datapoints.text))
         # get place candidates using allowed tags
-        places = extract_place_candidates(y_hat, allowed_tags)
+        unique_datapoints["place"] = extract_place_candidates(y_hat, allowed_tags)
+        # normalize place candidates and non-alphanumeric chars in text
+        unique_datapoints["text_clean"] = unique_datapoints.apply(lambda row: normalize_places(row.text, row.place["candidates"]), axis=1).apply(apply_transformations)
+        # merge the transformation applied to unique datapoints onto the duplicated
+        yield merge_duplicates_on_transformed(unique_datapoints, duplicated_datapoints)
 
-        # extend unique datapoints with places candidates (required by Geocode steps)
-        unique_datapoints_index = unique_datapoints.index
-        unique_datapoints.loc[unique_datapoints_index, "places"] = [tagged for index, tagged in places.items()]
-        # remove place candidates from text
-        unique_datapoints.loc[unique_datapoints_index, "text_clean"] = unique_datapoints.apply(normalize_places, axis=1)
-        # apply natural text transformations on place-free text (required by Annotation steps)
-        unique_datapoints.loc[unique_datapoints_index, "text_clean"] = unique_datapoints.text_clean.apply(apply_transformations)
 
-        # merge transformed unique datapoints onto duplicates
-        # drop target columns to avoid pandas suffix patching (i.e. <col>_x, <col>_y)
-        duplicates = batch_df[dupmask].drop(columns=["places", "text_clean"])
-        enriched_duplicates = duplicates.merge(unique_datapoints[["places", "text", "text_clean"]], on="text")
-        batch_transformed = pandas.concat([unique_datapoints, duplicates]).reset_index(drop=True)
-        # ndjson batch
-        yield batch_transformed.to_json(orient="records", force_ascii=False, lines=True)
+def task_metrics(datapoints_batches: typing.Iterable[pandas.DataFrame]) -> typing.Iterable[pandas.DataFrame]:
+    """Compute task metrics."""
+    batches=0
+    datapoints=0
+    with_place_candidates=0
+    for datapoints_batch in datapoints_batches:
+        # number of batches
+        batches += 1
+        # number of datapoints in batch
+        datapoints += len(datapoints_batch)
+        # number of datapoints in batch with place candidates
+        with_place_candidates += datapoints_batch.place.apply(lambda row: bool(row["candidates"])).sum()
+        yield datapoints_batch
+    console.info(dict(batches=batches, datapoints=datapoints, with_place_candidated=with_place_candidates))
+
+
+def log_datapoints(datapoints_batches: typing.Iterable[pandas.DataFrame]) -> typing.Iterable[pandas.DataFrame]:
+    """Log datapoints to console."""
+    for batch_id, datapoints_batch in enumerate(datapoints_batches, start=1): 
+        console.debug("processing datapoints batch ID #{}... Below, a sample of 5.".format(batch_id))
+        console.debug(datapoints_batch.head(5))
+        yield datapoints_batch
+
+
+def make_ndjson_batches(datapoints_batches: typing.Iterable[pandas.DataFrame]) -> typing.Iterable[str]:
+    """Convert datapoints batched from pandas.DataFrame to NDJSON format."""
+    for batch_df in datapoints_batches:
+        yield batch_df.to_json(orient="records", force_ascii=False, lines=True)
 
 
 @log_execution(console)
@@ -88,12 +116,21 @@ def run(args):
     allowed_tags = ["B-GPE", "I-GPE", "B-FAC", "I-FAC", "B-LOC", "I-LOC"]
     console.info("Allowed NER tags={}".format(allowed_tags))
 
-    # ad hoc logic to transform unique datapoint only and update their duplicates
-    ndjson_batches = make_ndjson_batches(zip_file, allowed_tags, batch_size=args.batch_size)
+    # build transformation pipeline
+    transform_pipeline = Pipeline()
+    transform_pipeline.add(iter_in_batches, dict(batch_size=args.batch_size))
+    transform_pipeline.add(convert_to_dataframe)
+    transform_pipeline.add(transform_datapoints, dict(allowed_tags=allowed_tags))
+    transform_pipeline.add(task_metrics)
+    transform_pipeline.add(log_datapoints)
+    transform_pipeline.add(make_ndjson_batches)
+
+    # execute pipeline on extracted datapoints
+    datapoints = zip_file.iter_jsonl()
+    transformed_datapoints = transform_pipeline.execute(datapoints)
 
     # cache
-    metrics = zip_file.cache(args.output_path, ndjson_batches)
-    console.info(metrics)
+    zip_file.cache(args.output_path, transformed_datapoints)
 
 
 if __name__ == "__main__":
@@ -135,3 +172,4 @@ if __name__ == "__main__":
     )
     # run task
     run(parser.parse_args())
+

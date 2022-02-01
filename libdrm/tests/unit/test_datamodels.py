@@ -8,7 +8,7 @@ from libdrm.datamodels import DataPointModel, ZipFileModel
 def test_DataPointModel_with_valid_input(valid_raw_input):
     """Test if DataPointModel.parse_raw validation is successful."""
     result = DataPointModel.parse_raw(valid_raw_input)
-    assert str(result) == "id=1 created_at='date' lang='id' text='text' text_clean=None places=None"
+    assert str(result) == "id=1 created_at='date' lang='id' text='text' text_clean=None place=None annotation=None"
 
 
 def test_DataPointModel_with_invalid_input(invalid_raw_input):
@@ -20,7 +20,7 @@ def test_DataPointModel_with_invalid_input(invalid_raw_input):
 def test_DataPointModel_with_enriched_input(enriched_input):
     """Test if DataPointModel validation is successful when the enriched input is given."""
     datapoint = DataPointModel.parse_raw(enriched_input)
-    assert datapoint.dict() == dict(datapoint) == {"id": 1, "created_at": "date", "lang": "id", "text": "text", "text_clean": None, "places": None}
+    assert datapoint.dict() == dict(datapoint) == {"id": 1, "created_at": "date", "lang": "id", "text": "text", "text_clean": None, "place": None, "annotation": None}
 
 
 def test_is_zip_file_with_valid_zipfile(valid_archive_path):
