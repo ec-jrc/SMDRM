@@ -4,7 +4,7 @@ on:
   push:
     # run if master branch
     branches:
-      - master
+      - main
     # run if changes in libdrm
     paths:
       - 'libdrm/**.py'

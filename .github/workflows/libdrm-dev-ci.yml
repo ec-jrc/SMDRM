@@ -5,7 +5,7 @@ on:
     # run for all branches but master
     branches:
       - '*'
-      - '!master'
+      - '!main'
     # run if changes in libdrm
     paths:
     - 'libdrm/**.py'
