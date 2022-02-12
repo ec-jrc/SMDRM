@@ -41,14 +41,11 @@ def log_execution(logger):
     def log(f):
         @functools.wraps(f)
         def wrapper(*args, **kwargs):
-            try:
-                # track elapsed time
-                time_start = time.time()
-                result = f(*args, **kwargs)
-                elapsed = time.time() - time_start
-                logger.info(f'{f.__name__}() completed in {elapsed:.4f}s')
-                return result
-            except Exception as e:
-                logger.exception(f'Exception in {f.__name__}(): {str(e)}')
+            # track elapsed time
+            time_start = time.time()
+            result = f(*args, **kwargs)
+            elapsed = time.time() - time_start
+            logger.info(f'{f.__name__}() completed in {elapsed:.4f}s')
+            return result
         return wrapper
     return log
