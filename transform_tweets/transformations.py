@@ -58,7 +58,12 @@ def extract_place_candidates(y_hat: typing.List[list], allowed_tags: typing.List
                     # break place candidate rebuilding when an unknown tag is reached
                     if future_tag not in allowed_tags:
                         break
-                    subset.append(curr_tokens[ftid])
+                    # token is a substring of place candidate
+                    token = curr_tokens[ftid]
+                    # non-alphanumeric strings might be wrongly tagged
+                    if not token.isalnum():
+                        continue
+                    subset.append(token)
 
                 # subset exists if place candidates are found
                 if subset:
@@ -105,6 +110,10 @@ def normalize_url(text: str) -> str:
 
 def normalize_url_broken(text: str) -> str:
     return url_broken.sub(" _url_", text)
+
+
+def remove_retweet_flag(text: str) -> str:
+    return text.lstrip("RT ")
 
 
 def normalize_new_lines(text: str) -> str:
@@ -168,6 +177,7 @@ def apply_transformations(text: str) -> str:
         normalize_url,
         normalize_url_broken,
         normalize_new_lines,
+        remove_retweet_flag,
         remove_special_chars,
         remove_quotes,
         remove_backslashes,

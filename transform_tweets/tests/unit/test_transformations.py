@@ -30,6 +30,16 @@ def test_extract_place_candidates(allowed_tags):
     assert place_candidates == expected_place_candidates
 
 
+def test_extract_place_candidates_non_alpha_gpe(allowed_tags):
+    """Test if extract_place_candidates removes non-alphanumeric tokens wrongly tagged by DeepPavlov."""
+    deeppavlov_output_payload = [
+        [["fake", "text", "with", "wrongly", "tagged", ")", "chars", "!", "?"]],
+        [["O", "O", "O", "B-GPE", "I-GPE", "I-GPE", "I-GPE", "O", "B-LOC"]],
+    ]
+    place_candidates = transformations.extract_place_candidates(deeppavlov_output_payload, allowed_tags)
+    assert place_candidates == [{"candidates": {"GPE": ["wrongly tagged chars"], "LOC": []}}]
+
+
 def test_normalize_places(datapoint_without_place, datapoint_with_gpe, datapoint_with_loc):
     """Test if normalize_places returns the normalized texts i.e. _loc_ tag for each recognized place candidate."""
 
