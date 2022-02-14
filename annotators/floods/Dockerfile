@@ -26,6 +26,7 @@ ENV CUDA_VISIBLE_DEVICES=0 \
 # install build deps
 RUN apt update \
     && apt install -y \
+      curl \
       git; \
     rm -rf /var/lib/apt/lists/*; \
     pip install --upgrade pip setuptools wheel; \
@@ -47,7 +48,6 @@ COPY download.sh .
 RUN bash download.sh $MODELS_DIR
 
 # copy souce code
-COPY VERSION.txt .
 COPY config.py .
 COPY wsgi.py .
 COPY app app

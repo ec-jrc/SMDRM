@@ -25,6 +25,7 @@ ENV CUDA_VISIBLE_DEVICES=0 \
 # install build deps
 RUN apt update \
     && apt install -y \
+      curl \
       gcc \
       g++ \
       git; \

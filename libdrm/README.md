@@ -8,38 +8,40 @@ For more details, go to the [source code](https://github.com/panc86/smdrm/tree/m
 
 ## Build
 
-Make sure to select the intended environment with ENV variable in [.env](../.env).
-
 ```shell
-./build_task.sh libdrm
+docker-compose build libdrm
 ```
 
 For more details, check the [Dockerfile](Dockerfile).
 
 ## Development
 
-Build a Jupyter Notebook development environment using the `ENV=dev`
-environment variable in .env.
+Enter the SMDRM Python interpreter
 
 ```shell
-# ENV=dev in .env
-./build_task.sh libdrm
+export ENV=dev
+docker-compose run --rm libdrm
 ```
 
-Mount your data, and the directory with the source code under development.
-Changes to the source code will be applied to the source code in the container
-without need to restart.
+Start a Jupyter Notebook and mount the project folder for dynamic modifications
+i.e., without the need to rebuild the image every time
 
 ```shell
-./start_dev.sh
+export ENV=dev
+docker-compose run --rm -v $(pwd):/opt/smdrm/ws -w /opt/smdrm/ws libdrm bash tools/dev.sh
 ```
 
 ## Tests
 
+```shell
+export ENV=test
+docker-compose build libdrm
+```
+
 Run the unittests
 
 ```shell
-docker container run -it --rm smdrm/libdrm tests/unit
+docker-compose run --rm libdrm tests/unit
 ```
 
 ## Modules

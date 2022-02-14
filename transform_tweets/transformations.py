@@ -7,8 +7,6 @@ import requests
 import typing
 
 
-# development flag
-development = os.getenv("ENV", default="dev") == "dev"
 # typing
 pandas_series = pandas.core.series.Series
 pandas_df = pandas.core.frame.DataFrame
@@ -20,12 +18,11 @@ def tag_with_mult_bert(texts: list) -> requests.Response:
         'accept': 'application/json',
         'Content-Type': 'application/json',
     }
-    # set url wrt the environment
-    host = "localhost" if development else "deeppavlov"
-    port = 5000
-    url = "http://{host}:{port}/model".format(host=host, port=port)
-    data = json.dumps({"texts": texts})
-    r = requests.post(url, headers=headers, data=data)
+    # API url from within the (default) Docker networks created with docker-compose
+    url = "http://{host}:{port}/{endpoint}".format(
+            host="deeppavlov", port=5000, endpoint="model/annotate"
+        )
+    r = requests.post(url, headers=headers, data=json.dumps({"texts": texts}))
     return r.json()
 
 

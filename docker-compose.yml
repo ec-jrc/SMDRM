@@ -70,7 +70,116 @@ x-airflow-common:
     postgres:
       condition: service_healthy
 
+x-pipelines-common:
+  # Base build arguments for pipeline components
+  build:
+    &pipelines-common-build
+    args:
+      DOCKER_HUB:
+      http_proxy:
+      https_proxy:
+    target: ${ENV:-dev}
+  environment:
+    &pipelines-common-env
+    DEBUG: ${DEBUG:-0}
+    ENV: ${ENV:-dev}
+    LOG_LEVEL: ${LOG_LEVEL:-INFO}
+
 services:
+
+  libdrm:
+    build:
+      <<: *pipelines-common-build
+      context: ./libdrm
+    image: libdrm
+
+  extract-tweets:
+    build:
+      <<: *pipelines-common-build
+      context: ./extract_tweets
+    environment:
+      <<: *pipelines-common-env
+    image: extract-tweets
+    profiles:
+      - pipelines
+
+  transform-tweets:
+    build:
+      <<: *pipelines-common-build
+      context: ./transform_tweets
+    environment:
+      <<: *pipelines-common-env
+      TF_CPP_MIN_LOG_LEVEL: ${TF_CPP_MIN_LOG_LEVEL:-2}
+    depends_on:
+      annotators-deeppavlov:
+        condition: service_healthy
+    image: transform-tweets
+    profiles:
+      - pipelines
+
+  floods-annotate:
+    build:
+      <<: *pipelines-common-build
+      context: ./floods_annotate
+    environment:
+      <<: *pipelines-common-env
+    depends_on:
+      annotators-floods:
+        condition: service_healthy
+    image: floods-annotate
+    profiles:
+      - pipelines
+
+  geocode-tweets:
+    build:
+      <<: *pipelines-common-build
+      context: ./geocode_tweets
+    environment:
+      <<: *pipelines-common-env
+    image: geocode-tweets
+    profiles:
+      - pipelines
+
+  annotators-deeppavlov:
+    build:
+      <<: *pipelines-common-build
+      context: ./annotators/deeppavlov
+    environment:
+      <<: *pipelines-common-env
+      TF_CPP_MIN_LOG_LEVEL: ${TF_CPP_MIN_LOG_LEVEL:-2}
+    image: deeppavlov
+    hostname: deeppavlov
+    ports:
+      - ${DEEPPAVLOV_PORT:-5000}:5000
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:5000/model/test"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: on-failure
+    volumes:
+      - deeppavlov:/opt/deeppavlov/.deeppavlov
+
+  annotators-floods:
+    build:
+      <<: *pipelines-common-build
+      context: ./annotators/floods
+    environment:
+      FLASK_APP: wsgi.py
+      FLASK_ENV: ${FLASK_ENV:-production}
+      SECRET_KEY: ${SECRET_KEY:-}
+    image: floods
+    hostname: floods
+    ports:
+      - ${FLOODS_PORT:-5010}:5000
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:5000/model/test"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: on-failure
+    volumes:
+      - floods:/opt/floods/models
 
   # https://onedevblog.com/how-to-fix-a-permission-denied-when-using-dockeroperator-in-airflow/
   docker-proxy:
@@ -276,36 +385,6 @@ services:
       <<: *airflow-common-depends-on
       airflow-init:
         condition: service_completed_successfully
-
-  deeppavlov:
-    env_file:
-      - ./annotators/deeppavlov/.env
-    image: smdrm/annotators/deeppavlov
-    hostname: deeppavlov
-    networks:
-      - annotators
-    ports:
-      - "5000:5000"
-    restart: on-failure
-    volumes:
-      - "deeppavlov:/opt/deeppavlov/.deeppavlov"
-
-  floods:
-    env_file:
-      - ./annotators/floods/.env
-    image: smdrm/annotators/floods
-    hostname: floods
-    networks:
-      - annotators
-    ports:
-      - "5010:5000"
-    restart: on-failure
-    volumes:
-      - "floods:/opt/floods/models"
-
-networks:
-  annotators:
-    attachable: true
 
 volumes:
   deeppavlov:

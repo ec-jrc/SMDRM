@@ -1,4 +1,4 @@
-FROM smdrm/libdrm as builder
+FROM libdrm as builder
 
 # SMDRM_HOME=/opt/smdrm
 WORKDIR $SMDRM_HOME/transform_tweets

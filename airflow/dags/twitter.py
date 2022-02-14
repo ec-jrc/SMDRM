@@ -71,14 +71,61 @@ with DAG(
     # providing that you have a docstring at the beginning of the DAG
     dag.doc_md = __doc__
 
+
+    ## API SENSORS
+
+    # check if DeepPavlov API is ready
+    is_deeppavlov_api_ready = HttpSensor(
+        task_id="is_deeppavlov_api_ready",
+        http_conn_id="deeppavlov_api",
+        # everything after url domain
+        endpoint="status",
+        # status response: {"ready": True}
+        response_check=lambda r: r.json()["ready"],
+        poke_interval=10,
+        timeout=30,
+    )
+    # documentation
+    is_deeppavlov_api_ready.doc_md = dedent(
+        """\
+        #### DeepPavlov API Uptime Status
+        Status check for DeepPavlov API.
+        This is an external plugin required by the following
+        task `transform_tweets` for Named Entity Recognition tagging.
+        """
+    )
+
+    # check if Floods API is ready
+    is_floods_api_ready = HttpSensor(
+        task_id="is_floods_api_ready",
+        http_conn_id="floods_api",
+        # everything after url domain
+        endpoint="status",
+        # status response: "ready"
+        response_check=lambda r: r.json() == "ready",
+        poke_interval=10,
+        timeout=30,
+    )
+    # documentation
+    is_floods_api_ready.doc_md = dedent(
+        """\
+        #### Floods API Uptime Status
+        Status check for Floods API.
+        This is an external plugin required by the following
+        task `floods_annotate` for Named Entity Recognition annotation.
+        """
+    )
+
+
+    ## Pipeline Tasks
+
     # extract tweets task
     extract_tweets = DockerOperator(
         task_id="extract_tweets",
         api_version="auto",
         auto_remove=True,
-        image="smdrm/extract_tweets:0.1.1-{{ params.ENV }}",
+        image="extract-tweets",
         docker_url=docker_url,
-        network_mode="host",
         mounts=[
             Mount(
                 source='{{ ti.xcom_pull(task_ids="push_collection_id", key="cID") }}',
@@ -100,35 +147,14 @@ with DAG(
         """
     )
 
-    # check if DeepPavlov API is ready
-    is_deeppavlov_api_ready = HttpSensor(
-        task_id="is_deeppavlov_api_ready",
-        http_conn_id="deeppavlov_api",
-        # everything after url domain
-        endpoint="status",
-        # status response: {"ready": True}
-        response_check=lambda r: r.json()["ready"],
-        poke_interval=10,
-        timeout=30,
-    )
-    # documentation
-    is_deeppavlov_api_ready.doc_md = dedent(
-        """\
-        #### DeepPavlov API Uptime Status
-        Status check for DeepPavlov API.
-        This is an external plugin required by the following
-        task `transform_tweets` for Named Entity Recognition tagging.
-        """
-    ) 
-
     # transform tweets task
     transform_tweets = DockerOperator(
         task_id="transform_tweets",
         api_version="auto",
         auto_remove=True,
-        image="smdrm/transform_tweets:0.1.4-{{ params.ENV }}",
+        image="transform-tweets",
         docker_url=docker_url,
-        network_mode="host",
+        network_mode="smdrm_default",
         mounts=[
             Mount(
                 source='{{ ti.xcom_pull(task_ids="push_collection_id", key="cID") }}',
@@ -150,35 +176,14 @@ with DAG(
         """
     )
 
-    # check if Floods API is ready
-    is_floods_api_ready = HttpSensor(
-        task_id="is_floods_api_ready",
-        http_conn_id="floods_api",
-        # everything after url domain
-        endpoint="status",
-        # status response: "ready"
-        response_check=lambda r: r.json() == "ready",
-        poke_interval=10,
-        timeout=30,
-    )
-
-    # documentation
-    is_floods_api_ready.doc_md = dedent(
-        """\
-        #### Floods API Uptime Status
-        Status check for Floods API.
-        This is an external plugin required by the following
-        task `floods_annotate` for Named Entity Recognition annotation.
-        """
-    ) 
     # annotations
     floods_annotate = DockerOperator(
         task_id="floods_annotate_tweets",
         api_version="auto",
         auto_remove=True,
-        image="smdrm/floods_annotate:0.1.1-{{ params.ENV }}",
+        image="floods-annotate",
         docker_url=docker_url,
-        network_mode="host",
+        network_mode="smdrm_default",
         mounts=[
             Mount(
                 source='{{ ti.xcom_pull(task_ids="push_collection_id", key="cID") }}',
@@ -204,9 +209,8 @@ with DAG(
         task_id="geocode_tweets",
         api_version="auto",
         auto_remove=True,
-        image="smdrm/geocode_tweets:0.1.0-{{ params.ENV }}",
+        image="geocode-tweets",
         docker_url=docker_url,
-        network_mode="host",
         mounts=[
             Mount(
                 source='{{ ti.xcom_pull(task_ids="push_collection_id", key="cID") }}',
@@ -228,14 +232,18 @@ with DAG(
         """
     )
 
-    # set tasks dependencies
+
+    ## Dependencies
+
     [
-        # XCom metadata
+        ## XCom Metadata
         push_collection_id(),
         push_filepaths(),
-        # api sensors
+        # API sensors
         is_deeppavlov_api_ready,
-        is_floods_api_ready
+        is_floods_api_ready,
     ] >> extract_tweets
-    extract_tweets >>  transform_tweets >> floods_annotate >> geocode_tweets
-    
+
+    # Tasks
+    extract_tweets >> transform_tweets >> floods_annotate >> geocode_tweets
+

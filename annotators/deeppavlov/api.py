@@ -70,7 +70,7 @@ class DeepPavlovModel(Resource):
 # add API resources
 api.add_resource(DeepPavlovStatus, "/status")
 api.add_resource(DeepPavlovModel, "/model")
-api.add_resource(DeepPavlovProbe, "/test")
+api.add_resource(DeepPavlovProbe, "/model/test")
 
 
 if __name__ == "__main__":

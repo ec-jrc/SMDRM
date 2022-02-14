@@ -26,10 +26,8 @@ Python 3.8
 
 ## Build
 
-Make sure to select the intended environment with ENV variable in [.env](../.env).
-
 ```shell
-./build_task.sh geocode_tweets
+docker-compose build geocode-tweets
 ```
 
 For more details, check the [Dockerfile](Dockerfile).
@@ -37,9 +35,8 @@ For more details, check the [Dockerfile](Dockerfile).
 ## Run
 
 ```shell
-# add your input data in the data/ directory
-# add --network host if ENV=dev
-docker container run --rm -it -v $(pwd)/data:/data smdrm/geocode_tweets
+# add your input zipfiles in the data/ directory
+docker container run --rm -it --network host -v $(pwd)/data:/data geocode-tweets
 ```
 
 ## Develop
@@ -48,17 +45,15 @@ You can develop in a standardized environment by mounting this directory
 to the project directory /opt/smdrm inside the container.
 
 ```shell
-docker container run --rm -it \
-  --network host \
-  -v $(pwd)/data:/data \
-  -v $(pwd)/geocode_tweets:/opt/smdrm/geocode_tweets \
-  smdrm/geocode_tweets
+export ENV=dev
+docker-compose run --rm -v $(pwd)/data:/data -v $(pwd)/geocode_tweets:/opt/smdrm/geocode_tweets geocode-tweets bash
 ```
 
-Or, project wide using Jupyter Notebook
+Or, starting a Jupyter Notebook session
 
 ```shell
-./start_dev.sh
+export ENV=dev
+docker-compose run --rm -v $(pwd):/opt/smdrm/ws -w /opt/smdrm/ws libdrm bash tools/dev.sh
 ```
 
 ## Tests
@@ -66,14 +61,14 @@ Or, project wide using Jupyter Notebook
 Build the Docker image for testing
 
 ```shell
-# ENV=test in .env
-./build_task.sh geocode_tweets
+export ENV=test
+docker-compose build geocode-tweets
 ```
 
-Run the unittests
+### Unittests
 
 ```shell
-docker container run --rm -it smdrm/geocode_tweets tests/unit
+docker-compose run --rm geocode-tweets tests/unit
 ```
 
 ## Releases

@@ -13,13 +13,8 @@ from libdrm.pipelines import Pipeline
 logging.basicConfig(level=logging.INFO)
 console = logging.getLogger("floods_annotate")
 
-# development flag
-development = os.getenv("ENV", default="dev") == "dev"
-
-# build floods url
-host = "localhost" if development else "floods"
-port = 5010
-base_url = "http://{host}:{port}".format(host=host, port=port)
+# API url from within the (default) Docker networks created with docker-compose
+base_url = "http://{host}:{port}/".format(host="floods", port=5000)
 
 # typing
 pandas_groupby = pandas.core.groupby.generic.DataFrameGroupBy
@@ -27,16 +22,12 @@ pandas_groupby = pandas.core.groupby.generic.DataFrameGroupBy
 
 def get_languages() -> typing.List[str]:
     """Floods Named Entity Recognition REST API call to get the list of languages enabled for annotation."""
-    url = base_url+"/model/languages"
-    r = requests.get(url)
-    return r.json()
+    return requests.get(base_url+"model/languages").json()
 
 
 def get_annotation_scores(texts: list, lang: str) -> typing.List[str]:
     """Floods Named Entity Recognition REST API call to annotate a list of texts."""
-    url = base_url+"/model/annotate/"+lang
-    r = requests.post(url, json={"texts": texts})
-    return r.json()
+    return requests.post(base_url+"model/annotate/"+lang, json={"texts": texts}).json()
 
 
 def group_batch_by_language(datapoints_batch: pandas.DataFrame, languages: typing.List[str]) -> pandas_groupby:
@@ -184,3 +175,4 @@ if __name__ == "__main__":
     )
     # run task
     run(parser.parse_args())
+
