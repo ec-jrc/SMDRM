@@ -48,7 +48,6 @@ COPY download.sh .
 RUN bash download.sh $MODELS_DIR
 
 # copy souce code
-COPY config.py .
 COPY wsgi.py .
 COPY app app
 
@@ -61,11 +60,13 @@ USER floods
 
 # Development stage
 FROM builder as dev
+ENV FLASK_ENV=development
 CMD flask run --host=0.0.0.0 
 
 
 # Testing stage
 FROM builder as test
+ENV TESTING=1
 RUN pip install pytest
 COPY tests tests
 ENTRYPOINT ["pytest"]

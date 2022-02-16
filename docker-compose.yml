@@ -81,7 +81,6 @@ x-pipelines-common:
     target: ${ENV:-dev}
   environment:
     &pipelines-common-env
-    DEBUG: ${DEBUG:-0}
     ENV: ${ENV:-dev}
     LOG_LEVEL: ${LOG_LEVEL:-INFO}
 
@@ -180,6 +179,18 @@ services:
     restart: on-failure
     volumes:
       - floods:/opt/floods/models
+
+  annotators-perftests:
+    build:
+      context: ./annotators/tests/perf
+    depends_on:
+      annotators-deeppavlov:
+        condition: service_healthy
+      annotators-floods:
+        condition: service_healthy
+    image: annotators-perftest
+    profiles:
+      - tests
 
   # https://onedevblog.com/how-to-fix-a-permission-denied-when-using-dockeroperator-in-airflow/
   docker-proxy:
