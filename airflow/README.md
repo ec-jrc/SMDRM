@@ -83,3 +83,17 @@ and be able to run airflow CLI locally
 docker-compose run --rm airflow-worker bash
 ```
 
+## Trigger manual DAG Run
+
+Trigger a manual DAG run
+
+Steps
+1. copy your zipfile in ./data/imports/
+2. execute `trigger-dag-run` docker container as follows
+
+```shell
+docker-compose run --rm trigger-dag-run
+```
+3. wait for the process execution
+4. collect your artifact data at ./data/exports/
+
