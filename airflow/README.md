@@ -77,7 +77,7 @@ and be able to run airflow CLI locally
 docker-compose run --rm airflow-cli bash
 ```
 
-## Trigger manual DAG Run
+## Run a DAG
 
 Trigger a manual DAG run
 
