@@ -20,15 +20,15 @@ The Docker Volume filesystem is structured as follows:
 
 ```text
 -date
-|
---time
-|
----file.zip
+ |
+ -time
+  |
+  -file.zip
 ```
 
 Where,
 * `date`=`YYYYMMDD`
-* `time`=`HHMM` (timezone aware)
+* `time`=`HHMM` (UTC)
 
 
 ## Build
@@ -74,7 +74,7 @@ Execute the airflow running container to spin the shell,
 and be able to run airflow CLI locally
 
 ```shell
-docker-compose run --rm airflow-worker bash
+docker-compose run --rm airflow-cli bash
 ```
 
 ## Trigger manual DAG Run
