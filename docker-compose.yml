@@ -398,21 +398,16 @@ services:
         condition: service_completed_successfully
 
   trigger-dag-run:
-    command: >
-        bash -c "pip install requests
-        && python tools/trigger_dag_run.py"
-    image: libdrm
+    build: ./tools/airflow
+    image: airflow-utils
     profiles:
-      - pipelines
+      - debug
     volumes:
       # export volume as link to airflow
       - export_db:/opt/smdrm/data/airflow
       # inport/export mounts
-      - ./data/exports:/opt/smdrm/data/out
-      - ./data/imports:/opt/smdrm/data/in
-      # export tools
-      - ./tools/airflow:/opt/smdrm/data/tools
-    working_dir: /opt/smdrm/data
+      - ./data/exports:/opt/smdrm/data/export
+      - ./data/imports:/opt/smdrm/data/import
 
 volumes:
   deeppavlov:

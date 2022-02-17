@@ -16,7 +16,7 @@ console = logging.getLogger("trigger_dag_run")
 
 # envs
 FILENAME = os.getenv("FILENAME")
-DEBUG = os.getenv("DEBUG", 0)
+DEBUG = int(os.getenv("DEBUG", 0))
 AIRFLOW_USERNAME=os.getenv("AIRFLOW_USERNAME", "airflow")
 AIRFLOW_PASSWORD=os.getenv("AIRFLOW_PASSWORD", "airflow")
 
@@ -30,8 +30,8 @@ airflow_api_base_url = "http://{AIRFLOW_USERNAME}:{AIRFLOW_PASSWORD}@{host}:{por
 
 # data directories
 data_root_dir = "/opt/smdrm/data"
-imports_root_dir = os.path.join(data_root_dir, "in")
-exports_root_dir = os.path.join(data_root_dir, "out")
+imports_root_dir = os.path.join(data_root_dir, "import")
+exports_root_dir = os.path.join(data_root_dir, "export")
 volume_root_dir = os.path.join(data_root_dir, "airflow")
 
 
@@ -160,8 +160,8 @@ def execute():
 
         # validate input zipfile
         if not ZipFileModel(filepath).is_valid():
-            console.error("Invalid zipfile.")
-            return  
+            console.error("Fount invalid zipfile. Nothing to do...")
+            continue
 
         # move imported zipfile into the Docker Volume
         # to make it available to the pipeline tasks in Airflow
