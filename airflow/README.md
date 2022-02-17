@@ -31,12 +31,6 @@ Where,
 * `time`=`HHMM` (timezone aware)
 
 
-```shell
-# export COLLECTION_ID
-# input_path is the full path to a zipfile on the host
-./tools/airflow/make_data_volume.sh <input_path>
-```
-
 ## Build
 
 Build the Docker image
@@ -92,7 +86,7 @@ Steps
 2. execute `trigger-dag-run` docker container as follows
 
 ```shell
-docker-compose run --rm trigger-dag-run
+docker-compose build trigger-dag-run && docker-compose run --rm trigger-dag-run
 ```
 3. wait for the process execution
 4. collect your artifact data at ./data/exports/
