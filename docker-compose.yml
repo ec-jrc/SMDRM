@@ -45,7 +45,12 @@ x-airflow-common:
   # Comment the image line, place your Dockerfile in the directory where you placed the docker-compose.yaml
   # and uncomment the "build" line below, Then run `docker-compose build` to build the images.
   #image: ${AIRFLOW_IMAGE_NAME:-apache/airflow:2.2.3}
-  build: ./airflow
+  build:
+    args:
+      DOCKER_HUB: ${DOCKER_HUB:-index.docker.io}
+      http_proxy:
+      https_proxy:
+    context: ./airflow
   environment:
     &airflow-common-env
     AIRFLOW__CORE__EXECUTOR: CeleryExecutor
@@ -56,6 +61,12 @@ x-airflow-common:
     AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'false'
     AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
     AIRFLOW__API__AUTH_BACKEND: 'airflow.api.auth.backend.basic_auth'
+    # email notification settings
+    AIRFLOW__SMTP__SMTP_HOST: ${SMTP_HOST:-}
+    AIRFLOW__SMTP__SMTP_PORT: ${SMTP_PORT:-}
+    AIRFLOW__SMTP__SMTP_USER: ${SMTP_EMAIL:-}
+    AIRFLOW__SMTP__SMTP_MAIL_FROM: ${SMTP_EMAIL:-}
+    AIRFLOW__SMTP__SMTP_PASSWORD: ${SMTP_PASSWORD:-}
     _PIP_ADDITIONAL_REQUIREMENTS: ${_PIP_ADDITIONAL_REQUIREMENTS:-}
     # SMDRM connections
     AIRFLOW_CONN_DEEPPAVLOV_API: 'http://deeppavlov:5000'
@@ -77,7 +88,7 @@ x-pipelines-common:
   build:
     &pipelines-common-build
     args:
-      DOCKER_HUB:
+      DOCKER_HUB: ${DOCKER_HUB:-index.docker.io}
       http_proxy:
       https_proxy:
     target: ${ENV:-dev}

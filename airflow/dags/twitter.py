@@ -10,10 +10,10 @@ from textwrap import dedent
 
 from airflow import DAG
 from airflow.decorators import task
-from airflow.operators.bash import BashOperator
 from airflow.providers.docker.operators.docker import DockerOperator
 from airflow.providers.http.sensors.http import HttpSensor
 from airflow.utils.dates import days_ago
+from airflow.operators.email import EmailOperator
 
 # set logging
 console = logging.getLogger(__name__)
@@ -49,8 +49,8 @@ def push_filepaths(ti=None, params=None, dag_run=None, test_mode=None):
 default_args = {
     "owner": "airflow",
     "depends_on_past": False,
-    "email": ["admin@localhost.com"],
-    "email_on_failure": False,
+    "email": ["Emanuele.PANIZIO@ext.ec.europa.eu", "valerio.lorini@ec.europa.eu"],
+    "email_on_failure": True,
     "email_on_retry": False,
     "retries": 1,
     "retry_delay": timedelta(minutes=1),
