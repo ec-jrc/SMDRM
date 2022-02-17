@@ -27,7 +27,10 @@ airflow/plugins
 
 # Data
 data/*
-!data/.gitkeep
+!data/**/
+data/imports/*
+data/exports/*
+
 
 # Temp files
 tools/places/temp/*
