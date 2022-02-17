@@ -57,6 +57,9 @@ x-airflow-common:
     AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
     AIRFLOW__API__AUTH_BACKEND: 'airflow.api.auth.backend.basic_auth'
     _PIP_ADDITIONAL_REQUIREMENTS: ${_PIP_ADDITIONAL_REQUIREMENTS:-}
+    # SMDRM connections
+    AIRFLOW_CONN_DEEPPAVLOV_API: 'http://deeppavlov:5000'
+    AIRFLOW_CONN_FLOODS_API: 'http://floods:5000'
   volumes:
     - ./airflow/dags:/opt/airflow/dags
     - ./airflow/logs:/opt/airflow/logs
