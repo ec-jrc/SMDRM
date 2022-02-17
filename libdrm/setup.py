@@ -16,9 +16,9 @@ setup(
     version=get_version(),
     description="Common helper modules shared by the pipeline services",
     long_description_content_type="text/markdown",
-    url="https://github.com/panc86/smdrm",
+    url="https://github.com/ec-jrc/SMDRM",
     author="Emanuele Panizio",
-    author_email="emanuele.panizio@ext.ec.europa.eu",
+    author_email="Emanuele.PANIZIO@ext.ec.europa.eu",
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Intended Audience :: Developers",
@@ -36,8 +36,7 @@ setup(
         "pydantic~=1.8",
     ],
     project_urls={
-        "Bug Reports": "https://github.com/panc86/smdrm/issues",
-        "Kanban": "https://github.com/panc86/smdrm/projects/1",
-        "Source": "https://github.com/panc86/smdrm",
+        "Bug Reports": "https://github.com/ec-jrc/SMDRM/issues",
+        "Source": "https://github.com/ec-jrc/SMDRM",
     },
 )
