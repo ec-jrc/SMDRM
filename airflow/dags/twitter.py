@@ -10,6 +10,7 @@ from textwrap import dedent
 
 from airflow import DAG
 from airflow.decorators import task
+from airflow.models import Variable
 from airflow.providers.docker.operators.docker import DockerOperator
 from airflow.providers.http.sensors.http import HttpSensor
 from airflow.utils.dates import days_ago
@@ -22,8 +23,13 @@ console = logging.getLogger(__name__)
 # a proxy (container) in the Docker network
 docker_url = "tcp://docker-proxy:2375"
 
+# emails to send failure notifications to
+emails_to_notify = list(filter(None, Variable.get("CSV_EMAILS_TO_NOTIFY_FAILURES").split(",")))
+# enable email notification for DAG failures if emails are given
+notifications_on = bool(emails_to_notify)
 
-@task
+
+@task(task_id='push_collection_id')
 def push_collection_id(ti=None, params=None, dag_run=None, test_mode=None):
     """Push collection ID XCom without a specific target"""
     cID = params["COLLECTION_ID"] if test_mode else dag_run.conf["COLLECTION_ID"] 
@@ -31,7 +37,7 @@ def push_collection_id(ti=None, params=None, dag_run=None, test_mode=None):
     ti.xcom_push(key="cID", value=cID)
 
 
-@task
+@task(task_id='push_filepaths')
 def push_filepaths(ti=None, params=None, dag_run=None, test_mode=None):
     """Push filepath XCom without a specific target"""
     fp = params["INPUT_PATH"] if test_mode else dag_run.conf["INPUT_PATH"] 
@@ -49,12 +55,13 @@ def push_filepaths(ti=None, params=None, dag_run=None, test_mode=None):
 default_args = {
     "owner": "airflow",
     "depends_on_past": False,
-    "email": ["Emanuele.PANIZIO@ext.ec.europa.eu", "valerio.lorini@ec.europa.eu"],
-    "email_on_failure": True,
+    "email": emails_to_notify,
+    "email_on_failure": notifications_on,
     "email_on_retry": False,
     "retries": 1,
     "retry_delay": timedelta(minutes=1),
 }
+
 
 with DAG(
     dag_id="twitter",

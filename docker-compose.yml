@@ -67,14 +67,16 @@ x-airflow-common:
     AIRFLOW__SMTP__SMTP_USER: ${SMTP_EMAIL:-}
     AIRFLOW__SMTP__SMTP_MAIL_FROM: ${SMTP_EMAIL:-}
     AIRFLOW__SMTP__SMTP_PASSWORD: ${SMTP_PASSWORD:-}
-    _PIP_ADDITIONAL_REQUIREMENTS: ${_PIP_ADDITIONAL_REQUIREMENTS:-}
+    _PIP_ADDITIONAL_REQUIREMENTS: ${_PIP_ADDITIONAL_REQUIREMENTS:-pytest}
     # SMDRM connections
     AIRFLOW_CONN_DEEPPAVLOV_API: 'http://deeppavlov:5000'
     AIRFLOW_CONN_FLOODS_API: 'http://floods:5000'
+    # csv emails to notify in case of failure
+    AIRFLOW_VAR_CSV_EMAILS_TO_NOTIFY_FAILURES: ${CSV_EMAILS_TO_NOTIFY_FAILURES:-}
   volumes:
     - ./airflow/dags:/opt/airflow/dags
     - ./airflow/logs:/opt/airflow/logs
-    - ./airflow/plugins:/opt/airflow/plugins
+    - ./airflow/tests:/opt/airflow/tests
   user: "${AIRFLOW_UID:-50000}:0"
   depends_on:
     &airflow-common-depends-on

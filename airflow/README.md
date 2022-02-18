@@ -64,9 +64,22 @@ Finally, you should see the following containers by running `docker-compose ps`
 - postgres      
 - redis          
 
-## UI
+## Tests
 
-Airflow UI is now available at http://localhost:8080 
+Airflow tests are divided as follows:
+
+* Validation
+* Unit
+* Integration
+* Acceptance (E2E)
+
+### Validation
+
+```shell
+# TODO: create test dedicated Docker Image as described in
+# https://airflow.apache.org/docs/docker-stack/build.html
+docker-compose run --rm airflow-cli bash -c 'pytest -v tests/'
+```
 
 ## Develop
 
@@ -90,4 +103,12 @@ docker-compose build trigger-dag-run && docker-compose run --rm trigger-dag-run
 ```
 3. wait for the process execution
 4. collect your artifact data at ./data/exports/
+
+## UI
+
+Airflow UI is now available at http://localhost:8080 
+
+Default credentials are:
+* USERNAME=airflow
+* PASSWORD=airflow
 
