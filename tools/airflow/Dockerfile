@@ -13,6 +13,7 @@ RUN pip install requests
 WORKDIR /opt/smdrm/data
 
 # create export DB volume
+RUN mkdir airflow
 VOLUME ./airflow
 
 # copy into image

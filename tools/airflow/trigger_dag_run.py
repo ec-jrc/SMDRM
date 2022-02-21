@@ -88,6 +88,7 @@ def run_dag(
         "logical_date": logical_date
         }
     response = requests.post(url, json=payload)
+    console.debug(response.text)
     response.raise_for_status()
     return response.json()
 
