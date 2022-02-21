@@ -76,9 +76,7 @@ Airflow tests are divided as follows:
 ### Validation
 
 ```shell
-# TODO: create test dedicated Docker Image as described in
-# https://airflow.apache.org/docs/docker-stack/build.html
-docker-compose run --rm airflow-cli bash -c 'pytest -v tests/'
+ENV=test docker-compose run --rm airflow-cli bash -c pytest
 ```
 
 ## Develop
