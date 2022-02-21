@@ -39,6 +39,28 @@
 # Feel free to modify this file to suit your needs.
 ---
 version: '3'
+
+x-pipelines-common:
+  # Base build arguments for pipeline components
+  &pipelines-common
+  build:
+    &pipelines-common-build
+    args:
+      DOCKER_HUB: ${DOCKER_HUB:-index.docker.io}
+      http_proxy:
+      https_proxy:
+    target: ${ENV:-dev}
+  depends_on:
+    &pipelines-common-depends-on
+    libdrm:
+      condition: service_completed_successfully
+  environment:
+    &pipelines-common-env
+    LOG_LEVEL: ${LOG_LEVEL:-INFO}
+  profiles:
+    - pipelines
+    - twitter
+
 x-airflow-common:
   &airflow-common
   # In order to add custom dependencies or upgrade provider packages you can use your extended image.
@@ -46,10 +68,7 @@ x-airflow-common:
   # and uncomment the "build" line below, Then run `docker-compose build` to build the images.
   #image: ${AIRFLOW_IMAGE_NAME:-apache/airflow:2.2.3}
   build:
-    args:
-      DOCKER_HUB: ${DOCKER_HUB:-index.docker.io}
-      http_proxy:
-      https_proxy:
+    <<: *pipelines-common-build
     context: ./airflow
   environment:
     &airflow-common-env
@@ -85,39 +104,25 @@ x-airflow-common:
     postgres:
       condition: service_healthy
 
-x-pipelines-common:
-  # Base build arguments for pipeline components
-  build:
-    &pipelines-common-build
-    args:
-      DOCKER_HUB: ${DOCKER_HUB:-index.docker.io}
-      http_proxy:
-      https_proxy:
-    target: ${ENV:-dev}
-  environment:
-    &pipelines-common-env
-    ENV: ${ENV:-dev}
-    LOG_LEVEL: ${LOG_LEVEL:-INFO}
-
 services:
 
   libdrm:
     build:
       <<: *pipelines-common-build
       context: ./libdrm
+    environment:
+      <<: *pipelines-common-env
     image: libdrm
 
   extract-tweets:
+    <<: *pipelines-common
     build:
       <<: *pipelines-common-build
       context: ./extract_tweets
-    environment:
-      <<: *pipelines-common-env
     image: extract-tweets
-    profiles:
-      - pipelines
 
   transform-tweets:
+    <<: *pipelines-common
     build:
       <<: *pipelines-common-build
       context: ./transform_tweets
@@ -125,34 +130,28 @@ services:
       <<: *pipelines-common-env
       TF_CPP_MIN_LOG_LEVEL: ${TF_CPP_MIN_LOG_LEVEL:-2}
     depends_on:
+      <<: *pipelines-common-depends-on
       annotators-deeppavlov:
         condition: service_healthy
     image: transform-tweets
-    profiles:
-      - pipelines
 
   floods-annotate:
+    <<: *pipelines-common
     build:
       <<: *pipelines-common-build
       context: ./floods_annotate
-    environment:
-      <<: *pipelines-common-env
     depends_on:
+      <<: *pipelines-common-depends-on
       annotators-floods:
         condition: service_healthy
     image: floods-annotate
-    profiles:
-      - pipelines
 
   geocode-tweets:
+    <<: *pipelines-common
     build:
       <<: *pipelines-common-build
       context: ./geocode_tweets
-    environment:
-      <<: *pipelines-common-env
     image: geocode-tweets
-    profiles:
-      - pipelines
 
   annotators-deeppavlov:
     build:
@@ -179,6 +178,7 @@ services:
       <<: *pipelines-common-build
       context: ./annotators/floods
     environment:
+      <<: *pipelines-common-env
       FLASK_APP: wsgi.py
       FLASK_ENV: ${FLASK_ENV:-production}
       SECRET_KEY: ${SECRET_KEY:-}
