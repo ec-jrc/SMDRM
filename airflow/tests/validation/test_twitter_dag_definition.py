@@ -2,10 +2,12 @@ import pytest
 from datetime import datetime, timezone
 from airflow.models import DagBag, TaskInstance
 
+
 @pytest.fixture(scope="class")
 def dag(dagbag):
     """Get Twitter DAG instance."""
     return dagbag.get_dag('twitter')
+
 
 class TestTwitterDagDefinition:
 
