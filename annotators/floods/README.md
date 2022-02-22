@@ -23,35 +23,52 @@ Sources:
 The Floods annotator uses those libraries as backend for preprocessing purposes.
 We install [Torch CPU only wheel](https://download.pytorch.org/whl/torch/) to save resources.
 
-> Tensorflow logs
-disabled with `TF_CPP_MIN_LOG_LEVEL`
-0 = all messages are logged (default behavior)
-1 = INFO messages are not printed
-2 = INFO and WARNING messages are not printed
-3 = INFO, WARNING, and ERROR messages are not printed
+> :bulb: TIP: Tensorflow logs are disabled with `TF_CPP_MIN_LOG_LEVEL=x`
+> * 0 = all messages are logged (default behavior)
+> * 1 = INFO messages are not printed
+> * 2 = INFO and WARNING messages are not printed
+> * 3 = INFO, WARNING, and ERROR messages are not printed
+
+> :bangbang: execute all bash commands from project root directory
 
 ## Build
 
-Export `ENV` varible to build the image for that environment
-
 ```shell
-./build_task.sh annotators/floods
+docker-compose build annotators-floods
 ```
 
 ## Run
 
 ```shell
-docker-compose up floods
+docker-compose up annotators-floods
 ```
 
 ## Develop
 
 ```shell
-# add /bin/bash to enter the container shell
-docker container run --rm -it -v $(pwd)/annotators/floods:/opt/floods smdrm/annotators/floods
+export FLASK_ENV=development
+docker-compose run --rm \
+  -v smdrm_floods:/opt/floods/models \
+  -v $(pwd)/annotators/floods:/opt/floods \
+  annotators-floods \
+  /bin/bash
 ```
 
-## Usage
+## API
+
+### Usage
+
+```shell
+# from host network
+curl http://localhost:5010/model/annotate/en \
+  -H "Content-Type: application/json" \
+  -d '{"texts": ["a flood disaster text url","another flood disaster text url"]}'
+
+# Response
+# ["0.022930","0.006453"]
+```
+
+### Test
 
 Test the API with the following synthetic data points
 
@@ -65,24 +82,16 @@ curl http://localhost:5010/model/test
 
 > :information_source:
 > Note the `texts` key in the payload, and `en` (lang ISO code) in the URL.
+Build the Docker image for testing
 
-```shell
-# from host network
-curl http://localhost:5010/model/annotate/en \
-  -H "Content-Type: application/json" \
-  -d '{"texts": ["a flood disaster text url","another flood disaster text url"]}'
-
-# Response
-# ["0.022930","0.006453"]
-```
 
 ## Tests
 
-Build the Docker image for testing
+Build the Docker image for tests
 
 ```shell
-# ENV=test in .env
-./build_task.sh annotators/floods
+export ENV=test
+docker-compose build annotators-floods
 ```
 
 ### Unit
@@ -90,18 +99,10 @@ Build the Docker image for testing
 Run the unit tests
 
 ```shell
-docker container run --rm -it smdrm/annotators/floods tests/unit
+docker-compose run --rm annotators-floods tests/unit
 ```
 
 ### Integration
 
-Initialize the test instance of the API
-
-```shell
-```
-
-Run the integration tests
-
-```shell
-```
+WIP
 

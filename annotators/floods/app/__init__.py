@@ -7,11 +7,10 @@ for different environments based on the value of the CONFIG_TYPE environment var
 # logging configuration
 # https://flask.palletsprojects.com/en/1.0.x/logging/#logging
 # https://stackoverflow.com/questions/51318988/why-flask-logger-does-not-log-in-docker-when-using-uwsgi-in-front
+from flask import Flask, render_template
 import logging
 from logging.config import dictConfig
 import os
-from flask import Flask, render_template
-from config import Config
 
 
 # define logging config before the app initizalization
@@ -33,17 +32,14 @@ dictConfig({
 
 
 # using root logger to merge flask and gunicorn logs
-logger = logging.getLogger()
+console = logging.getLogger()
 
 
 ### Application Factory ###
 def create_app():
 
     app = Flask(__name__)
-
-    # Configure the flask app instance
-    CONFIG_TYPE = os.getenv('CONFIG_TYPE', default='config.DevelopmentConfig')
-    app.config.from_object(CONFIG_TYPE)
+    console.debug(app.config)
 
     # Register blueprints
     register_blueprints(app)
@@ -107,7 +103,7 @@ def configure_logrotate(app):
     # create logrotate directory
     logs_dir = os.path.join(app.instance_path, "logs")
     os.makedirs(logs_dir, exist_ok=True)
-    logger.info("logs directory: {}".format(logs_dir))
+    console.debug("logs directory: {}".format(logs_dir))
     # create a file handler object
     file_handler = RotatingFileHandler(os.path.join(logs_dir, 'app.log'), maxBytes=16384, backupCount=20)
     file_handler.setLevel(logging.WARNING)
@@ -116,3 +112,4 @@ def configure_logrotate(app):
     # add file handler object to the app.logger
     # can be used via current_app.logger
     app.logger.addHandler(file_handler)
+

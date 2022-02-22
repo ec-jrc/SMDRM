@@ -1,5 +1,6 @@
 ARG DOCKER_HUB="index.docker.io"
 FROM ${DOCKER_HUB}/python:3.7-slim as builder
+
 LABEL Author.Name="Emanuele Panizio" \
       Author.Email="Emanuele.PANIZIO@ext.ec.europa.eu"
 
@@ -25,6 +26,7 @@ ENV CUDA_VISIBLE_DEVICES=0 \
 # install build deps
 RUN apt update \
     && apt install -y \
+      curl \
       gcc \
       g++ \
       git; \

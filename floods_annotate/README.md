@@ -16,11 +16,8 @@ Executes
 
 ## Build
 
-Make sure to select the intended environment with ENV variable in [.env](../.env).
-
-
 ```shell
-./build_task.sh floods_annotate
+docker-compose build floods-annotate
 ```
 
 For more details, check the [Dockerfile](Dockerfile).
@@ -28,9 +25,8 @@ For more details, check the [Dockerfile](Dockerfile).
 ## Run
 
 ```shell
-# add your input data in the data/ directory
-# add --network host if ENV=dev
-docker container run --rm -it -v $(pwd)/data:/data smdrm/floods_annotate
+# add your input zipfiles in the data/ directory
+docker container run --rm -it --network host -v $(pwd)/data:/data floods-annotate
 ```
 
 ## Develop
@@ -39,17 +35,15 @@ You can develop in a standardized environment by mounting this directory
 to the project directory /opt/smdrm inside the container.
 
 ```shell
-docker container run --rm -it \
-  --network host \
-  -v $(pwd)/data:/data \
-  -v $(pwd)/floods_annotate:/opt/smdrm/floods_annotate \
-  smdrm/floods_annotate
+export ENV=dev
+docker-compose run --rm -v $(pwd)/data:/data -v $(pwd)/floods_annotate:/opt/smdrm/floods_annotate floods-annotate bash 
 ```
 
-Or, project wide using Jupyter Notebook
+Or, starting a Jupyter Notebook session
 
 ```shell
-./start_dev.sh
+export ENV=dev
+docker-compose run --rm -v $(pwd):/opt/smdrm/ws -w /opt/smdrm/ws libdrm bash tools/dev.sh
 ```
 
 ## Test
@@ -57,14 +51,14 @@ Or, project wide using Jupyter Notebook
 Build the Docker image for testing
 
 ```shell
-# ENV=test in .env
-./build_task.sh floods_annotate
+export ENV=test
+docker-compose build floods-annotate
 ```
 
-Run the unittests
+### Unittests
 
 ```shell
-docker container run --rm -it smdrm/floods_annotate tests/unit
+docker-compose run --rm floods-annotate tests/unit
 ```
 
 ## Releases

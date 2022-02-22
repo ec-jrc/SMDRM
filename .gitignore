@@ -21,9 +21,16 @@ nbs/*
 **/tmp_trainer
 **/instance
 
+# Airflow
+airflow/logs
+airflow/plugins
+
 # Data
 data/*
-!data/.gitkeep
+!data/**/
+data/imports/*
+data/exports/*
+
 
 # Temp files
 tools/places/temp/*

@@ -24,10 +24,10 @@ class DeepPavlovStatus(Resource):
         return {"ready": True}
 
 
-class DeepPavlovProbe(Resource):
+class DeepPavlovTest(Resource):
     """API test."""
 
-    def post(self):
+    def get(self):
         try:
             y_hat = model(["string"])
             return {"test": "passed"}
@@ -69,8 +69,8 @@ class DeepPavlovModel(Resource):
 
 # add API resources
 api.add_resource(DeepPavlovStatus, "/status")
-api.add_resource(DeepPavlovModel, "/model")
-api.add_resource(DeepPavlovProbe, "/test")
+api.add_resource(DeepPavlovModel, "/model/annotate")
+api.add_resource(DeepPavlovTest, "/model/test")
 
 
 if __name__ == "__main__":

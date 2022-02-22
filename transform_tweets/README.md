@@ -16,10 +16,8 @@ Transform data point `text` field.
 
 ## Build
 
-Make sure to select the intended environment with ENV variable in [.env](../.env).
-
 ```shell
-./build_task.sh transform_tweets
+docker-compose build transform-tweets
 ```
 
 For more details, check the [Dockerfile](Dockerfile).
@@ -27,9 +25,8 @@ For more details, check the [Dockerfile](Dockerfile).
 ## Run
 
 ```shell
-# add your input data in the data/ directory
-# add --network host if ENV=dev
-docker container run --rm -it -v $(pwd)/data:/data smdrm/transform_tweets
+# add your input zipfiles in the data/ directory
+docker container run --rm -it --network host -v $(pwd)/data:/data transform-tweets
 ```
 
 ## Develop
@@ -38,17 +35,15 @@ You can develop in a standardized environment by mounting this directory
 to the project directory /opt/smdrm inside the container.
 
 ```shell
-docker container run --rm -it \
-  --network host \
-  -v $(pwd)/data:/data \
-  -v $(pwd)/transform_tweets:/opt/smdrm/transform_tweets \
-  smdrm/transform_tweets
+export ENV=dev
+docker-compose run --rm -v $(pwd)/data:/data -v $(pwd)/transform_tweets:/opt/smdrm/transform_tweets transform-tweets bash
 ```
 
-Or, project wide using Jupyter Notebook
+Or, starting a Jupyter Notebook session
 
 ```shell
-./start_dev.sh
+export ENV=dev
+docker-compose run --rm -v $(pwd):/opt/smdrm/ws -w /opt/smdrm/ws libdrm bash tools/dev.sh
 ```
 
 ## Test
@@ -56,17 +51,21 @@ Or, project wide using Jupyter Notebook
 Build the Docker image for testing
 
 ```shell
-# ENV=test in .env
-./build_task.sh transform_tweets
+export ENV=test
+docker-compose build transform-tweets
 ```
 
-Run the unittests
+### Unittests
 
 ```shell
-docker container run --rm -it smdrm/transform_tweets tests/unit
+docker-compose run --rm transform-tweets tests/unit
 ```
 
 ## Releases
+
+- **0.1.5**
+  Place candidate extraction discards non-alphanumeric characters.
+  Transformations include Twitter Retweeted `RT` flag removal.
 
 - **0.1.4**
   Code refactoring that leverages the Pipe and Filter design pattern.

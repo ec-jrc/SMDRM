@@ -1,4 +1,5 @@
-FROM jrc/smdrm_base
+FROM libdrm
+
 LABEL Author.Name="Emanuele Panizio" \
       Author.Email="Emanuele.PANIZIO@ext.ec.europa.eu"
 
@@ -10,3 +11,4 @@ COPY data data
 
 ENTRYPOINT ["python", "test_annotate.py"]
 CMD ["--help"]
+
