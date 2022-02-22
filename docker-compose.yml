@@ -126,9 +126,6 @@ services:
     build:
       <<: *pipelines-common-build
       context: ./transform_tweets
-    environment:
-      <<: *pipelines-common-env
-      TF_CPP_MIN_LOG_LEVEL: ${TF_CPP_MIN_LOG_LEVEL:-2}
     depends_on:
       <<: *pipelines-common-depends-on
       annotators-deeppavlov:
@@ -159,11 +156,10 @@ services:
       context: ./annotators/deeppavlov
     environment:
       <<: *pipelines-common-env
-      TF_CPP_MIN_LOG_LEVEL: ${TF_CPP_MIN_LOG_LEVEL:-2}
     image: deeppavlov
     hostname: deeppavlov
     ports:
-      - ${DEEPPAVLOV_PORT:-5000}:5000
+      - ${DEEPPAVLOV_PORT:-5050}:5000
     healthcheck:
       test: ["CMD", "curl", "--fail", "http://localhost:5000/model/test"]
       interval: 30s
@@ -171,7 +167,7 @@ services:
       retries: 5
     restart: on-failure
     volumes:
-      - deeppavlov:/opt/deeppavlov/.deeppavlov
+      - deeppavlov-volume:/DeepPavlov/.deeppavlov
 
   annotators-floods:
     build:
@@ -193,7 +189,7 @@ services:
       retries: 5
     restart: on-failure
     volumes:
-      - floods:/opt/floods/models
+      - floods-volume:/opt/floods/models
 
   annotators-perftests:
     build:
@@ -420,14 +416,14 @@ services:
       - debug
     volumes:
       # export volume as link to airflow
-      - export_db:/opt/smdrm/data/airflow
+      - export-db-volume:/opt/smdrm/data/airflow
       # inport/export mounts
       - ./data/exports:/opt/smdrm/data/export
       - ./data/imports:/opt/smdrm/data/import
 
 volumes:
-  deeppavlov:
-  floods:
+  deeppavlov-volume:
+  floods-volume:
   postgres-db-volume:
-  export_db:
+  export-db-volume:
 

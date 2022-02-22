@@ -2,9 +2,6 @@ import deeppavlov
 from flask import Flask, request, jsonify
 from flask_restful import Resource, Api, abort
 import os
-import tensorflow
-
-#tensorflow.compat.v1.logging.set_verbosity(tensorflow.compat.v1.logging.ERROR)
 
 # api info
 app = Flask("DeepPavlovAPI")
@@ -14,7 +11,8 @@ api = Api(app)
 # DeepPavlov model returns 2 lists per sentence.
 # A list of tokens as the words in the sentence, and a list of tags as the model predictions.
 # e.g. [There,was,flood,in,London] [O,O,O,O,GPE]
-model = deeppavlov.build_model(deeppavlov.configs.ner.ner_ontonotes_bert_mult, download=False)
+config_path = deeppavlov.configs.ner.ner_ontonotes_bert_mult
+model = deeppavlov.build_model(config_path, download=False)
 
 
 class DeepPavlovStatus(Resource):
@@ -83,14 +81,13 @@ if __name__ == "__main__":
     )
     parser.add_argument("--host", default="0.0.0.0", help="The host IP address. Default is %(default)s.")
     parser.add_argument("--port", default=5000, help="The host port. Default is %(default)s.")
-    parser.add_argument("--debug", action="store_true", default=False, help="Enable debugging. Default is %(default)s.")
     args = parser.parse_args()
 
     # setup logging
-    logging.basicConfig(level="DEBUG" if args.debug else "INFO")
+    logging.basicConfig(level=os.getenv("LOG_LEVEL", "INFO"))
     console = logging.getLogger("deeppavlov")
     logging.getLogger("werkzeug").propagate = False
 
     # start api
-    app.run(debug=args.debug, host=args.host, port=args.port)
+    app.run(debug=False, host=args.host, port=args.port)
 
