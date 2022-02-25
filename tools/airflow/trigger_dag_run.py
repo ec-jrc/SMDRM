@@ -69,7 +69,7 @@ def run_dag(
         dag_run_id: str,
         logical_date: str,
         dag_id: str,
-        collection_id: str = "smdrm_export_db"
+        collection_id: str = "smdrm_export-db-volume"
     ):
     """
     Manually trigger DAG run via Airflow REST API.
