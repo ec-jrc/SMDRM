@@ -15,28 +15,25 @@ Execution
   * city coordinates when a single match exists
   * region bounding box centroid coordinates when multiple matches exist 
 
-## Requirements
+## Installation and Usage
 
-Docker Engine
-Python 3.8
- - libdrm
- - pandas
+![Python](https://img.shields.io/badge/Python-3.8-information)&nbsp;&nbsp;![LibDRM](https://img.shields.io/badge/libdrm-latest-information)&nbsp;&nbsp;![Pandas](https://img.shields.io/badge/Pandas-1.4.1-information)
 
-> :bangbang: execute all bash commands from project root directory
+> :bangbang: Execute all bash commands from project root directory
 
-## Build
+### Build
 
 ```shell
 docker-compose build geocode-tweets
 ```
 
-For more details, check the [Dockerfile](Dockerfile).
+For additional details, check the [Dockerfile](Dockerfile).
 
-## Run
+### Run
 
 ```shell
 # add your input zipfiles in the data/ directory
-docker container run --rm -it --network host -v $(pwd)/data:/data geocode-tweets
+docker-compose run --rm -v $(pwd)/data:/data geocode-tweets
 ```
 
 ## Develop

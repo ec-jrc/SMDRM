@@ -5,35 +5,44 @@ call the DeepPavlov Named Entity Recongnition AI framework.
 It is an external plugin to tag input texts.
 
 Sources:
-* [GitHub](https://github.com/deepmipt/stand_kubernetes_cluster/tree/master/utils/dp_base) page.
+* [GitHub](https://github.com/deepmipt/stand_kubernetes_cluster/tree/master/utils/dp_base)
 * [DeepPavlov](http://docs.deeppavlov.ai)
-section in the Official Documentation, and the
-
-## Requirements
-
-* Python 3.7
-  * deeppavlov==0.15.0
-  * tensorflow==1.15.2
   * [ner_ontonotes_bert_mult](https://github.com/deepmipt/DeepPavlov/blob/0.17.1/deeppavlov/configs/ner/ner_ontonotes_bert_mult.json)
 
-> :bulb: TIP: Tensorflow logs are disabled with `TF_CPP_MIN_LOG_LEVEL=x`
-> * 0 = all messages are logged (default behavior)
-> * 1 = INFO messages are not printed
-> * 2 = INFO and WARNING messages are not printed
-> * 3 = INFO, WARNING, and ERROR messages are not printed
+## Installation and Usage
 
-> :bangbang: execute all bash commands from project root directory
+![Python](https://img.shields.io/badge/Python-3.7-information)&nbsp;&nbsp;![DeepPavlov](https://img.shields.io/badge/DeepPavlov-0.15.0-information)&nbsp;&nbsp;![Flask](https://img.shields.io/badge/Flask-2.0.1-information)&nbsp;&nbsp;![Flask-RESTful](https://img.shields.io/static/v1?label=Flask%20RESTful&message=0.3.9&color=information)&nbsp;&nbsp;![TensorFlow](https://img.shields.io/badge/TensorFlow-1.15.2-information)
 
-## Build
+> :bangbang: Execute all bash commands from project root directory
+
+### Build
 
 ```shell
 docker-compose build annotators-deeppavlov
 ```
 
-## Run
+### Run
 
 ```shell
 docker-compose up annotators-deeppavlov
+```
+
+### API
+
+Send a REST HTTP POST request to the API
+
+```shell
+curl -X POST http://localhost:5000/model \
+  -H 'Content-Type: application/json' \
+  -d '{"texts": ["Un texte d`information sur Rio de Janeiro, écrit à Paris."]}'
+```
+
+Test the API
+
+```shell
+curl http://localhost:5000/model/test
+
+# Response: {"test": "passed"}
 ```
 
 ## Develop
@@ -45,24 +54,6 @@ docker-compose run --rm \
   annotators-deeppavlov \
   /bin/bash
 ```
-
-## API
-
-### Usage
-
-```shell
-curl -X POST http://localhost:5000/model \
-  -H 'Content-Type: application/json' \
-  -d '{"texts": ["Un texte d`information sur Rio de Janeiro, écrit à Paris."]}'
-```
-
-### Test
-
-```shell
-curl -X POST http://localhost:5000/model/test
-```
-
-Should return `"passed"` if REST API service is healthy, or `"failed"`.
 
 ## Tests
 

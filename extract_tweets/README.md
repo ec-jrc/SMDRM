@@ -1,30 +1,33 @@
 # Extract Tweets
 
-Extracts/creates specific fields to enforce the SMDRM Datapoint Data Model.
+Extracts/creates specific [fields](../docs/architecture.md#fields) to create a SMDRM [datapoint](../docs/glossary.md#datapoint).
 It minimizes the memory consumption footprint by removing unnecessary data.
 
-## Extractions
-
+Execution
 * filter raw bytes that failed the JSON transformation
 * extract raw Twitter datapoint if already processed
 * extract the most text from a given Twitter datapoint
 * parse specific fields from raw Twitter datapoint
 
-> :bangbang: execute all bash commands from project root directory
+## Installation and Usage
 
-## Build
+![Python](https://img.shields.io/badge/Python-3.8-information)&nbsp;&nbsp;![LibDRM](https://img.shields.io/badge/libdrm-latest-information)
+
+> :bangbang: Execute all bash commands from project root directory
+
+### Build
 
 ```shell
-ocker-compose build extract-tweets
+docker-compose build extract-tweets
 ```
 
-For more details, check the [Dockerfile](Dockerfile).
+For additional details, check the [Dockerfile](Dockerfile).
 
-## Run
+### Run
 
 ```shell
 # add your input zipfiles in the data/ directory
-docker container run --rm -it --network host -v $(pwd)/data:/data extract-tweets
+docker-compose run --rm -v $(pwd)/data:/data extract-tweets
 ```
 
 ## Develop

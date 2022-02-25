@@ -3,14 +3,14 @@
 **/__pycache__
 *.pyc
 *.egg-info
-*.ipynb_checkpoints
 
 # Config
 *.env
 
 # Development
 nbs/*
-!nbs/.gitkeep
+!nbs/README.md
+*.ipynb_checkpoints
 
 # Tasks
 **/build
@@ -23,14 +23,13 @@ nbs/*
 
 # Airflow
 airflow/logs
-airflow/plugins
 
 # Data
 data/*
+!data/README.md
 !data/**/
 data/imports/*
 data/exports/*
-
 
 # Temp files
 tools/places/temp/*
@@ -38,3 +37,4 @@ tools/places/temp/*
 
 # sys
 .Trash*
+

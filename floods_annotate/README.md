@@ -8,25 +8,29 @@ of languages.
 It is accessible via HTTP REST API request. The expected input data is a batch
 of texts of a single language.
 
-Executes
+Execution
 * group batch by language
 * HTTP call to Floods Annotator API
 
-> :bangbang: execute all bash commands from project root directory
+## Installation and Usage
 
-## Build
+![Python](https://img.shields.io/badge/Python-3.8-information)&nbsp;&nbsp;![LibDRM](https://img.shields.io/badge/libdrm-latest-information)&nbsp;&nbsp;![Pandas](https://img.shields.io/badge/Pandas-1.3.5-information)&nbsp;&nbsp;![Requests](https://img.shields.io/badge/requests-2.27.0-information)
+
+> :bangbang: Execute all bash commands from project root directory
+
+### Build
 
 ```shell
 docker-compose build floods-annotate
 ```
 
-For more details, check the [Dockerfile](Dockerfile).
+For additional details, check the [Dockerfile](Dockerfile).
 
-## Run
+### Run
 
 ```shell
 # add your input zipfiles in the data/ directory
-docker container run --rm -it --network host -v $(pwd)/data:/data floods-annotate
+docker-compose run --rm -v $(pwd)/data:/data floods-annotate
 ```
 
 ## Develop

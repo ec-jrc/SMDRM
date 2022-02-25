@@ -4,35 +4,36 @@ Let us establish a concise glossary of terms that will be the jargon used throug
 
 ## Annotate
 
-The action of assigning a probability score to the `text` field of a datapoint
-i.e., a float number between 0 and 1 representing the likelihood that the textual
-information in the `text` field refers to a specific disaster type.
+The action of assigning a probability score to the `text` field of a datapoint.
+This is a float number between 0 and 1 representing the likelihood that the textual
+information in the `text` field refers to a specific [disaster](#disaster) type.
 
-## DAG
+## Datapoint
 
-Add
+It is a JSON dictionary made of a specific set of [fields](architecture.md#fields).
 
-### Datapoints
+## Directed Acyclic Graph
 
-The smallest data unit. It is a JSON formatted dictionary made of a number of required fields.
-For more info, see the [Input Data Model](../README.md#input-data-model) section.
+Within the Airflow ecosystem, a Directed Acyclic Graph (DAG) is a workflow of coded instructions
+to execute a sequence of _tasks_ that make a pipeline. Each task must be atomic,
+which means it produces the same result every time it is executed on a defined dataset.
+A DAG specifies the dependencies between tasks, and the order in which to execute them, and run retries.
 
 ## Disaster
 
 Within the context of SMDRM, a (environmental) disaster can be of the following types:
 * Floods
 
-## Uploads
+## Task
 
-The compressed input data that users intend to enrich.
-Each upload has the following requirements:
-* at least 1 zip file
-* at least 1 JSON file in the zip file
-* only 1 JSON formatted datapoint for each line in the JSON file
-
-You can verify the required datapoint structure in the [Input Data Model](../README.md#input-data-model) section.
+A task is the smallest component of a pipeline. It executes a specific logic,
+be it fetching data, running analysis, triggering other systems, or more.
 
 ## Workflow
 
-add
+A workflow consists of an orchestrated and repeatable pattern of activity,
+enabled by the systematic organization of resources into processes that
+transform materials, provide services, or process information.
+
+Source [Wikipedia](https://en.wikipedia.org/wiki/Workflow)
 

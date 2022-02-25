@@ -1,18 +1,26 @@
 # LibDRM
 
-It holds the core functionality required by SMDRM Pipeline tasks.
+LibDRM holds the core functionality required by the tasks of the SMDRM Pipeline.
+For additional details on the tasks, check the [airflow/README.md](https://github.com/ec-jrc/SMDRM/blob/main/airflow/README.md) section.
 
-For more details, go to the [source code](https://github.com/panc86/smdrm/tree/master/libdrm) on GitHub.
+## Installation and Usage
 
-> :bangbang: execute all bash commands from project root directory
+![Python](https://img.shields.io/badge/Python-3.8-information)&nbsp;&nbsp;![Pydantic](https://img.shields.io/badge/Pydantic-~=1.8-information)
 
-## Build
+> :bangbang: Execute all bash commands from project root directory
+
+### Build
 
 ```shell
 docker-compose build libdrm
 ```
 
-For more details, check the [Dockerfile](Dockerfile).
+For additional details, check the [Dockerfile](Dockerfile).
+
+### Run
+
+This Docker image is used as base image to build, and develop the SMDRM Pipeline tasks.
+It is not supposed to be run directly, unless for development purposes.
 
 ## Development
 
@@ -24,7 +32,7 @@ docker-compose run --rm libdrm
 ```
 
 Start a Jupyter Notebook and mount the project folder for dynamic modifications
-i.e., without the need to rebuild the image every time
+without the need to rebuild the image every time.
 
 ```shell
 export ENV=dev
@@ -97,3 +105,4 @@ GitHub Action.
   This allows failure when those fields are screened under certain conditions.
   For instance, `cnn_texts = g.text_clean.values.tolist()` in
   _floods_annotate/src/floods_annotate.py_
+

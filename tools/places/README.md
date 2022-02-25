@@ -11,7 +11,6 @@ The attributes table of the Global Regions GeoJSON file are joined into the attr
 table of Geonames DB using the `Join attributes by location` spatial operation to create
 the Global Locations dataset, our final output.
 
-
 ## Global Regions
 
 The Global Regions GeoJSON is a [GADM36](https://gadm.org/data.html) based basemap.
@@ -21,7 +20,6 @@ region type and size.
 We use the level 0 (Country level) to extract small Countries like archipelagos.
 Whereas, we use levels 1 and 2 to extract big Countries with different administrative levels
 of subdivision like Brazil, US, or China.
-
 
 ## Global Cities (Geonames DB)
 
@@ -33,7 +31,6 @@ We use the `latitude`, and `longitude` coordinates, as well as the `name`, and
 
 The coordinates of one or many cities are assigned to the datapoint that contains
 Geo Political Entities (GPE) in text that match those of the cities.
-
 
 ## Instructions
 
@@ -81,7 +78,6 @@ python tools/places/build_global_regions.py
 
 This outputs a single global_regions_v1.geojson file with the features selected in the steps above.
 
-
 #### GADM Levels
 
 * GID_0: Country ISO 3
@@ -117,7 +113,6 @@ Copy/paste the section with regards to the level you want to select/extract feat
 > For unknown reasons, Bedfordshire in England (UK) is not selected using the SQL statement for level 2 (sub)regions.
 > Thus, this should be manually extracted, and converted to geojson as described [above](#basemap).
 
-
 ### Create Global Cities
 
 Steps:
@@ -127,7 +122,6 @@ Steps:
 
 Now, Global Regions from the previous step can be joined onto
 this layer by means of the `Join attributes by location` spatial operation.
-
 
 ### Create Global Locations
 
@@ -163,3 +157,4 @@ and merge any missing region attribute.
 > the region bounding box they belong to. This produces cities with unmatched regions.
 > This is not allowed for the region_id, as well as the city coordinates is a strict
 > requirement of the `geocode_tweets` task
+

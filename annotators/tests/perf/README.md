@@ -1,6 +1,6 @@
 # Performance Tests
 
-> :bangbang: execute all bash commands from project root directory
+> :bangbang: Execute all bash commands from project root directory
 
 ## Build
 

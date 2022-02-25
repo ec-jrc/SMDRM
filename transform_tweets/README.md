@@ -1,32 +1,38 @@
 # Transform Tweets
 
-Transform data point `text` field.
+Appy normalization transformations on the datapoint `text` field,
+and extracts place candidates for geocoding purposes.
 
-## Transformations
+Execution
+* remove user mentions
+* normalize URLs
+* normalize hashtags
+* remove punctuation
+* remove retweets
+* normalize white spaces
+* remove new lines
+* remove dates
+* tag place candidates
 
-* mentions
-* URLs
-* hashtags
-* punctuation
-* white spaces
-* new lines
-* dates
+## Installation and Usage
 
-> :bangbang: execute all bash commands from project root directory
+![Python](https://img.shields.io/badge/Python-3.8-information)&nbsp;&nbsp;![LibDRM](https://img.shields.io/badge/libdrm-latest-information)&nbsp;&nbsp;![Pandas](https://img.shields.io/badge/Pandas-1.3.5-information)&nbsp;&nbsp;![Requests](https://img.shields.io/badge/requests-2.27.0-information)
 
-## Build
+> :bangbang: Execute all bash commands from project root directory
+
+### Build
 
 ```shell
 docker-compose build transform-tweets
 ```
 
-For more details, check the [Dockerfile](Dockerfile).
+For additional details, check the [Dockerfile](Dockerfile).
 
-## Run
+### Run
 
 ```shell
 # add your input zipfiles in the data/ directory
-docker container run --rm -it --network host -v $(pwd)/data:/data transform-tweets
+docker-compose run --rm -v $(pwd)/data:/data transform-tweets
 ```
 
 ## Develop

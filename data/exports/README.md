@@ -1,4 +1,4 @@
 # Exports
 
-In this directory, you will find the zipfile artifacts produced by the Ariflow pipeline run.
+Use this directory to collect the enriched zipfile produced by the Ariflow DAG run.
 

@@ -1,4 +1,4 @@
 # Imports
 
-Use this directory to add zipfiles that you want to execute in an Ariflow pipeline run.
+Use this directory to add zipfiles that you want to process in an Airflow DAG run.
 
