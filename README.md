@@ -48,7 +48,7 @@ There are two ways to import an input zipfile to a pipeline:
 We assume that your shell is in the project root directory.
 
 ```shell
-./tools/process_zipfile.sh <fullpath-to-zipfile>
+./process_zipfile.sh <fullpath-to-zipfile>
 ```
 
 > :information_source: For additional details on the steps executed,
