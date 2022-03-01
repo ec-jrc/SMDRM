@@ -88,6 +88,7 @@ x-airflow-common:
     # SMDRM connections
     AIRFLOW_CONN_DEEPPAVLOV_API: 'http://deeppavlov:5000'
     AIRFLOW_CONN_FLOODS_API: 'http://floods:5000'
+    AIRFLOW_CONN_ELASTICSEARCH_API: 'http://elasticsearch:9200'
     # csv emails to notify in case of failure
     AIRFLOW_VAR_CSV_EMAILS_TO_NOTIFY_FAILURES: ${CSV_EMAILS_TO_NOTIFY_FAILURES:-}
   volumes:
@@ -147,6 +148,17 @@ services:
       <<: *pipelines-common-build
       context: ./geocode_tweets
     image: geocode-tweets
+
+  cache-tweets:
+    <<: *pipelines-common
+    build:
+      <<: *pipelines-common-build
+      context: ./cache_tweets
+    depends_on:
+      <<: *pipelines-common-depends-on
+      elasticsearch:
+        condition: service_healthy
+    image: cache-tweets
 
   annotators-deeppavlov:
     build:

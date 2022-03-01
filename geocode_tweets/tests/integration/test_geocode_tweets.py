@@ -30,24 +30,24 @@ def test_geocode_datapoints_with_cities(ambiguous_places):
                 'LOC': ['Potomac River', 'Potomac River'],
                 'GPE': ['Alexandria Potomac River', 'Georgetown']
                 },
-            'coordinates': [
-                [43.98333, 25.33333],
-                [38.80484, -77.04692]
-                ],
             'meta': [
                 {
                     'country_name': 'Romania',
                     'country_code': 'ROU',
                     'region_name': 'Teleorman',
                     'city_name': 'Alexandria',
-                    'region_id': 1865
+                    'region_id': 1865,
+                    'latitude': 43.98333,
+                    'longitude': 25.33333
                     },
                 {
                     'country_name': 'United States',
                     'country_code': 'USA',
                     'region_name': 'Virginia',
                     'city_name': 'Alexandria',
-                    'region_id': 12926
+                    'region_id': 12926,
+                    'latitude': 38.80484,
+                    'longitude': -77.04692
                     }
                 ]
             }
@@ -84,22 +84,22 @@ def test_geocode_datapoints_with_regions(ambiguous_places):
             'candidates': {
                 'GPE': ['Louisiana', 'Virginia', 'US']
                 },
-        'coordinates': [
-            [31.204971, -92.527046],
-            [38.817146, -77.091072]
-            ],
         'meta': [
             {
                 'country_name': 'United States',
                 'country_code': 'USA',
                 'region_name': 'Louisiana',
-                'region_id': 11258
+                'region_id': 11258,
+                'latitude': 31.204971,
+                'longitude': -92.527046
                 },
             {
                 'country_name': 'United States',
                 'country_code': 'USA',
                 'region_name': 'Virginia',
-                'region_id': 12926
+                'region_id': 12926,
+                'latitude': 38.817146,
+                'longitude': -77.091072
                 }
             ]
         }

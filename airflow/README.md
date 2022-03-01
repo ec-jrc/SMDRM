@@ -26,6 +26,7 @@ Table 1 shows the `twitter` DAG _tasks_
 |`transform_tweets`|Apply place and grammar normalization transformations to clean the `text` field and identify place candidates.|
 |`floods_annotate`|Assign a floods related probability score to the datapoint given its (cleaned) `text`.|
 |`geocode_tweets`|Assign latitude and longitude coordinates to the datapoint whose place candidates matches against a [GADM](https://gadm.org) based [Global Places gazettier](geocode_tweets/config/global_places_v1.tsv).|
+|`cache_tweets`|Cache geocoded datapoints to Elasticsearch.|
 
 _Table 1. Twitter DAG Tasks_
 
