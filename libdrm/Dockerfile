@@ -15,7 +15,8 @@ ENV DEBIAN_FRONTEND=noninteractive \
     PIP_NO_CACHE_DIR=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    PATH=$PATH:${SMDRM_HOME}/.local/bin
+    PATH=$PATH:${SMDRM_HOME}/.local/bin \
+    SMDRM_HOME=${SMDRM_HOME}
 
 # upgrade pip, setuptools, and wheel
 # this enables the installation of pre-compiled packages
