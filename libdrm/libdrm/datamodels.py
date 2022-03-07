@@ -5,8 +5,8 @@ import zipfile
 
 
 class DataPointModel(pydantic.BaseModel, extra=pydantic.Extra.ignore):
-    """A Pydantic validator class that ignores unknown fields,
-    and fails on missing fields of a given datapoint."""
+    """A Pydantic validator class.
+    Ignores unknown fields, and fails on missing fields of a given JSON dictionary."""
 
     id: int
     created_at: str
@@ -56,4 +56,3 @@ class ZipFileModel:
             for batch_id, batch_jsonl in enumerate(jsonl_batch_gen, start=1):
                 # write ndjson batch to zip file
                 zf.writestr("{}.ndjson".format(batch_id), batch_jsonl)
-

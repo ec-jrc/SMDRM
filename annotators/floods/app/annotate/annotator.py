@@ -5,9 +5,8 @@ from laserembeddings import Laser
 from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 
-# ner models directory
-root_dir = os.environ["FLOODS_HOME"]
-models_dir = os.path.join(root_dir, "models")
+# ner models directory (inside Docker)
+models_dir = "/home/user/models"
 
 # load floods models config
 # fail if not found

@@ -1,19 +1,21 @@
 """SMDRM LIBDRM setup module."""
 
 import os
-from setuptools import find_packages, setup
+from setuptools import setup
 
+here = os.path.dirname(os.path.abspath(__file__))
 
-def get_version():
-    root = os.path.dirname(os.path.abspath(__file__))
-    with open(os.path.join(root, "VERSION.txt")) as v:
-        version = v.read()
-        return version
+about = {}
+with open(os.path.join(here, 'libdrm', '__version__.py')) as f:
+    exec(f.read(), about)
 
+packages = ["libdrm"]
+
+install_requires = ["pydantic~=1.8", "pytest>=7"]
 
 setup(
     name="libdrm",
-    version=get_version(),
+    version=about["__version__"],
     description="Common helper modules shared by the pipeline services",
     long_description_content_type="text/markdown",
     url="https://github.com/ec-jrc/SMDRM",
@@ -29,12 +31,10 @@ setup(
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3 :: Only",
     ],
-    package_dir={"": "src"},
-    packages=find_packages(where="src"),
-    python_requires=">3.7, <3.10",
-    install_requires=[
-        "pydantic~=1.8",
-    ],
+    package_dir={"libdrm": "libdrm"},
+    packages=packages,
+    python_requires=">=3.7, <3.9",
+    install_requires=install_requires,
     project_urls={
         "Bug Reports": "https://github.com/ec-jrc/SMDRM/issues",
         "Source": "https://github.com/ec-jrc/SMDRM",

@@ -117,8 +117,7 @@ def run(args):
     # input path validation
     zip_file = ZipFileModel(args.input_path)
     if not zip_file.is_valid():
-        console.error("Not a valid zip file.")
-        sys.exit(13)
+        raise TypeError("Not a valid zip file.")
 
     # build annotation pipeline
     annotate_pipeline = Pipeline()
@@ -138,13 +137,6 @@ def run(args):
 
 
 if __name__ == "__main__":
-    """
-    Exit Codes
-      1 - Path not found
-      2 - Path is a directory, but a zip file is expected
-      3 - Not a valid zip file
-    """
-
     from argparse import ArgumentParser
 
     parser = ArgumentParser(

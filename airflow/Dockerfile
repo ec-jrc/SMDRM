@@ -20,15 +20,6 @@ USER airflow
 # override docker operator with custom version
 COPY custom_ops/docker.py $DOCKER_OP_PATH
 
-# update pip
-RUN python -m pip install --upgrade pip
-
-
-# Develop stage
-FROM builder as dev
-
-
-# Testing stage
-FROM builder as test
-RUN pip install pytest
+# update pip and install pytest
+RUN python -m pip install --upgrade pip pytest
 

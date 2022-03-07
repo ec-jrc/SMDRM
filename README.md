@@ -30,7 +30,7 @@ Start the app
 > the app still takes several minutes to be up and running.
 
 ```shell
-docker-compose up airflow-init && docker-compose up
+docker-compose up
 ```
 
 ## Usage
@@ -74,5 +74,5 @@ For further documentation resources, check the _docs_ directory
 
 ## Licence
 
-[European Union Public Licence (EUPL) V1.2](https://joinup.ec.europa.eu/sites/default/files/custom-page/attachment/2020-03/EUPL-1.2%20EN.txt)
+[European Union Public Licence (EUPL) V1.2](LICENCE)
 

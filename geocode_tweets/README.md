@@ -13,11 +13,11 @@ Execution
 * searches over multiple GPEs until it finds a match in the `reference_keywords`
 * returns a (dict) serialized Place object with:
   * city coordinates when a single match exists
-  * region bounding box centroid coordinates when multiple matches exist 
+  * region bounding box centroid coordinates when multiple matches exist
 
 ## Installation and Usage
 
-![Python](https://img.shields.io/badge/Python-3.8-information)&nbsp;&nbsp;![LibDRM](https://img.shields.io/badge/libdrm-latest-information)&nbsp;&nbsp;![Pandas](https://img.shields.io/badge/Pandas-1.4.1-information)
+![Python](https://img.shields.io/badge/Python-3.8-information)&nbsp;&nbsp;![LibDRM](https://img.shields.io/badge/libdrm-latest-information)&nbsp;&nbsp;![Pandas](https://img.shields.io/badge/Pandas-~=1.4-information)
 
 > :bangbang: Execute all bash commands from project root directory
 
@@ -39,33 +39,24 @@ docker-compose run --rm -v $(pwd)/data:/data geocode-tweets
 ## Develop
 
 You can develop in a standardized environment by mounting this directory
-to the project directory /opt/smdrm inside the container.
+to the project directory /home/smdrm inside the container.
 
 ```shell
-export ENV=dev
-docker-compose run --rm -v $(pwd)/data:/data -v $(pwd)/geocode_tweets:/opt/smdrm/geocode_tweets geocode-tweets bash
+docker-compose run --rm \
+    -v $(pwd)/data:/data \
+    -v $(pwd)/geocode_tweets:/home/smdrm/geocode_tweets \
+    geocode-tweets \
+    /bin/bash
 ```
 
-Or, starting a Jupyter Notebook session
-
-```shell
-export ENV=dev
-docker-compose run --rm -v $(pwd):/opt/smdrm/ws -w /opt/smdrm/ws libdrm bash tools/dev.sh
-```
+Or, you can start a [Jupyter Notebook session](../libdrm/README.md#development).
 
 ## Tests
 
-Build the Docker image for testing
+Run the unittests
 
 ```shell
-export ENV=test
-docker-compose build geocode-tweets
-```
-
-### Unittests
-
-```shell
-docker-compose run --rm geocode-tweets tests/unit
+docker-compose run --rm geocode-tweets pytest
 ```
 
 ## Releases

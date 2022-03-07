@@ -31,8 +31,11 @@ docker-compose up annotators-deeppavlov
 
 Send a REST HTTP POST request to the API
 
+> :information_source: The container's port is randomly assigned to enable scaling.
+> Run `docker-compose ps` to find the port number
+
 ```shell
-curl -X POST http://localhost:5000/model \
+curl -X POST http://localhost:<port>/model \
   -H 'Content-Type: application/json' \
   -d '{"texts": ["Un texte d`information sur Rio de Janeiro, écrit à Paris."]}'
 ```
@@ -40,7 +43,7 @@ curl -X POST http://localhost:5000/model \
 Test the API
 
 ```shell
-curl http://localhost:5000/model/test
+curl http://localhost:<port>/model/test
 
 # Response: {"test": "passed"}
 ```
@@ -49,26 +52,13 @@ curl http://localhost:5000/model/test
 
 ```shell
 docker-compose run --rm \
-  -v smdrm_deeppavlov:/opt/deeppavlov/.deeppavlov \
-  -v $(pwd)/annotators/deeppavlov:/opt/deeppavlov \
+  -v smdrm_deeppavlov-volume:/home/deeppavlov/.deeppavlov \
+  -v $(pwd)/annotators/deeppavlov:/home/deeppavlov \
   annotators-deeppavlov \
   /bin/bash
 ```
 
 ## Tests
-
-Build the Docker image for tests
-
-```shell
-export ENV=test
-docker-compose build annotators-deeppavlov
-```
-
-### Unit
-
-WIP
-
-### Integration
 
 WIP
 

@@ -1,84 +1,68 @@
+# syntax=docker/dockerfile:1
 ARG DOCKER_HUB="index.docker.io"
-FROM ${DOCKER_HUB}/python:3.8-slim as builder
+FROM ${DOCKER_HUB}/python:3.8-slim
+
 LABEL Author.Name="Emanuele Panizio" \
       Author.Email="Emanuele.PANIZIO@ext.ec.europa.eu"
 
 # build env varibles
 ARG http_proxy
 ARG https_proxy
-ENV http_proxy=$http_proxy https_proxy=$https_proxy
-
-ARG FLOODS_HOME=/opt/floods
-ARG MODELS_DIR=$FLOODS_HOME/models
-
-# runtime env variavles
-ENV CUDA_VISIBLE_DEVICES=0 \
-    DEBIAN_FRONTEND=noninteractive \
-    LANG=C.UTF-8 \
-    PIP_NO_CACHE_DIR=1 \
-    PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1 \
-    TF_CPP_MIN_LOG_LEVEL=2 \
-    FLOODS_HOME=$FLOODS_HOME \
-    MODELS_DIR=$MODELS_DIR \
-    PATH=$PATH:$FLOODS_HOME/.local/bin
+ENV http_proxy=$http_proxy \
+    https_proxy=$https_proxy \
+    CUDA_VISIBLE_DEVICES=0 \
+    DEBIAN_FRONTEND=noninteractive
 
 # install build deps
-RUN apt update \
-    && apt install -y \
-      curl \
-      git; \
-    rm -rf /var/lib/apt/lists/*; \
-    pip install --upgrade pip setuptools wheel; \
-    useradd -ms /bin/bash -d $FLOODS_HOME floods
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        build-essential \
+        curl \
+        git \
+        locales && \
+    printf '%s\n%s\n' 'en_US.UTF-8 UTF-8' >> /etc/locale.gen && locale-gen && \
+    apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false && \
+	rm -rf /var/lib/apt/lists/* && rm -rf /root/.cache
 
-# set the working directory
-WORKDIR $FLOODS_HOME
+# runtime env variables
+ENV PIP_NO_CACHE_DIR=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    LANG='en_US.UTF-8' LANGUAGE='en_US.UTF-8' LC_ALL='en_US.UTF-8'
 
-# Floods model download models into models/ inside the FLOODS_HOME
-# attach a volume to cache the created artifacts to reuse it
-VOLUME $MODELS_DIR
+# create non priviledged user
+RUN useradd -m user
+USER 1000
+
+# prepare environment
+RUN cd /home/user && \
+        python -m venv venv && \
+        venv/bin/pip install -U pip setuptools wheel
+ENV PATH=/home/user/venv/bin:$PATH
+WORKDIR /home/user
 
 # install requirements
-COPY requirements.txt .
+COPY --chown=1000:1000 requirements.txt  .
 RUN pip install -r requirements.txt
 
 # install models
-COPY download.sh .
-RUN bash download.sh $MODELS_DIR
+COPY --chown=1000:1000 download.sh .
+RUN mkdir ./models && \
+    bash download.sh && \
+    rm -r ./models/.git
 
 # copy souce code
-COPY wsgi.py .
-COPY app app
+COPY --chown=1000:1000 wsgi.py .
+COPY --chown=1000:1000 app app
+COPY --chown=1000:1000 tests tests
 
-# install package from source
-RUN chown -R floods: $FLOODS_HOME
+# runtime execution
+CMD flask run --host=0.0.0.0 --port=5000
 
-# login as unpriviledged user as per Docker Best Practices
-USER floods
-
-
-# Development stage
-FROM builder as dev
-ENV FLASK_ENV=development
-CMD flask run --host=0.0.0.0 
-
-
-# Testing stage
-FROM builder as test
-ENV TESTING=1
-RUN pip install pytest
-COPY tests tests
-ENTRYPOINT ["pytest"]
-CMD ["--help"]
-
-
-# Production stage
-FROM builder as prod
-CMD gunicorn wsgi:app \
-      --log-level=${LOG_LEVEL} \
-      --bind=${FLOODS_HOST}:${FLOODS_PORT} \
-      --workers=2 \
-      --threads=4 \
-      --name floods
+#CMD gunicorn wsgi:app \
+#      --log-level=${LOG_LEVEL} \
+#      --bind=${FLOODS_HOST}:${FLOODS_PORT} \
+#      --workers=2 \
+#      --threads=4 \
+#      --name floods
 

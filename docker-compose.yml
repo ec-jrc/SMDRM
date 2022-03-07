@@ -49,7 +49,6 @@ x-pipelines-common:
       DOCKER_HUB: ${DOCKER_HUB:-index.docker.io}
       http_proxy:
       https_proxy:
-    target: ${ENV:-dev}
   depends_on:
     &pipelines-common-depends-on
     libdrm:
@@ -59,7 +58,6 @@ x-pipelines-common:
     LOG_LEVEL: ${LOG_LEVEL:-INFO}
   profiles:
     - pipelines
-    - twitter
 
 x-airflow-common:
   &airflow-common
@@ -156,10 +154,10 @@ services:
       context: ./annotators/deeppavlov
     environment:
       <<: *pipelines-common-env
-    image: deeppavlov
+    image: annotators/deeppavlov
     hostname: deeppavlov
     ports:
-      - ${DEEPPAVLOV_PORT:-5050}:5000
+      - 5000
     healthcheck:
       test: ["CMD", "curl", "--fail", "http://localhost:5000/model/test"]
       interval: 30s
@@ -167,7 +165,7 @@ services:
       retries: 5
     restart: on-failure
     volumes:
-      - deeppavlov-volume:/DeepPavlov/.deeppavlov
+      - deeppavlov-volume:/home/user/.deeppavlov
 
   annotators-floods:
     build:
@@ -178,10 +176,10 @@ services:
       FLASK_APP: wsgi.py
       FLASK_ENV: ${FLASK_ENV:-production}
       SECRET_KEY: ${SECRET_KEY:-}
-    image: floods
+    image: annotators/floods
     hostname: floods
     ports:
-      - ${FLOODS_PORT:-5010}:5000
+      - 5000
     healthcheck:
       test: ["CMD", "curl", "--fail", "http://localhost:5000/model/test"]
       interval: 30s
@@ -189,7 +187,7 @@ services:
       retries: 5
     restart: on-failure
     volumes:
-      - floods-volume:/opt/floods/models
+      - floods-volume:/home/user/models
 
   annotators-perftests:
     build:
@@ -209,7 +207,7 @@ services:
     command: "TCP4-LISTEN:2375,fork,reuseaddr UNIX-CONNECT:/var/run/docker.sock"
     ports:
       - 2376:2375
-    restart: always
+    restart: unless-stopped
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
 
@@ -416,14 +414,41 @@ services:
       - debug
     volumes:
       # export volume as link to airflow
-      - export-db-volume:/opt/smdrm/data/airflow
+      - export-db-volume:/home/smdrm/data/airflow
       # inport/export mounts
-      - ./data/exports:/opt/smdrm/data/export
-      - ./data/imports:/opt/smdrm/data/import
+      - ./data/exports:/home/smdrm/data/export
+      - ./data/imports:/home/smdrm/data/import
+
+  elasticsearch:
+    environment:
+      - cluster.name=smdrm-elastic
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms${ES_MEMORY:-512}m -Xmx${ES_MEMORY:-512}m"
+    healthcheck:
+        test: ["CMD-SHELL", "curl --silent --fail localhost:9200/_cluster/health || exit 1"]
+        interval: 30s
+        timeout: 10s
+        retries: 5
+    image: docker.elastic.co/elasticsearch/elasticsearch:${ELASTIC_VERSION:-8.0.0}
+    ports:
+      - 9200:9200
+      - 9300:9300
+    volumes:
+      - es_node:/usr/share/elasticsearch/data
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:${ELASTIC_VERSION:-8.0.0}
+    depends_on:
+      - elasticsearch
+    ports:
+      - 5601:5601
 
 volumes:
   deeppavlov-volume:
+  es_node:
+  export-db-volume:
   floods-volume:
   postgres-db-volume:
-  export-db-volume:
 

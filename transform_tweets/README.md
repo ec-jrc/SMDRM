@@ -1,7 +1,7 @@
 # Transform Tweets
 
 Appy normalization transformations on the datapoint `text` field,
-and extracts place candidates for geocoding purposes.
+and extracts place candidates for geocoding purposes with [DeepPavlov](https://deeppavlov.ai/).
 
 Execution
 * remove user mentions
@@ -14,9 +14,16 @@ Execution
 * remove dates
 * tag place candidates
 
+## Annotator
+
+DeepPavlov annotator uses a pre-trained model for multilingual geolocation tagging.
+It is accessible via HTTP REST API request to the dedicated Docker container.
+
+The expected input data is a batch of texts.
+
 ## Installation and Usage
 
-![Python](https://img.shields.io/badge/Python-3.8-information)&nbsp;&nbsp;![LibDRM](https://img.shields.io/badge/libdrm-latest-information)&nbsp;&nbsp;![Pandas](https://img.shields.io/badge/Pandas-1.3.5-information)&nbsp;&nbsp;![Requests](https://img.shields.io/badge/requests-2.27.0-information)
+![Python](https://img.shields.io/badge/Python-3.8-information)&nbsp;&nbsp;![LibDRM](https://img.shields.io/badge/libdrm-latest-information)&nbsp;&nbsp;![Requests](https://img.shields.io/badge/Requests-~=2.27-information)&nbsp;&nbsp;![Pandas](https://img.shields.io/badge/Pandas-~=1.4-information)
 
 > :bangbang: Execute all bash commands from project root directory
 
@@ -38,33 +45,24 @@ docker-compose run --rm -v $(pwd)/data:/data transform-tweets
 ## Develop
 
 You can develop in a standardized environment by mounting this directory
-to the project directory /opt/smdrm inside the container.
+to the project directory /home/smdrm inside the container.
 
 ```shell
-export ENV=dev
-docker-compose run --rm -v $(pwd)/data:/data -v $(pwd)/transform_tweets:/opt/smdrm/transform_tweets transform-tweets bash
+docker-compose run --rm \
+    -v $(pwd)/data:/data \
+    -v $(pwd)/transform_tweets:/home/smdrm/transform_tweets \
+    transform-tweets \
+    /bin/bash
 ```
 
-Or, starting a Jupyter Notebook session
-
-```shell
-export ENV=dev
-docker-compose run --rm -v $(pwd):/opt/smdrm/ws -w /opt/smdrm/ws libdrm bash tools/dev.sh
-```
+Or, you can start a [Jupyter Notebook session](../libdrm/README.md#development).
 
 ## Test
 
-Build the Docker image for testing
+Run the unittests
 
 ```shell
-export ENV=test
-docker-compose build transform-tweets
-```
-
-### Unittests
-
-```shell
-docker-compose run --rm transform-tweets tests/unit
+docker-compose run --rm transform-tweets pytest
 ```
 
 ## Releases

@@ -1,14 +1,17 @@
+# syntax=docker/dockerfile:1
 ARG DOCKER_HUB="index.docker.io"
-FROM ${DOCKER_HUB}/python:3.7-slim as builder
+FROM ${DOCKER_HUB}/python:3.7-slim
 
 LABEL Author.Name="Emanuele Panizio" \
       Author.Email="Emanuele.PANIZIO@ext.ec.europa.eu"
 
-ENV CUDA_VISIBLE_DEVICES=0 \
+# build env variables
+ARG http_proxy
+ARG https_proxy
+ENV http_proxy=$http_proxy \
+    https_proxy=$https_proxy \
+    CUDA_VISIBLE_DEVICES=0 \
     DEBIAN_FRONTEND=noninteractive
-
-# set the working directory
-WORKDIR /DeepPavlov
 
 # install build deps
 RUN apt-get update && \
@@ -19,9 +22,7 @@ RUN apt-get update && \
         locales && \
     printf '%s\n%s\n' 'en_US.UTF-8 UTF-8' 'ru_RU.UTF-8 UTF-8' >> /etc/locale.gen && locale-gen && \
     apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false && \
-	rm -rf /var/lib/apt/lists/* && rm -rf /root/.cache && \
-    useradd -s /bin/bash -d /DeepPavlov -M user && \
-    chown -R user:0 /DeepPavlov
+	rm -rf /var/lib/apt/lists/* && rm -rf /root/.cache
 
 # runtime env variables
 ENV PIP_NO_CACHE_DIR=1 \
@@ -29,47 +30,26 @@ ENV PIP_NO_CACHE_DIR=1 \
     PYTHONUNBUFFERED=1 \
     LANG='en_US.UTF-8' LANGUAGE='en_US.UTF-8' LC_ALL='en_US.UTF-8'
 
-# make virtual env
-USER user
-RUN python -m venv ./venv
-# add venv to PATH
-ENV PATH=/DeepPavlov/venv/bin:$PATH
-# upgrade pip base
-RUN pip install --upgrade pip setuptools wheel
+# create non priviledged user
+RUN useradd -m user
+USER 1000
 
-# assign user permissions
-# ensure successful pip install
-USER root
-RUN chown -R user:0 /DeepPavlov
+# prepare environment
+RUN cd /home/user && \
+    mkdir .deeppavlov && \
+        python -m venv venv && \
+        venv/bin/pip install -U pip setuptools wheel
+ENV PATH=/home/user/venv/bin:$PATH \
+    CONFIG=ner_ontonotes_bert_mult
+WORKDIR /home/user
 
-# install python dependencies
-USER user
-COPY requirements.txt .
-RUN pip install -r requirements.txt
+# install requirements
+COPY --chown=1000:1000 requirements.txt .
+RUN pip install -r requirements.txt && \
+    python -m deeppavlov install $CONFIG && \
 
 # copy source code
-COPY --chown=user:0 api.py start.sh ./
-ENV CONFIG=ner_ontonotes_bert_mult
-RUN python -m deeppavlov install $CONFIG
+COPY --chown=1000:1000 api.py start.sh ./
 
-
-## Development stage
-FROM builder as dev
 CMD ["./start.sh"]
-
-
-# Testing stage
-FROM builder as test
-RUN pip install pytest
-COPY tests tests
-ENTRYPOINT ["pytest"]
-CMD ["--help"]
-
-
-FROM builder as stg
-
-# build env variables
-ARG http_proxy
-ARG https_proxy
-ENV http_proxy=$http_proxy https_proxy=$https_proxy
 

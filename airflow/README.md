@@ -112,7 +112,7 @@ Airflow tests are divided as follows:
 ### Validation
 
 ```shell
-ENV=test docker-compose run --rm airflow-cli bash -c pytest
+docker-compose run --rm airflow-cli bash -c pytest
 ```
 
 ## Develop

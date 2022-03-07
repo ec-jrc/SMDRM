@@ -43,38 +43,37 @@ def extend_text_field(data: dict) -> str:
                             return ""
 
 
-def filter_invalid_datapoints(datapoints: typing.Iterable[dict]) -> typing.Iterable[dict]: 
-    """Remove invalid datapoints from the pipeline."""
+def filter_invalid_json_lines(json_lines: typing.Iterable[dict]) -> typing.Iterable[dict]: 
+    """Remove invalid json lines from the pipeline."""
     invalid=0
-    for datapoint in datapoints:
-        if datapoint is None:
+    for jsonl in json_lines:
+        if jsonl is None:
             invalid += 1
             continue
-        yield datapoint
+        yield jsonl
     console.info(dict(invalid=invalid))
 
 
-def parse_raw_datapoints(
-        datapoints: typing.Iterable[dict],
-        raw_datapoint_field="tweet",
+def parse_json_lines(
+        json_lines: typing.Iterable[dict],
+        field_id="tweet",
 ) -> typing.Iterable[dict]:
-    """Parse raw (unprocessed) datapoints from given field,
+    """Parse raw (unprocessed) json lines from given field,
     and extend text using other fields when possible."""
     missing_text=0
-    for datapoint in datapoints:
+    for jsonl in json_lines:
         # get raw datapoint from `tweet` field if exists
-        datapoint = datapoint.get(raw_datapoint_field, datapoint)
+        parsed_jsonl = jsonl.get(field_id, jsonl)
         # extend text field from tweet object
-        extended_text = extend_text_field(datapoint)
+        extended_text = extend_text_field(parsed_jsonl)
         if not extended_text:
             missing_text += 1
-        yield datapoint
+        yield parsed_jsonl
     console.info(dict(missing_text=missing_text))
 
 
-
-def build_datamodel(datapoints: typing.Iterable[dict]) -> typing.Iterable[dict]:
-    """Build datapoint model
+def build_datapoints(json_lines: typing.Iterable[dict]) -> typing.Iterable[dict]:
+    """Build SMDRM datapoints from json lines
         base fields
           - id
           - created_at
@@ -85,11 +84,11 @@ def build_datamodel(datapoints: typing.Iterable[dict]) -> typing.Iterable[dict]:
           - place
           - text_clean
     """
-    for datapoint in datapoints:
-        # build datapoint model from dictionary
-        datamodel = DataPointModel.parse_obj(datapoint)
+    for jsonl in json_lines:
+        # build datapoint from raw json
+        datapoint = DataPointModel.parse_obj(jsonl)
         # yield as dictionary
-        yield datamodel.dict()
+        yield datapoint.dict()
 
 
 def task_metrics(datapoints: typing.Iterable[dict]) -> typing.Iterable[dict]:
@@ -133,14 +132,13 @@ def run(args):
     # input path validation
     zip_file = ZipFileModel(args.input_path)
     if not zip_file.is_valid():
-        console.error("Not a valid zip file.")
-        sys.exit(13)
+        raise TypeError("Not a valid zip file.")
 
     # build extraction pipeline
     extract_pipeline = Pipeline()
     extract_pipeline.add(filter_invalid_datapoints)
     extract_pipeline.add(parse_raw_datapoints, dict(raw_datapoint_field="tweet"))
-    extract_pipeline.add(build_datamodel)
+    extract_pipeline.add(build_datapoints)
     extract_pipeline.add(task_metrics)
     extract_pipeline.add(log_datapoints)
     extract_pipeline.add(make_ndjson_batches, dict(batch_size=args.batch_size))
@@ -154,17 +152,11 @@ def run(args):
 
 
 if __name__ == "__main__":
-    """
-    Exit Codes
-      1 - Path not found
-      2 - Path is a directory, but a zip file is expected
-      3 - Not a valid zip file
-    """
-
     from argparse import ArgumentParser
 
     parser = ArgumentParser(
-        description="It minimizes the memory consumption footprint by removing unnecessary data."
+        description="""Extracts/creates specific fields to create SMDRM datapoints. \
+        It minimizes the memory consumption footprint by removing unnecessary data."""
     )
     parser.add_argument(
         "--input-path",

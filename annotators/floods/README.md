@@ -9,7 +9,7 @@ It requires `lang` and `texts` fields to be able to compute a correct annotation
 
 ## Installation and Usage
 
-![Python](https://img.shields.io/badge/Python-3.8-information)&nbsp;&nbsp;![Flask](https://img.shields.io/badge/Flask-2.0.2-information)&nbsp;&nbsp;![Laser](https://img.shields.io/badge/LaserEmbeddings-1.1.2-information)&nbsp;&nbsp;![Torch](https://img.shields.io/static/v1?label=TorchC%20PU&message=1.10.0&color=information)
+![Python](https://img.shields.io/badge/Python-3.8-information)&nbsp;&nbsp;![Flask](https://img.shields.io/badge/Flask-2.0.2-information)&nbsp;&nbsp;![Laser](https://img.shields.io/badge/LaserEmbeddings-1.1.2-information)&nbsp;&nbsp;![TensorFlow](https://img.shields.io/badge/Tensorflow-2.6.0-information)&nbsp;&nbsp;![Keras](https://img.shields.io/badge/Keras-2.6.*-information)&nbsp;&nbsp;![Torch](https://img.shields.io/static/v1?label=TorchC%20PU&message=1.10.0&color=information)
 
 > :bangbang: Execute all bash commands from project root directory
 
@@ -29,12 +29,13 @@ docker-compose up annotators-floods
 
 Send a REST HTTP POST request to the API
 
-> :information_source: Note the `texts` key in the payload,
-> and `en` (lang ISO code) in the URL.
+Note the `texts` key in the payload, and the `en` (lang ISO code) in the URL.
+
+> :information_source: The container's port is randomly assigned to enable scaling.
+> Run `docker-compose ps` to find the port number
 
 ```shell
-# from host network
-curl http://localhost:5010/model/annotate/en \
+curl http://localhost:<port>/model/annotate/en \
   -H "Content-Type: application/json" \
   -d '{"texts": ["a flood disaster text url","another flood disaster text url"]}'
 
@@ -44,7 +45,7 @@ curl http://localhost:5010/model/annotate/en \
 Test the API
 
 ```shell
-curl http://localhost:5010/model/test
+curl http://localhost:<port>/model/test
 
 # Response: "passed"
 ```
@@ -52,32 +53,22 @@ curl http://localhost:5010/model/test
 ## Develop
 
 ```shell
-export FLASK_ENV=development
 docker-compose run --rm \
-  -v smdrm_floods:/opt/floods/models \
-  -v $(pwd)/annotators/floods:/opt/floods \
+  -v smdrm_floods-volume:/home/floods/models \
+  -v $(pwd)/annotators/floods:/home/floods \
   annotators-floods \
   /bin/bash
 ```
 
 ## Tests
 
-Build the Docker image for testing
-
-```shell
-export ENV=test
-docker-compose build annotators-floods
-```
-
-### Unit
-
-Run the unit tests
+Run the unittests
 
 ```shell
 docker-compose run --rm annotators-floods tests/unit
 ```
 
-### Integration
+Run the integration tests
 
 WIP
 

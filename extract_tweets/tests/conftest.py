@@ -7,21 +7,21 @@ import pytest
 
 
 @pytest.fixture()
-def valid_datapoint():
+def valid_json_line():
     yield dict(id=1, created_at="datetime", lang="ml", text="a text from valid datapoint")
 
 
 @pytest.fixture()
-def invalid_datapoint():
+def invalid_json_line():
     yield None
 
 
 @pytest.fixture()
-def processed_datapoint():
+def preprocessed_json_line():
     yield {"unprocessed": dict(id=1, created_at="datetime", lang="ml", text="a text from legacy datapoint"), "fake": "key"}
 
 
 @pytest.fixture()
-def datapoints(valid_datapoint, invalid_datapoint, processed_datapoint):
-    yield iter([valid_datapoint, invalid_datapoint, processed_datapoint])
+def json_lines(valid_json_line, invalid_json_line, preprocessed_json_line):
+    yield iter([valid_json_line, invalid_json_line, preprocessed_json_line])
 

@@ -5,21 +5,21 @@ from zipfile import BadZipFile
 from libdrm.datamodels import DataPointModel, ZipFileModel
 
 
-def test_DataPointModel_with_valid_input(valid_raw_input):
+def test_DataPointModel_with_valid_input():
     """Test if DataPointModel.parse_raw validation is successful."""
-    result = DataPointModel.parse_raw(valid_raw_input)
+    result = DataPointModel.parse_raw(b'{"id": "1", "created_at": "date", "lang": "id", "text": "text"}')
     assert str(result) == "id=1 created_at='date' lang='id' text='text' text_clean=None place=None annotation=None"
 
 
-def test_DataPointModel_with_invalid_input(invalid_raw_input):
+def test_DataPointModel_with_invalid_input():
     """Test if DataPointModel validation fails due to invalid input format."""
     with pytest.raises(pydantic.ValidationError):
-        DataPointModel.parse_raw(invalid_raw_input)
+        DataPointModel.parse_raw(b'Does it look valid JSON bytes to you??')
 
 
-def test_DataPointModel_with_enriched_input(enriched_input):
+def test_DataPointModel_with_enriched_input():
     """Test if DataPointModel validation is successful when the enriched input is given."""
-    datapoint = DataPointModel.parse_raw(enriched_input)
+    datapoint = DataPointModel.parse_raw(b'{"id": "1", "created_at": "date", "lang": "id", "text": "text", "text_clean": null, "place": null, "annotation": null}')
     assert datapoint.dict() == dict(datapoint) == {"id": 1, "created_at": "date", "lang": "id", "text": "text", "text_clean": None, "place": None, "annotation": None}
 
 
@@ -68,3 +68,4 @@ def test_iter_json_on_valid_zipfile_wrong_data(wrong_archive_path):
     assert zf.is_valid()
     with pytest.raises(StopIteration):
         next(zf.iter_jsonl())
+

@@ -1,11 +1,11 @@
 # LibDRM
 
-LibDRM holds the core functionality required by the tasks of the SMDRM Pipeline.
+LibDRM Python package holds the core functionality required by the tasks of the SMDRM Pipeline.
 For additional details on the tasks, check the [airflow/README.md](https://github.com/ec-jrc/SMDRM/blob/main/airflow/README.md) section.
 
 ## Installation and Usage
 
-![Python](https://img.shields.io/badge/Python-3.8-information)&nbsp;&nbsp;![Pydantic](https://img.shields.io/badge/Pydantic-~=1.8-information)
+![Python](https://img.shields.io/badge/Python-3.8-information)&nbsp;&nbsp;![Pydantic](https://img.shields.io/badge/Pydantic-~=1.8-information)&nbsp;&nbsp;![Pytest](https://img.shields.io/badge/Pytest-~=7.0-information)
 
 > :bangbang: Execute all bash commands from project root directory
 
@@ -24,32 +24,19 @@ It is not supposed to be run directly, unless for development purposes.
 
 ## Development
 
-Enter the SMDRM Python interpreter
-
-```shell
-export ENV=dev
-docker-compose run --rm libdrm
-```
-
 Start a Jupyter Notebook and mount the project folder for dynamic modifications
 without the need to rebuild the image every time.
 
 ```shell
-export ENV=dev
-docker-compose run --rm -v $(pwd):/opt/smdrm/ws -w /opt/smdrm/ws libdrm bash tools/dev.sh
+docker-compose run --rm -v $(pwd):/home/smdrm/ws libdrm bash ws/tools/dev.sh
 ```
 
 ## Tests
 
-```shell
-export ENV=test
-docker-compose build libdrm
-```
-
 Run the unittests
 
 ```shell
-docker-compose run --rm libdrm tests/unit
+docker-compose run --rm libdrm pytest libdrm/tests
 ```
 
 ## Modules
@@ -60,38 +47,26 @@ Usable by all tasks
 
 ### Datamodels
 
-Consistent structure of input/output data
-
 * `DataPointModel`
 * `ZipFileModel`
 
-### Elastic
+`DataPointModel` [Pydantic](https://pydantic-docs.helpmanual.io/) Class object is
+a representation of a natural disaster datapoint. It defines required fields, and
+inherits validation as well as raw data parsing capabilities.
 
-This module contains a custom ElasticSearch Client that performs the following API operations:
-* create index template
-* create/delete index
-* add document
-* add document batch
-
-It also contains the ElasticSearch Template Mappings definition to set the data structure of indexed data points.
+`ZipFileModel` Class object is a representation of a zipfile parser. It enables
+reading, writing, and validation capabilities for zipfiles of any size.
 
 ### Pipelines
 
-Pipeline Class creates ad hoc data processing pipeline using generators and OOP.
-
-It also defines the required fields of the Disaster (data point) Model via
-the `DisasterModel` Class using [Pydantinc](https://pydantic-docs.helpmanual.io/).
-
-## Publish
-
-GitHub Action.
+Provides a OOP data processing pipeline.
 
 ## Releases
 
 - **0.1.10**
-  New DataPointModel data structure:
+  New DataPointModel fields:
    * include legacy fields
-   * better field naming
+   * clearer field naming
 
 - **0.1.9**
   Remove hardcoded metrics generation from `ZipFileModel.cache()` method.
@@ -105,4 +80,3 @@ GitHub Action.
   This allows failure when those fields are screened under certain conditions.
   For instance, `cnn_texts = g.text_clean.values.tolist()` in
   _floods_annotate/src/floods_annotate.py_
-
