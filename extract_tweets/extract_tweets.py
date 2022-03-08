@@ -136,16 +136,15 @@ def run(args):
 
     # build extraction pipeline
     extract_pipeline = Pipeline()
-    extract_pipeline.add(filter_invalid_datapoints)
-    extract_pipeline.add(parse_raw_datapoints, dict(raw_datapoint_field="tweet"))
+    extract_pipeline.add(filter_invalid_json_lines)
+    extract_pipeline.add(parse_json_lines, dict(field_id="tweet"))
     extract_pipeline.add(build_datapoints)
     extract_pipeline.add(task_metrics)
     extract_pipeline.add(log_datapoints)
     extract_pipeline.add(make_ndjson_batches, dict(batch_size=args.batch_size))
 
     # execute pipeline on raw datapoints
-    raw_datapoints = zip_file.iter_jsonl()
-    extracted_datapoints = extract_pipeline.execute(raw_datapoints)
+    extracted_datapoints = extract_pipeline.execute(zip_file.iter_jsonl())
 
     # cache
     zip_file.cache(args.output_path, extracted_datapoints)

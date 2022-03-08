@@ -8,13 +8,10 @@ ENV FILENAME= \
 RUN pip install requests
 
 # set workdir
-# HOME=/opt/smdrm
-# PWD=$HOME/libdrm
-WORKDIR /opt/smdrm/data
+WORKDIR /home/smdrm/data
 
 # create export DB volume
 RUN mkdir airflow
-VOLUME ./airflow
 
 # copy into image
 COPY --chown=smdrm:smdrm trigger_dag_run.py .

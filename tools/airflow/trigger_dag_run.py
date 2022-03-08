@@ -29,7 +29,7 @@ airflow_api_base_url = "http://{AIRFLOW_USERNAME}:{AIRFLOW_PASSWORD}@{host}:{por
 )
 
 # data directories
-data_root_dir = "/opt/smdrm/data"
+data_root_dir = "/home/smdrm/data"
 imports_root_dir = os.path.join(data_root_dir, "import")
 exports_root_dir = os.path.join(data_root_dir, "export")
 volume_root_dir = os.path.join(data_root_dir, "airflow")

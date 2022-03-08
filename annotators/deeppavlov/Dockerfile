@@ -46,7 +46,7 @@ WORKDIR /home/user
 # install requirements
 COPY --chown=1000:1000 requirements.txt .
 RUN pip install -r requirements.txt && \
-    python -m deeppavlov install $CONFIG && \
+    python -m deeppavlov install $CONFIG
 
 # copy source code
 COPY --chown=1000:1000 api.py start.sh ./

@@ -436,7 +436,7 @@ services:
       - 9200:9200
       - 9300:9300
     volumes:
-      - es_node:/usr/share/elasticsearch/data
+      - elastic-node:/usr/share/elasticsearch/data
 
   kibana:
     image: docker.elastic.co/kibana/kibana:${ELASTIC_VERSION:-8.0.0}
@@ -447,7 +447,7 @@ services:
 
 volumes:
   deeppavlov-volume:
-  es_node:
+  elastic-node:
   export-db-volume:
   floods-volume:
   postgres-db-volume:

@@ -20,5 +20,5 @@ cp $INPUT_PATH $CWD/data/imports/
 docker-compose build trigger-dag-run
 
 # run
-docker-compose run --rm trigger-dag-run
+docker-compose run --rm -e DEBUG=${DEBUG:-0} trigger-dag-run
 

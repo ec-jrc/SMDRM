@@ -35,8 +35,8 @@ Table 2 shows the external plugins the Twitter DAG uses to enrich the input data
 
 |Name|Image|URL|Responsibilities|
 |----|-----|---|----------------|
-|[DeepPavlov API](annotators/deeppavlov/README.md)|[_deeppavlov_](annotators/deeppavlov/Dockerfile)|`http://localhost:5050/`|DeepPavlov NER REST API for geo political, location, and facility entity tagging.|
-|[Floods API](annotators/floods/README.md)|[_floods_](annotators/floods/Dockerfile)|`http://floods:5010/`|Floods NER REST API to annotate floods disaster type related datapoints.|
+|[DeepPavlov API](annotators/deeppavlov/README.md)|[_deeppavlov_](annotators/deeppavlov/Dockerfile)|`http:/deeppavlov/:5000/`|DeepPavlov NER REST API for geo political, location, and facility entity tagging.|
+|[Floods API](annotators/floods/README.md)|[_floods_](annotators/floods/Dockerfile)|`http://floods:5000/`|Floods NER REST API to annotate floods disaster type related datapoints.|
 
 _Table 2. External Plugins_
 
@@ -117,10 +117,12 @@ docker-compose run --rm airflow-cli bash -c pytest
 
 ## Develop
 
-Execute the airflow running container to spin the shell,
-and be able to run airflow CLI locally
+Run the airflow-cli to spin an airflow CLI ready shell
+
+You can use the CLI to trigger DAGs and individual tasks for testing purposes. 
+For instance, we test the Elasticsearch API sensor task as follows:
 
 ```shell
-docker-compose run --rm airflow-cli bash
+docker-compose run --rm airflow-cli airflow tasks test twitter is_elasticsearch_api_ready 2022-01-01
 ```
 
