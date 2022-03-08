@@ -2,40 +2,21 @@ name: LIBDRM CI
 
 on:
   push:
-    # run if master branch
-    branches:
-      - main
-    # run if changes in libdrm
     paths:
-      - 'libdrm/**.py'
+      - 'libdrm/**/*.py'
 
 jobs:
   libdrm-ci:
-    name: Build, test, and publish LIBDRM Python package
-
+    name: LibDRM unittests
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python 3.8
-      uses: actions/setup-python@v2
-      with:
-        python-version: 3.8
+    - name: Code checkout
+      uses: actions/checkout@v2
+  
+    - name: Build Docker image
+      run: docker build ./libdrm --tag libdrm:test
 
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip setuptools
-        pip install build pytest
-        pip install libdrm/
+    - name: Run unittests
+      run: docker container run --rm libdrm:test pytest
 
-    - name: Test with pytest
-      run: pytest libdrm/tests
-
-    - name: Build binary package
-      run: python -m build --sdist --outdir dist/ libdrm
-
-    - name: Publish distribution to PyPI
-      uses: pypa/gh-action-pypi-publish@release/v1
-      with:
-        user: __token__
-        password: ${{ secrets.PYPI_API_TOKEN }}
