@@ -16,7 +16,7 @@ install_requires = ["pydantic~=1.8", "pytest>=7"]
 setup(
     name="libdrm",
     version=about["__version__"],
-    description="Common helper modules shared by the pipeline services",
+    description=about["__description__"],
     long_description_content_type="text/markdown",
     url="https://github.com/ec-jrc/SMDRM",
     author="Emanuele Panizio",
@@ -40,3 +40,4 @@ setup(
         "Source": "https://github.com/ec-jrc/SMDRM",
     },
 )
+
