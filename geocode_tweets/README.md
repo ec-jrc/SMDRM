@@ -61,6 +61,12 @@ docker-compose run --rm geocode-tweets pytest
 
 ## Releases
 
+- **0.1.1**
+  Update `place.meta.coordinates` data field to clearer
+  `place.meta.latitude`, and `place.meta.longitude` data fields.
+  The new fields simplify ElasticSearch queries, and the structure
+  of the index templates.
+
 - **0.1.0**
   First Release
 

@@ -97,7 +97,6 @@ def geocode_datapoints(
         console.debug("GPEs={}".format(gpes))
 
         # add placeholder fields
-        datapoint["place"]["coordinates"] = []
         datapoint["place"]["meta"] = []
 
         # try matching cities
@@ -123,17 +122,16 @@ def geocode_datapoints(
                 continue
 
             # compute centroid latitude and longitude coordinates from bbox
-            coords = [[round(lat, 6), round(lon, 6)] for (lat, lon) in df.bbox.apply(get_bbox_centroid).values]
+            centroid = df.bbox.apply(get_bbox_centroid)
+            df["latitude"] = centroid.map(lambda c: c[0])
+            df["longitude"] = centroid.map(lambda c: c[1])
             df.drop(columns="bbox", inplace=True)
 
         else:
             fields = ["country_name", "country_code", "region_name", "city_name", "latitude", "longitude", "region_id"]
             df = places_df[matches][fields]
-            coords = df[["latitude", "longitude"]].values.tolist()
-            df.drop(columns=["latitude", "longitude"], inplace=True)
 
         # update geocode output fields
-        datapoint["place"]["coordinates"].extend(coords)
         datapoint["place"]["meta"] = df.to_dict(orient="records")
 
         yield datapoint

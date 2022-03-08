@@ -122,6 +122,30 @@ with DAG(
         """
     )
 
+    # check if Elasticsearch API is ready
+    is_elasticsearch_api_ready = HttpSensor(
+        task_id="is_elasticsearch_api_ready",
+        http_conn_id="elasticsearch_api",
+        # everything after url domain
+        endpoint="_cluster/health",
+        # status response: {"status": "green|yellow"}
+        response_check=lambda r: r.status_code == 200 and "status" in r.json(),
+        poke_interval=10,
+        timeout=30,
+    )
+    # documentation
+    is_elasticsearch_api_ready.doc_md = dedent(
+        """\
+        #### Elasticsearch API Uptime Status
+        Status check for Elasticsearch API.
+        This is an external NoSQL DB plugin required by the following
+        task `cache_tweets` for caching enriched datapoints. It enables
+        fast queries, and dataset discovery through Kibana dashboard.
+
+        Kibana is available at the default port @ http://localhost:5601.
+        """
+    )
+
 
     ## Pipeline Tasks
 
@@ -225,7 +249,7 @@ with DAG(
                 ),
             ],
         mount_tmp_dir=False,
-        command='python geocode_tweets.py --debug \
+        command='python geocode_tweets.py \
         --input-path {{ ti.xcom_pull(task_ids="push_filepaths", key="filepath_floods") }} \
         --output-path {{ ti.xcom_pull(task_ids="push_filepaths", key="filepath_geocoded") }}',
     )
@@ -235,6 +259,36 @@ with DAG(
         #### Geocode Tweets
         Search place candidates identified at `transform_tweets`
         step against our Global Places datasets.
+        """
+    )
+
+    # cache
+    cache_tweets = DockerOperator(
+        task_id="cache_tweets",
+        api_version="auto",
+        auto_remove=True,
+        image="cache-tweets",
+        docker_url=docker_url,
+        network_mode="smdrm_default",
+        mounts=[
+            Mount(
+                source='{{ ti.xcom_pull(task_ids="push_collection_id", key="cID") }}',
+                target="/data",
+                type="volume"
+                ),
+            ],
+        mount_tmp_dir=False,
+        command='python cache_tweets.py \
+        --input-path {{ ti.xcom_pull(task_ids="push_filepaths", key="filepath_geocoded") }}'
+    )
+    # documentation
+    cache_tweets.doc_m = dedent(
+        """\
+        #### Cache Tweets
+        Caches the content of a zipfile of enriched datapoints
+        that passed through the tasks of a pipeline (DAG) to ElasticSearch.
+
+        You can use the Kibana UI to manage the cached datapoints.
         """
     )
 
@@ -248,8 +302,9 @@ with DAG(
         # API sensors
         is_deeppavlov_api_ready,
         is_floods_api_ready,
+        is_elasticsearch_api_ready,
     ] >> extract_tweets
 
     # Tasks
-    extract_tweets >> transform_tweets >> floods_annotate >> geocode_tweets
+    extract_tweets >> transform_tweets >> floods_annotate >> geocode_tweets >> cache_tweets
 

@@ -36,7 +36,7 @@ docker-compose run --rm -v $(pwd):/home/smdrm/ws libdrm bash ws/tools/dev.sh
 Run the unittests
 
 ```shell
-docker-compose run --rm libdrm pytest libdrm/tests
+docker-compose run --rm libdrm pytest
 ```
 
 ## Modules
@@ -80,3 +80,4 @@ Provides a OOP data processing pipeline.
   This allows failure when those fields are screened under certain conditions.
   For instance, `cnn_texts = g.text_clean.values.tolist()` in
   _floods_annotate/src/floods_annotate.py_
+
