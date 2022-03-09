@@ -6,7 +6,7 @@ from setuptools import setup
 here = os.path.dirname(os.path.abspath(__file__))
 
 about = {}
-with open(os.path.join(here, 'libdrm', '__version__.py')) as f:
+with open(os.path.join(here, "libdrm", "__version__.py")) as f:
     exec(f.read(), about)
 
 packages = ["libdrm"]
@@ -40,4 +40,3 @@ setup(
         "Source": "https://github.com/ec-jrc/SMDRM",
     },
 )
-

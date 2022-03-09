@@ -40,7 +40,9 @@ def iter_geo_features(input_path: str) -> typing.Iterable[dict]:
             # available only on levels above 0
             region_name = feature["properties"].get("NAME_1", None)
             subregion_name = feature["properties"].get("NAME_2", None)
-            region_name_local = feature["properties"].get("NL_NAME_1", None) or feature["properties"].get("NL_NAME_2", None)
+            region_name_local = feature["properties"].get("NL_NAME_1", None) or feature[
+                "properties"
+            ].get("NL_NAME_2", None)
 
             # add bbox as field
             bbox = parse_bbox(feature["bbox"])
@@ -69,13 +71,10 @@ def make_geojson(test: bool = False) -> dict:
         "name": filename,
         "crs": {
             "type": "name",
-            "properties": {
-                "name": "urn:ogc:def:crs:OGC:1.3:CRS84"
-            }
+            "properties": {"name": "urn:ogc:def:crs:OGC:1.3:CRS84"},
         },
-        "features": []
+        "features": [],
     }
-
 
     # used as region id
     feature_id = 1
@@ -113,7 +112,7 @@ def save_geojson(data: dict) -> None:
     # save to json file
     filepath = os.path.join(output_data_dir, "{}.geojson".format(filename))
     print("saving to", filepath)
-    with open(filepath, "w", encoding='utf-8') as outfile:
+    with open(filepath, "w", encoding="utf-8") as outfile:
         json.dump(data, outfile, ensure_ascii=False)
 
 
@@ -121,7 +120,9 @@ if __name__ == "__main__":
     from argparse import ArgumentParser
 
     parser = ArgumentParser(description="Build Global Regions basemap.")
-    parser.add_argument("--test", action="store_true", default=False, help="Enable tests.")
+    parser.add_argument(
+        "--test", action="store_true", default=False, help="Enable tests."
+    )
     args = parser.parse_args()
     # buils global regions
     geojson = make_geojson(args.test)

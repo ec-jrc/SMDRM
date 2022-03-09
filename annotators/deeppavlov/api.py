@@ -79,8 +79,12 @@ if __name__ == "__main__":
         description="""A custom API hosting a ready-to-use instance of the
         DeepPavlov Named Entity Recongnition AI framework."""
     )
-    parser.add_argument("--host", default="0.0.0.0", help="The host IP address. Default is %(default)s.")
-    parser.add_argument("--port", default=5000, help="The host port. Default is %(default)s.")
+    parser.add_argument(
+        "--host", default="0.0.0.0", help="The host IP address. Default is %(default)s."
+    )
+    parser.add_argument(
+        "--port", default=5000, help="The host port. Default is %(default)s."
+    )
     args = parser.parse_args()
 
     # setup logging
@@ -90,4 +94,3 @@ if __name__ == "__main__":
 
     # start api
     app.run(debug=False, host=args.host, port=args.port)
-

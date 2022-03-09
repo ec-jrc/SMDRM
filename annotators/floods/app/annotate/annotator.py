@@ -12,7 +12,9 @@ models_dir = "/home/user/models"
 # fail if not found
 config_file = os.path.join(models_dir, "models", "current-model.json")
 if not os.path.exists(config_file):
-    raise ValueError("Configuration file not found. Check if $MODELS_DIR is set, and has valid content.")
+    raise ValueError(
+        "Configuration file not found. Check if $MODELS_DIR is set, and has valid content."
+    )
 with open(config_file) as conf:
     floods_config = json.load(conf)["model-by-language"]
 
@@ -21,9 +23,9 @@ available_languages = [lang for lang in floods_config]
 
 # laserembeddings config (multilingual tokenizazion)
 embeddings_dir = os.path.join(models_dir, "embeddings")
-codes_path=os.path.join(embeddings_dir, "93langs.fcodes")
-vocab_path=os.path.join(embeddings_dir, "93langs.fvocab")
-encoder_path=os.path.join(embeddings_dir, "bilstm.93langs.2018-12-26.pt")
+codes_path = os.path.join(embeddings_dir, "93langs.fcodes")
+vocab_path = os.path.join(embeddings_dir, "93langs.fvocab")
+encoder_path = os.path.join(embeddings_dir, "bilstm.93langs.2018-12-26.pt")
 # embeddings instance
 laser = Laser(codes_path, vocab_path, encoder_path)
 
@@ -77,5 +79,5 @@ def init_annotators():
     to have them ready on incoming HTTP requests."""
     annotators_by_lang = {}
     for lang in available_languages:
-       annotators_by_lang[lang] = FloodsAnnotator(lang=lang)
+        annotators_by_lang[lang] = FloodsAnnotator(lang=lang)
     return annotators_by_lang

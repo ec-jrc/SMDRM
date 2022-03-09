@@ -36,7 +36,9 @@ def test_model_it_infer_on_flood(floods_ita):
     """
     Test inference (predictions) of Italian FloodModel on flood related text.
     """
-    sample_text = tuple(["Piogge torrenziali stanno causando alluvioni ed inondazioni."])
+    sample_text = tuple(
+        ["Piogge torrenziali stanno causando alluvioni ed inondazioni."]
+    )
     result = floods_ita.infer(sample_text)[0]
     assert result == pytest.approx(0.44, 0.1)
 
@@ -55,7 +57,8 @@ def test_model_ml_infer_on_flood(floods_ml):
     """
     Test inference (predictions) of Multilingual FloodModel on junk text.
     """
-    sample_text = tuple(["Проливные дожди поднимают уровень реки По и вызывают наводнения."])
+    sample_text = tuple(
+        ["Проливные дожди поднимают уровень реки По и вызывают наводнения."]
+    )
     result = floods_ml.infer(sample_text)[0]
     assert result == pytest.approx(0.65, 0.1)
-

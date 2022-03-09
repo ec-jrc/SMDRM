@@ -20,7 +20,9 @@ logging.basicConfig(level=logging.INFO)
 console = logging.getLogger("transform_tweets")
 
 
-def convert_to_dataframe(datapoints_batches: typing.Iterable[list]) -> typing.Iterable[pandas.DataFrame]:
+def convert_to_dataframe(
+    datapoints_batches: typing.Iterable[list],
+) -> typing.Iterable[pandas.DataFrame]:
     """Converts datapoints batches i.e. list of JSON into Pandas DataFrame."""
     for datapoints_batch in datapoints_batches:
         yield pandas.DataFrame(datapoints_batch)
@@ -28,66 +30,92 @@ def convert_to_dataframe(datapoints_batches: typing.Iterable[list]) -> typing.It
 
 def get_duplicates_filter(batch_df: pandas.DataFrame) -> pandas.Series:
     """Get boolean mask of duplicated datapoints."""
-    return batch_df.duplicated(subset="text", keep='first')
+    return batch_df.duplicated(subset="text", keep="first")
 
 
 def merge_duplicates_on_transformed(unique_transformed, duplicates):
     """Merge transformed unique datapoints onto duplicates.
     Drop target columns to avoid pandas suffix patching (i.e. <col>_x, <col>_y)."""
-    enriched_duplicates = duplicates.drop(columns=["place", "text_clean"]).merge(unique_transformed[["place", "text", "text_clean"]], on="text")
-    return pandas.concat([unique_transformed, enriched_duplicates]).reset_index(drop=True)
+    enriched_duplicates = duplicates.drop(columns=["place", "text_clean"]).merge(
+        unique_transformed[["place", "text", "text_clean"]], on="text"
+    )
+    return pandas.concat([unique_transformed, enriched_duplicates]).reset_index(
+        drop=True
+    )
 
 
 def transform_datapoints(
-        datapoints_batches: typing.Iterable[pandas.DataFrame],
-        allowed_tags: typing.List[str],
+    datapoints_batches: typing.Iterable[pandas.DataFrame],
+    allowed_tags: typing.List[str],
 ) -> typing.Iterable[pandas.DataFrame]:
     for batch_id, batch_df in enumerate(datapoints_batches, start=1):
 
         # find duplicated datapoints in batch
         duplicates = get_duplicates_filter(batch_df)
-        console.debug("duplication ratio {:.4f}".format(duplicates.sum() / len(duplicates)))
+        console.debug(
+            "duplication ratio {:.4f}".format(duplicates.sum() / len(duplicates))
+        )
 
         # split batch into unique and duplicated datapoints
         # only unique datapoints are tagged with the NER algorithm
         unique_datapoints = batch_df[~duplicates].copy()
-        duplicated_datapoints = batch_df[duplicates].copy() 
+        duplicated_datapoints = batch_df[duplicates].copy()
 
         # tag texts with DeepPavlov (multilingual BERT) NER model
         y_hat = tag_with_mult_bert(list(unique_datapoints.text))
         # get place candidates using allowed tags
         unique_datapoints["place"] = extract_place_candidates(y_hat, allowed_tags)
         # normalize place candidates and non-alphanumeric chars in text
-        unique_datapoints["text_clean"] = unique_datapoints.apply(lambda row: normalize_places(row.text, row.place["candidates"]), axis=1).apply(apply_transformations)
+        unique_datapoints["text_clean"] = unique_datapoints.apply(
+            lambda row: normalize_places(row.text, row.place["candidates"]), axis=1
+        ).apply(apply_transformations)
         # merge the transformation applied to unique datapoints onto the duplicated
         yield merge_duplicates_on_transformed(unique_datapoints, duplicated_datapoints)
 
 
-def task_metrics(datapoints_batches: typing.Iterable[pandas.DataFrame]) -> typing.Iterable[pandas.DataFrame]:
+def task_metrics(
+    datapoints_batches: typing.Iterable[pandas.DataFrame],
+) -> typing.Iterable[pandas.DataFrame]:
     """Compute task metrics."""
-    batches=0
-    datapoints=0
-    with_place_candidates=0
+    batches = 0
+    datapoints = 0
+    with_place_candidates = 0
     for datapoints_batch in datapoints_batches:
         # number of batches
         batches += 1
         # number of datapoints in batch
         datapoints += len(datapoints_batch)
         # number of datapoints in batch with place candidates
-        with_place_candidates += datapoints_batch.place.apply(lambda row: bool(row["candidates"])).sum()
+        with_place_candidates += datapoints_batch.place.apply(
+            lambda row: bool(row["candidates"])
+        ).sum()
         yield datapoints_batch
-    console.info(dict(batches=batches, datapoints=datapoints, with_place_candidated=with_place_candidates))
+    console.info(
+        dict(
+            batches=batches,
+            datapoints=datapoints,
+            with_place_candidated=with_place_candidates,
+        )
+    )
 
 
-def log_datapoints(datapoints_batches: typing.Iterable[pandas.DataFrame]) -> typing.Iterable[pandas.DataFrame]:
+def log_datapoints(
+    datapoints_batches: typing.Iterable[pandas.DataFrame],
+) -> typing.Iterable[pandas.DataFrame]:
     """Log datapoints to console."""
-    for batch_id, datapoints_batch in enumerate(datapoints_batches, start=1): 
-        console.debug("processing datapoints batch ID #{}... Below, a sample of 5.".format(batch_id))
+    for batch_id, datapoints_batch in enumerate(datapoints_batches, start=1):
+        console.debug(
+            "processing datapoints batch ID #{}... Below, a sample of 5.".format(
+                batch_id
+            )
+        )
         console.debug(datapoints_batch.head(5))
         yield datapoints_batch
 
 
-def make_ndjson_batches(datapoints_batches: typing.Iterable[pandas.DataFrame]) -> typing.Iterable[str]:
+def make_ndjson_batches(
+    datapoints_batches: typing.Iterable[pandas.DataFrame],
+) -> typing.Iterable[str]:
     """Convert datapoints batched from pandas.DataFrame to NDJSON format."""
     for batch_df in datapoints_batches:
         yield batch_df.to_json(orient="records", force_ascii=False, lines=True)
@@ -135,9 +163,7 @@ def run(args):
 if __name__ == "__main__":
     from argparse import ArgumentParser
 
-    parser = ArgumentParser(
-        description="Transform data point `text` field."
-    )
+    parser = ArgumentParser(description="Transform data point `text` field.")
     parser.add_argument(
         "--input-path",
         required=True,
@@ -163,4 +189,3 @@ if __name__ == "__main__":
     )
     # run task
     run(parser.parse_args())
-

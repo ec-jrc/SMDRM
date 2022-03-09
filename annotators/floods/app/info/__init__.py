@@ -2,6 +2,6 @@
 
 from flask import Blueprint
 
-info_blueprint = Blueprint('info', __name__, template_folder='templates')
+info_blueprint = Blueprint("info", __name__, template_folder="templates")
 
 from . import views

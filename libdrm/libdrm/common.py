@@ -20,7 +20,9 @@ def path_arg(path: str) -> str:
     return os.path.abspath(path)
 
 
-def iter_in_batches(generator: typing.Iterable, batch_size: int = 1000) -> typing.Iterable[list]:
+def iter_in_batches(
+    generator: typing.Iterable, batch_size: int = 1000
+) -> typing.Iterable[list]:
     """Iterate a given generator in batches.
     Indicated for resources expensive tasks such as Annotations, and Geocoding."""
     batch = []
@@ -38,6 +40,7 @@ def iter_in_batches(generator: typing.Iterable, batch_size: int = 1000) -> typin
 
 def log_execution(logger):
     """Log elapsed time for successful execution, or Exception for failure for a decodated function."""
+
     def log(f):
         @functools.wraps(f)
         def wrapper(*args, **kwargs):
@@ -45,7 +48,9 @@ def log_execution(logger):
             time_start = time.time()
             result = f(*args, **kwargs)
             elapsed = time.time() - time_start
-            logger.info(f'{f.__name__}() completed in {elapsed:.4f}s')
+            logger.info(f"{f.__name__}() completed in {elapsed:.4f}s")
             return result
+
         return wrapper
+
     return log

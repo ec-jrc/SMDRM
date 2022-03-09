@@ -6,9 +6,9 @@ expected_place_candidates = [
     # datapoint_without_place
     {"candidates": None},
     # datapoint_with_gpe
-    {"candidates": {'GPE': ['Rio de Janeiro', 'Paris']}},
+    {"candidates": {"GPE": ["Rio de Janeiro", "Paris"]}},
     # datapoint_with_loc
-    {"candidates": {'LOC': ['Roccacannuccia nella pianura pontina']}},
+    {"candidates": {"LOC": ["Roccacannuccia nella pianura pontina"]}},
 ]
 
 
@@ -17,16 +17,68 @@ def test_extract_place_candidates(allowed_tags):
     deeppavlov_output_payload = [
         [
             ["a", "text", "in", "english", "without", "place", "candidates", "."],
-            ["Un", "texte", "d", "`", "information", "sur", "Rio", "de", "Janeiro", ",", "écrit", "à", "Paris", "."],
-            ["ed", "uno", "in", "italiano", "da", "Roccacannuccia", "nella", "pianura", "pontina"],
+            [
+                "Un",
+                "texte",
+                "d",
+                "`",
+                "information",
+                "sur",
+                "Rio",
+                "de",
+                "Janeiro",
+                ",",
+                "écrit",
+                "à",
+                "Paris",
+                ".",
+            ],
+            [
+                "ed",
+                "uno",
+                "in",
+                "italiano",
+                "da",
+                "Roccacannuccia",
+                "nella",
+                "pianura",
+                "pontina",
+            ],
         ],
         [
             ["O", "O", "O", "B-LANGUAGE", "O", "O", "O", "O"],
-            ["O", "O", "O", "O", "O", "O", "B-GPE", "I-GPE", "I-GPE", "O", "O", "O", "B-GPE", "O"],
-            ["O", "B-CARDINAL", "O", "B-LANGUAGE", "O", "B-LOC", "I-LOC", "I-LOC", "I-LOC"],
+            [
+                "O",
+                "O",
+                "O",
+                "O",
+                "O",
+                "O",
+                "B-GPE",
+                "I-GPE",
+                "I-GPE",
+                "O",
+                "O",
+                "O",
+                "B-GPE",
+                "O",
+            ],
+            [
+                "O",
+                "B-CARDINAL",
+                "O",
+                "B-LANGUAGE",
+                "O",
+                "B-LOC",
+                "I-LOC",
+                "I-LOC",
+                "I-LOC",
+            ],
         ],
     ]
-    place_candidates = transformations.extract_place_candidates(deeppavlov_output_payload, allowed_tags)
+    place_candidates = transformations.extract_place_candidates(
+        deeppavlov_output_payload, allowed_tags
+    )
     assert place_candidates == expected_place_candidates
 
 
@@ -36,11 +88,17 @@ def test_extract_place_candidates_non_alpha_gpe(allowed_tags):
         [["fake", "text", "with", "wrongly", "tagged", ")", "chars", "!", "?"]],
         [["O", "O", "O", "B-GPE", "I-GPE", "I-GPE", "I-GPE", "O", "B-LOC"]],
     ]
-    place_candidates = transformations.extract_place_candidates(deeppavlov_output_payload, allowed_tags)
-    assert place_candidates == [{"candidates": {"GPE": ["wrongly tagged chars"], "LOC": []}}]
+    place_candidates = transformations.extract_place_candidates(
+        deeppavlov_output_payload, allowed_tags
+    )
+    assert place_candidates == [
+        {"candidates": {"GPE": ["wrongly tagged chars"], "LOC": []}}
+    ]
 
 
-def test_normalize_places(datapoint_without_place, datapoint_with_gpe, datapoint_with_loc):
+def test_normalize_places(
+    datapoint_without_place, datapoint_with_gpe, datapoint_with_loc
+):
     """Test if normalize_places returns the normalized texts i.e. _loc_ tag for each recognized place candidate."""
 
     texts = [
@@ -49,8 +107,10 @@ def test_normalize_places(datapoint_without_place, datapoint_with_gpe, datapoint
         datapoint_with_loc["text"],
     ]
 
-    result = transformations.normalize_places(texts[1], expected_place_candidates[1]["candidates"])
-    assert result == 'Un texte d`information sur _loc_, écrit à _loc_.'
+    result = transformations.normalize_places(
+        texts[1], expected_place_candidates[1]["candidates"]
+    )
+    assert result == "Un texte d`information sur _loc_, écrit à _loc_."
 
 
 def test_apply_transformations():
@@ -59,4 +119,3 @@ def test_apply_transformations():
     result = transformations.apply_transformations(text)
     expected = "nos nos vemos   or or or en la sb nick and cia  runtomiami sbliv 100yardas yarders nfl  badurl   _urlincl_ _locincl_"
     assert result == expected
-

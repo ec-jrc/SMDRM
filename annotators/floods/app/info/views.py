@@ -6,13 +6,13 @@ from flask import abort, jsonify, current_app
 logger = logging.getLogger()
 
 
-@info_blueprint.route('/', methods=['GET'])
+@info_blueprint.route("/", methods=["GET"])
 def index():
     # TODO: create swagger doc
     logger.debug("TODO: create swagger doc")
     return jsonify("Index page")
 
 
-@info_blueprint.route('/status', methods=['GET'])
+@info_blueprint.route("/status", methods=["GET"])
 def status():
     return jsonify("ready"), 200

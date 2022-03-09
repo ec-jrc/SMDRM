@@ -26,9 +26,19 @@ def load_global_places() -> pandas.DataFrame:
     return places_df
 
 
-def filter_places_by_bbox(places_df: pandas.DataFrame, min_lon: float, min_lat: float, max_lon: float, max_lat: float) -> pandas.Series:
+def filter_places_by_bbox(
+    places_df: pandas.DataFrame,
+    min_lon: float,
+    min_lat: float,
+    max_lon: float,
+    max_lat: float,
+) -> pandas.Series:
     """Filter places within a given bounding box."""
-    within_mask = places_df.apply(lambda city: min_lon <= city.longitude <= max_lon and min_lat <= city.latitude <= max_lat, axis=1)
+    within_mask = places_df.apply(
+        lambda city: min_lon <= city.longitude <= max_lon
+        and min_lat <= city.latitude <= max_lat,
+        axis=1,
+    )
     return places_df[within_mask].copy()
 
 
@@ -55,7 +65,11 @@ def get_bbox_centroid(bbox: str, precision: int = 6) -> tuple:
 def get_gpes(datapoint: dict, min_len: int = 4) -> list:
     """Get Geo Political Entities from place candidates if any."""
     try:
-        return [gpe for gpe in datapoint["place"]["candidates"]["GPE"] if len(gpe) >= min_len]
+        return [
+            gpe
+            for gpe in datapoint["place"]["candidates"]["GPE"]
+            if len(gpe) >= min_len
+        ]
     except (KeyError, TypeError):
         return []
 
@@ -66,12 +80,18 @@ def flatten_gpes(gpes: typing.List[str]) -> typing.List[str]:
     return [entity for gpe in gpes for entity in gpe.split(" ")]
 
 
-def get_city_filter(places_df: pandas.DataFrame, gpes: typing.List[str]) -> pandas.Series:
+def get_city_filter(
+    places_df: pandas.DataFrame, gpes: typing.List[str]
+) -> pandas.Series:
     """Pandas boolean mask of matching cities in Global Places against the given GPEs."""
-    return places_df.city_name.isin(gpes) & places_df.city_alternatenames.str.contains("|".join(gpes), na=False, case=False, regex=True)
+    return places_df.city_name.isin(gpes) & places_df.city_alternatenames.str.contains(
+        "|".join(gpes), na=False, case=False, regex=True
+    )
 
 
-def get_region_filter(places_df: pandas.DataFrame, gpes: typing.List[str]) -> pandas.Series:
+def get_region_filter(
+    places_df: pandas.DataFrame, gpes: typing.List[str]
+) -> pandas.Series:
     """Pandas boolean mask of matching regions in Global Places against the given GPEs."""
     return places_df.region_name.isin(gpes) | places_df.subregion_name.isin(gpes)
 
@@ -107,10 +127,18 @@ def geocode_datapoints(
 
         if hits == 0:
             # try matching regions if match_cities is empty
-            console.debug("GPEs do not match any city in Global Places. Try matching regions...")
+            console.debug(
+                "GPEs do not match any city in Global Places. Try matching regions..."
+            )
             matches = get_region_filter(places_df, gpes)
-            
-            fields = ["country_name", "country_code", "region_name", "bbox", "region_id"]
+
+            fields = [
+                "country_name",
+                "country_code",
+                "region_name",
+                "bbox",
+                "region_id",
+            ]
             df = places_df[matches][fields]
             df.drop_duplicates(inplace=True)
             matches = len(df)
@@ -128,7 +156,15 @@ def geocode_datapoints(
             df.drop(columns="bbox", inplace=True)
 
         else:
-            fields = ["country_name", "country_code", "region_name", "city_name", "latitude", "longitude", "region_id"]
+            fields = [
+                "country_name",
+                "country_code",
+                "region_name",
+                "city_name",
+                "latitude",
+                "longitude",
+                "region_id",
+            ]
             df = places_df[matches][fields]
 
         # update geocode output fields
@@ -139,10 +175,10 @@ def geocode_datapoints(
 
 def task_metrics(datapoints: typing.Iterable[dict]) -> typing.Iterable[dict]:
     """Collect task metrics."""
-    total=0
-    with_gpe=0
-    geolocated=0
-    geolocated_fuzzy=0
+    total = 0
+    with_gpe = 0
+    geolocated = 0
+    geolocated_fuzzy = 0
     for datapoint in datapoints:
         total += 1
         if get_gpes(datapoint):
@@ -153,7 +189,14 @@ def task_metrics(datapoints: typing.Iterable[dict]) -> typing.Iterable[dict]:
             if len(coords) > 1:
                 geolocated_fuzzy += 1
         yield datapoint
-    console.info(dict(total=total, with_gpe=with_gpe, geolocated=geolocated, geolocated_fuzzy=geolocated_fuzzy))
+    console.info(
+        dict(
+            total=total,
+            with_gpe=with_gpe,
+            geolocated=geolocated,
+            geolocated_fuzzy=geolocated_fuzzy,
+        )
+    )
 
 
 def log_datapoints(datapoints: typing.Iterable[dict]) -> typing.Iterable[dict]:
@@ -180,8 +223,12 @@ def run(args):
     if args.debug:
         console.setLevel(logging.DEBUG)
 
-    if not args.region_id and not all([args.min_lon, args.min_lat, args.max_lon, args.max_lat]):
-        console.warning("Neither region ID not bounding box filters were given. Geocoding precision will be low.")
+    if not args.region_id and not all(
+        [args.min_lon, args.min_lat, args.max_lon, args.max_lat]
+    ):
+        console.warning(
+            "Neither region ID not bounding box filters were given. Geocoding precision will be low."
+        )
 
     # make output path
     if not args.output_path:
@@ -204,8 +251,14 @@ def run(args):
 
     if all([args.min_lon, args.min_lat, args.max_lon, args.max_lat]):
         # filter only places of interest wrt the region bounding box linked to the collection
-        console.info("filter global places by bbox: {}".format(",".join([args.min_lon, args.min_lat, args.max_lon, args.max_lat])))
-        places_df = filter_places_by_bbox(places_df, args.min_lon, args.min_lat, args.max_lon, args.max_lat)
+        console.info(
+            "filter global places by bbox: {}".format(
+                ",".join([args.min_lon, args.min_lat, args.max_lon, args.max_lat])
+            )
+        )
+        places_df = filter_places_by_bbox(
+            places_df, args.min_lon, args.min_lat, args.max_lon, args.max_lat
+        )
 
     # build geocode pipeline
     geocode_pipeline = Pipeline()
@@ -290,4 +343,3 @@ if __name__ == "__main__":
     )
     # run task
     run(parser.parse_args())
-

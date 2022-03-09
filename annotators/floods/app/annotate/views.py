@@ -13,13 +13,13 @@ languages = [lang for lang in annotators]
 logger.info("annotation offered in {}".format(languages))
 
 
-@annotate_blueprint.route('/languages', methods=['GET'])
+@annotate_blueprint.route("/languages", methods=["GET"])
 def get_languages():
     """Get languages available for annotation."""
     return jsonify(languages), 200
 
 
-@annotate_blueprint.route('/test', methods=['GET'])
+@annotate_blueprint.route("/test", methods=["GET"])
 def test_model():
     """Test annotation."""
     result = "failed"
@@ -31,14 +31,16 @@ def test_model():
     return jsonify(result), 200
 
 
-@annotate_blueprint.route('/annotate/<string:lang>', methods=['POST'])
+@annotate_blueprint.route("/annotate/<string:lang>", methods=["POST"])
 def annotate(lang):
     """Annotate batch of texts of a specific language.
     Input: {"texts": typing.List[str]}
     Ouptut: typing.List[str]
     """
     if lang not in languages:
-        current_app.logger.warning("Unkwnon language ISO code. Use `ml` to enable a multilingual annotation.")
+        current_app.logger.warning(
+            "Unkwnon language ISO code. Use `ml` to enable a multilingual annotation."
+        )
         abort(400)
 
     texts = request.json.get("texts", None)
@@ -53,4 +55,3 @@ def annotate(lang):
     response = jsonify(["{:.6f}".format(round(p, 6)) for p in proba])
     logger.debug(response)
     return response, 201
-

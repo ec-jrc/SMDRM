@@ -26,7 +26,9 @@ def build_index(index_suffix: str) -> str:
     return "smdrm_" + index_suffix
 
 
-def build_bulk_operations(index: str, datapoints: typing.List[dict], tags: typing.List[str] = None) -> str:
+def build_bulk_operations(
+    index: str, datapoints: typing.List[dict], tags: typing.List[str] = None
+) -> str:
     """Build bulk operations for datapoints batch in a single request.
     Source: https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-bulk.html."""
 
@@ -152,4 +154,3 @@ if __name__ == "__main__":
     )
     # run task
     run(parser.parse_args())
-

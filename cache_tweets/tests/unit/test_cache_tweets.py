@@ -4,7 +4,6 @@ import typing
 from conftest import cache_tweets
 
 
-
 def test_build_index():
     """Test build_index()."""
 
@@ -21,15 +20,21 @@ def test_add_component_template(client):
 def test_add_index_template(client):
     """Test add_index_template() calls the correct resources with the expected arguments."""
 
-    actual = cache_tweets.add_index_template(client, dict(index="template", settings={"shards": 1}))
-    client.indices.put_index_template.assert_called_once_with(index="template", settings={"shards": 1})
+    actual = cache_tweets.add_index_template(
+        client, dict(index="template", settings={"shards": 1})
+    )
+    client.indices.put_index_template.assert_called_once_with(
+        index="template", settings={"shards": 1}
+    )
 
 
 def test_create_index(client):
     """Test create_index() calls the correct resources with the expected arguments."""
 
     actual = cache_tweets.create_index(client, index="test_index")
-    client.indices.create.assert_called_once_with(index="test_index", wait_for_active_shards=1)
+    client.indices.create.assert_called_once_with(
+        index="test_index", wait_for_active_shards=1
+    )
 
 
 def test_index_exists(client):
@@ -47,7 +52,9 @@ def test_build_bulk_operations(datapoint, operations):
 
     index = "test_index"
     tags = ["test", "unit"]
-    datapoints = [datapoint,]
+    datapoints = [
+        datapoint,
+    ]
 
     # operations
     actual = cache_tweets.build_bulk_operations(index, datapoints, tags)
@@ -60,4 +67,3 @@ def test_cache_datapoints(client, operations):
 
     actual = cache_tweets.cache_datapoints(client, operations)
     client.bulk.assert_called_once_with(operations=operations, source=True)
-

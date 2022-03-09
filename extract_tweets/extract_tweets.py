@@ -43,9 +43,11 @@ def extend_text_field(data: dict) -> str:
                             return ""
 
 
-def filter_invalid_json_lines(json_lines: typing.Iterable[dict]) -> typing.Iterable[dict]: 
+def filter_invalid_json_lines(
+    json_lines: typing.Iterable[dict],
+) -> typing.Iterable[dict]:
     """Remove invalid json lines from the pipeline."""
-    invalid=0
+    invalid = 0
     for jsonl in json_lines:
         if jsonl is None:
             invalid += 1
@@ -55,12 +57,12 @@ def filter_invalid_json_lines(json_lines: typing.Iterable[dict]) -> typing.Itera
 
 
 def parse_json_lines(
-        json_lines: typing.Iterable[dict],
-        field_id="tweet",
+    json_lines: typing.Iterable[dict],
+    field_id="tweet",
 ) -> typing.Iterable[dict]:
     """Parse raw (unprocessed) json lines from given field,
     and extend text using other fields when possible."""
-    missing_text=0
+    missing_text = 0
     for jsonl in json_lines:
         # get raw datapoint from `tweet` field if exists
         parsed_jsonl = jsonl.get(field_id, jsonl)
@@ -74,15 +76,15 @@ def parse_json_lines(
 
 def build_datapoints(json_lines: typing.Iterable[dict]) -> typing.Iterable[dict]:
     """Build SMDRM datapoints from json lines
-        base fields
-          - id
-          - created_at
-          - lang
-          - text
-        optional (set to null if not found in raw datapoint)
-          - annotation
-          - place
-          - text_clean
+    base fields
+      - id
+      - created_at
+      - lang
+      - text
+    optional (set to null if not found in raw datapoint)
+      - annotation
+      - place
+      - text_clean
     """
     for jsonl in json_lines:
         # build datapoint from raw json
@@ -93,7 +95,7 @@ def build_datapoints(json_lines: typing.Iterable[dict]) -> typing.Iterable[dict]
 
 def task_metrics(datapoints: typing.Iterable[dict]) -> typing.Iterable[dict]:
     """Compute task metrics."""
-    extracted=0
+    extracted = 0
     for datapoint in datapoints:
         extracted += 1
         yield datapoint

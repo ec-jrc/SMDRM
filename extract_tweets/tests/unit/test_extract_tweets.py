@@ -25,9 +25,11 @@ def test_filter_invalid_json_lines(json_lines):
 
 def test_parse_raw_datapoints(preprocessed_json_line):
     """Test if parse_json_lines parsed the raw datapoint from a given field name"""
-    g = extract_tweets.parse_json_lines([preprocessed_json_line], field_id="unprocessed")
+    g = extract_tweets.parse_json_lines(
+        [preprocessed_json_line], field_id="unprocessed"
+    )
     for res in g:
-        assert res['text'] == 'a text from legacy datapoint'
+        assert res["text"] == "a text from legacy datapoint"
 
 
 def test_build_datapoints(valid_json_line):
@@ -35,7 +37,15 @@ def test_build_datapoints(valid_json_line):
     g = extract_tweets.build_datapoints([valid_json_line])
     for res in g:
         assert isinstance(res, dict)
-        assert res == {'id': 1, 'created_at': 'datetime', 'lang': 'ml', 'text': 'a text from valid datapoint', 'annotation': None, 'text_clean': None, 'place': None}
+        assert res == {
+            "id": 1,
+            "created_at": "datetime",
+            "lang": "ml",
+            "text": "a text from valid datapoint",
+            "annotation": None,
+            "text_clean": None,
+            "place": None,
+        }
 
 
 def test_make_ndjson_batches(valid_json_line):
@@ -43,7 +53,7 @@ def test_make_ndjson_batches(valid_json_line):
     expected_batches = 2
     expected_datapoints_per_batch = 5
 
-    g = extract_tweets.make_ndjson_batches([valid_json_line]*10, batch_size=5)
+    g = extract_tweets.make_ndjson_batches([valid_json_line] * 10, batch_size=5)
     for batch_id, res in enumerate(g, start=1):
         continue
 
@@ -51,4 +61,3 @@ def test_make_ndjson_batches(valid_json_line):
     assert expected_batches == batch_id
     # newline chars count to find the number of datapoints
     assert expected_datapoints_per_batch == res.count("\n")
-

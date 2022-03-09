@@ -21,4 +21,3 @@ def invalid_archive_path():
 def wrong_archive_path():
     """Path to wrong zip file data."""
     return os.path.join(cwd, "data/wrong.zip")
-

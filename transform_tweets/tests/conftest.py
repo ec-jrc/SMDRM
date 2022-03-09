@@ -1,5 +1,6 @@
 import os
 import sys
+
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 import transform_tweets
 import transformations
@@ -79,4 +80,3 @@ class DeepPavlovMockResponse:
         """mock json() method always returns a specific testing dictionary
         you can override this value when needed."""
         return self.payload
-

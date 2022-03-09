@@ -17,15 +17,17 @@ console = logging.getLogger("trigger_dag_run")
 # envs
 FILENAME = os.getenv("FILENAME")
 DEBUG = int(os.getenv("DEBUG", 0))
-AIRFLOW_USERNAME=os.getenv("AIRFLOW_USERNAME", "airflow")
-AIRFLOW_PASSWORD=os.getenv("AIRFLOW_PASSWORD", "airflow")
+AIRFLOW_USERNAME = os.getenv("AIRFLOW_USERNAME", "airflow")
+AIRFLOW_PASSWORD = os.getenv("AIRFLOW_PASSWORD", "airflow")
 
 # airflow REST API
-airflow_api_base_url = "http://{AIRFLOW_USERNAME}:{AIRFLOW_PASSWORD}@{host}:{port}/api/v1/".format(
-    host="airflow-webserver",
-    port=8080,
-    AIRFLOW_USERNAME=AIRFLOW_USERNAME,
-    AIRFLOW_PASSWORD=AIRFLOW_PASSWORD,
+airflow_api_base_url = (
+    "http://{AIRFLOW_USERNAME}:{AIRFLOW_PASSWORD}@{host}:{port}/api/v1/".format(
+        host="airflow-webserver",
+        port=8080,
+        AIRFLOW_USERNAME=AIRFLOW_USERNAME,
+        AIRFLOW_PASSWORD=AIRFLOW_PASSWORD,
+    )
 )
 
 # data directories
@@ -46,7 +48,9 @@ def get_import_files() -> typing.Iterable[str]:
         yield filepath
 
 
-def export_zipfile_to_airflow(filepath: str, datetime_fs: str, remove_original: bool = True) -> str:
+def export_zipfile_to_airflow(
+    filepath: str, datetime_fs: str, remove_original: bool = True
+) -> str:
     """Replace/move imported zipfile to Docker Volume filesystem."""
     # make datetime based filesystem in the Docker container executing the task
     # i.e. /data/YYYYMMDD/<filename>.zip
@@ -65,28 +69,28 @@ def export_zipfile_to_airflow(filepath: str, datetime_fs: str, remove_original: 
 
 
 def run_dag(
-        airflow_rel_filepath: str,
-        dag_run_id: str,
-        logical_date: str,
-        dag_id: str,
-        collection_id: str = "smdrm_export-db-volume"
-    ):
+    airflow_rel_filepath: str,
+    dag_run_id: str,
+    logical_date: str,
+    dag_id: str,
+    collection_id: str = "smdrm_export-db-volume",
+):
     """
     Manually trigger DAG run via Airflow REST API.
     The Docker volume smdrm_export_db is the bridge
     to make input zipfiles available inside airflow.
     """
-    url = airflow_api_base_url+"dags/{DAG_ID}/dagRuns".format(DAG_ID=dag_id)
+    url = airflow_api_base_url + "dags/{DAG_ID}/dagRuns".format(DAG_ID=dag_id)
     payload = {
         "conf": {
             # aka Docker Volume ID
             "COLLECTION_ID": collection_id,
             # inside the pipeline task container filesystem
             "INPUT_PATH": os.path.join("/data", airflow_rel_filepath),
-            },
+        },
         "dag_run_id": dag_run_id,
-        "logical_date": logical_date
-        }
+        "logical_date": logical_date,
+    }
     response = requests.post(url, json=payload)
     console.debug(response.text)
     response.raise_for_status()
@@ -94,10 +98,10 @@ def run_dag(
 
 
 def dag_run_state(dag_run_id: str, dag_id: str):
-    url = airflow_api_base_url+"dags/{DAG_ID}/dagRuns/{DAG_run_ID}".format(
-            DAG_ID=dag_id,
-            DAG_run_ID=dag_run_id,
-        )
+    url = airflow_api_base_url + "dags/{DAG_ID}/dagRuns/{DAG_run_ID}".format(
+        DAG_ID=dag_id,
+        DAG_run_ID=dag_run_id,
+    )
     response = requests.get(url)
     response.raise_for_status()
     return response.json()["state"]
@@ -105,7 +109,7 @@ def dag_run_state(dag_run_id: str, dag_id: str):
 
 def get_airflow_api_health():
     """REST API call to chech its health."""
-    response = requests.get(airflow_api_base_url+"health")
+    response = requests.get(airflow_api_base_url + "health")
     response.raise_for_status()
     return response.json()
 
@@ -122,7 +126,7 @@ def wait_on_success(dag_run_id: str, dag_id: str, sleep_secs: int = 15):
         state = dag_run_state(dag_run_id, dag_id=dag_id)
 
         if state == "failed":
-            raise DAGRunFailure 
+            raise DAGRunFailure
 
         if state != "success":
             console.debug("state={} > sleeping {} seconds...".format(state, sleep_secs))
@@ -150,7 +154,7 @@ def export_artifacts_to_host(airflow_abs_filepath: str):
 def execute():
     if DEBUG:
         console.setLevel(logging.DEBUG)
-   
+
     # validate Airflow API status
     airflow_api_health = get_airflow_api_health()
     console.debug("Airflow API health={}".format(airflow_api_health))
@@ -168,10 +172,10 @@ def execute():
         # to make it available to the pipeline tasks in Airflow
         dt_based_fs = datetime.now().date().isoformat()
         airflow_rel_filepath = export_zipfile_to_airflow(
-                filepath,
-                dt_based_fs,
-                remove_original=not DEBUG,
-            )
+            filepath,
+            dt_based_fs,
+            remove_original=not DEBUG,
+        )
 
         # DAG run trigger
         # get execution time
@@ -179,7 +183,7 @@ def execute():
         console.debug("DAG run UTC execution time={}".format(utc_exec_time))
 
         dag_id = os.getenv("DAG_ID", "twitter")
-        dag_run_id = os.getenv("DAG_run_ID", "manual_"+utc_exec_time)
+        dag_run_id = os.getenv("DAG_run_ID", "manual_" + utc_exec_time)
 
         console.info("Triggering DAG run {}".format(dag_run_id))
         response = run_dag(airflow_rel_filepath, dag_run_id, utc_exec_time, dag_id)
@@ -198,4 +202,3 @@ def execute():
 
 if __name__ == "__main__":
     execute()
-

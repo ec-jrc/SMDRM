@@ -22,18 +22,24 @@ pandas_groupby = pandas.core.groupby.generic.DataFrameGroupBy
 
 def get_languages() -> typing.List[str]:
     """Floods Named Entity Recognition REST API call to get the list of languages enabled for annotation."""
-    return requests.get(base_url+"model/languages").json()
+    return requests.get(base_url + "model/languages").json()
 
 
 def get_annotation_scores(texts: list, lang: str) -> typing.List[str]:
     """Floods Named Entity Recognition REST API call to annotate a list of texts."""
-    return requests.post(base_url+"model/annotate/"+lang, json={"texts": texts}).json()
+    return requests.post(
+        base_url + "model/annotate/" + lang, json={"texts": texts}
+    ).json()
 
 
-def group_batch_by_language(datapoints_batch: pandas.DataFrame, languages: typing.List[str]) -> pandas_groupby:
+def group_batch_by_language(
+    datapoints_batch: pandas.DataFrame, languages: typing.List[str]
+) -> pandas_groupby:
     # a temp field with a normalized version of the lang field
     # as we developed a multilingual embeddings, we can vectorize any language if comes as "ml"
-    lang_tmp = datapoints_batch.lang.apply(lambda lang: lang if lang in languages else "ml")
+    lang_tmp = datapoints_batch.lang.apply(
+        lambda lang: lang if lang in languages else "ml"
+    )
     # group df by (normalized) language
     return datapoints_batch.groupby(lang_tmp)
 
@@ -61,16 +67,20 @@ def annotate_language_groups(groups: pandas_groupby) -> typing.Iterable[dict]:
         yield g
 
 
-def convert_to_dataframe(datapoints_batches: typing.Iterable[list]) -> typing.Iterable[pandas.DataFrame]:
+def convert_to_dataframe(
+    datapoints_batches: typing.Iterable[list],
+) -> typing.Iterable[pandas.DataFrame]:
     """Converts datapoints batches i.e. list of JSON into Pandas DataFrame."""
     for datapoints_batch in datapoints_batches:
         yield pandas.DataFrame(datapoints_batch)
 
 
-def task_metrics(datapoints_batches: typing.Iterable[pandas.DataFrame]) -> typing.Iterable[pandas.DataFrame]:
+def task_metrics(
+    datapoints_batches: typing.Iterable[pandas.DataFrame],
+) -> typing.Iterable[pandas.DataFrame]:
     """Compute task metrics."""
-    batches=0
-    annotated=0
+    batches = 0
+    annotated = 0
     for datapoints_batch in datapoints_batches:
         batches += 1
         annotated += len(datapoints_batch)
@@ -78,15 +88,23 @@ def task_metrics(datapoints_batches: typing.Iterable[pandas.DataFrame]) -> typin
     console.info(dict(batches=batches, annotated=annotated))
 
 
-def log_datapoints(datapoints_batches: typing.Iterable[pandas.DataFrame]) -> typing.Iterable[pandas.DataFrame]:
+def log_datapoints(
+    datapoints_batches: typing.Iterable[pandas.DataFrame],
+) -> typing.Iterable[pandas.DataFrame]:
     """Log datapoints to console."""
     for batch_id, datapoints_batch in enumerate(datapoints_batches, start=1):
-        console.debug("processing datapoints batch ID #{}... Below, a sample of 5.".format(batch_id))
+        console.debug(
+            "processing datapoints batch ID #{}... Below, a sample of 5.".format(
+                batch_id
+            )
+        )
         console.debug(datapoints_batch.head(5))
         yield datapoints_batch
 
 
-def annotate_batches(datapoints_batches: typing.Iterable[pandas.DataFrame]) -> typing.Iterable[pandas.DataFrame]:
+def annotate_batches(
+    datapoints_batches: typing.Iterable[pandas.DataFrame],
+) -> typing.Iterable[pandas.DataFrame]:
     """Annotate datapoints batches dataframe by language group."""
     # api call to get the list of annotation-ready languages
     languages = get_languages()
@@ -98,7 +116,9 @@ def annotate_batches(datapoints_batches: typing.Iterable[pandas.DataFrame]) -> t
         yield from annotate_language_groups(groups)
 
 
-def make_ndjson_batches(datapoints_batches: typing.Iterable[pandas.DataFrame]) -> typing.Iterable[pandas.DataFrame]:
+def make_ndjson_batches(
+    datapoints_batches: typing.Iterable[pandas.DataFrame],
+) -> typing.Iterable[pandas.DataFrame]:
     for datapoints_batch in datapoints_batches:
         yield datapoints_batch.to_json(orient="records", force_ascii=False, lines=True)
 
@@ -167,4 +187,3 @@ if __name__ == "__main__":
     )
     # run task
     run(parser.parse_args())
-

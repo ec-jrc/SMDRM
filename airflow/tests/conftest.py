@@ -1,9 +1,10 @@
 import pytest
 from airflow import DAG
-from airflow.utils.dates import days_ago 
+from airflow.utils.dates import days_ago
 from airflow.models import DagBag
 
 import sys
+
 sys.path.append("/opt/airflow/dags/twitter.py")
 import twitter
 
@@ -27,4 +28,3 @@ def unittest_dag():
         start_date=days_ago(5),
     ) as dag:
         yield dag
-

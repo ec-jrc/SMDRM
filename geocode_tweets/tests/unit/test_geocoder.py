@@ -5,10 +5,20 @@ from tests.conftest import geocode_tweets
 def test_load_global_places(ambiguous_places):
     """Test if load_global_places return the DataFrame with the expected fields."""
     expected_fields = [
-        'city_id', 'city_name', 'city_asciiname', 'city_alternatenames',
-        'latitude', 'longitude', 'population', 'country_code', 'country_name',
-        'region_name', 'subregion_name', 'region_name_local', 'bbox',
-        'region_id'
+        "city_id",
+        "city_name",
+        "city_asciiname",
+        "city_alternatenames",
+        "latitude",
+        "longitude",
+        "population",
+        "country_code",
+        "country_name",
+        "region_name",
+        "subregion_name",
+        "region_name_local",
+        "bbox",
+        "region_id",
     ]
     assert list(ambiguous_places.columns) == expected_fields
 
@@ -23,9 +33,15 @@ def test_get_bbox_centroid():
 
 def test_filter_places_by_bbox(ambiguous_places):
     """Test if filter_places_by_bbox obtains Alexandria with the bbox of Egypt."""
-    egypt_bbox = dict(min_lon=28.965546, min_lat=30.262758, max_lon=30.108749, max_lat=31.359861)
-    filtered_places = geocode_tweets.filter_places_by_bbox(ambiguous_places, **egypt_bbox)
-    assert filtered_places.city_name.to_dict() == {6746: 'Alexandria'}, "There is only 1 Alexandria in Egypt."
+    egypt_bbox = dict(
+        min_lon=28.965546, min_lat=30.262758, max_lon=30.108749, max_lat=31.359861
+    )
+    filtered_places = geocode_tweets.filter_places_by_bbox(
+        ambiguous_places, **egypt_bbox
+    )
+    assert filtered_places.city_name.to_dict() == {
+        6746: "Alexandria"
+    }, "There is only 1 Alexandria in Egypt."
 
 
 def test_filter_places_by_region_id(ambiguous_places):
@@ -99,4 +115,3 @@ def test_get_region_filter(ambiguous_places):
     result = geocode_tweets.get_region_filter(ambiguous_places, ["Virginia"])
     assert result.sum() == 1
     assert "USA" in ambiguous_places[result].country_code.values
-

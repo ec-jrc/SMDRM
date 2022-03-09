@@ -18,52 +18,35 @@ smdrm_component_template_config = {
     "master_timeout": "10s",
     "template": {
         "mappings": {
-            "_source": {
-                "enabled": "true"
-            },
+            "_source": {"enabled": "true"},
             # new fields are not added automatically at root level
             # unless they are manually included in properties
             "dynamic": "strict",
-
             # annotations
             "dynamic_templates": [
                 {
                     "annotations_as_float": {
                         "match_mapping_type": "string",
                         "path_match": "annotation.*",
-                        "mapping": {
-                            "type": "float"
-                        }
+                        "mapping": {"type": "float"},
                     }
                 }
             ],
             "properties": {
-
                 # required fields
                 "created_at": {
                     "type": "date",
                     # Twitter date format
-                    "format": "EEE LLL dd HH:mm:ss Z yyyy"
+                    "format": "EEE LLL dd HH:mm:ss Z yyyy",
                 },
                 "id": {
                     "type": "text",
                 },
-                "lang": {
-                    "type": "keyword"
-                },
-                "text": {
-                    "type": "text"
-                },
-                "tags": {
-                    "type": "keyword"
-                },
-
+                "lang": {"type": "keyword"},
+                "text": {"type": "text"},
+                "tags": {"type": "keyword"},
                 # annotation field is dynamic wrt the annotation model
-                "annotation": {
-                    "dynamic": "true",
-                    "type": "object"
-                },
-
+                "annotation": {"dynamic": "true", "type": "object"},
                 # transformation fields
                 "text_clean": {
                     # non-searchable
@@ -74,29 +57,23 @@ smdrm_component_template_config = {
                     # keep relationships among values of nested subfields
                     "type": "nested",
                     "properties": {
-
                         # candidates is dynamic wrt the place candidates matching
-                        "candidates": {
-                            "dynamic": "true",
-                            "type": "object"
-                        },
-
+                        "candidates": {"dynamic": "true", "type": "object"},
                         # meta is dynamic wrt the place candidate type matched (city or region)
-                        "meta": {
-                            "dynamic": "true",
-                            "type": "object"
-                        }
-                    }
-                }
-            }
+                        "meta": {"dynamic": "true", "type": "object"},
+                    },
+                },
+            },
         }
-    }
+    },
 }
 
 # index template
 smdrm_index_template_config = {
     "name": "smdrm_index_template",
-    "index_patterns": ["smdrm*", ],
+    "index_patterns": [
+        "smdrm*",
+    ],
     "template": {
         "settings": {
             "number_of_shards": 1,
@@ -105,8 +82,8 @@ smdrm_index_template_config = {
     },
     "version": "1",
     "priority": 500,
-    "composed_of": ["smdrm_component_template_base", ],
-    "meta": {
-        "description": "SMDRM index template"
-    }
+    "composed_of": [
+        "smdrm_component_template_base",
+    ],
+    "meta": {"description": "SMDRM index template"},
 }

@@ -20,7 +20,7 @@ class TestXComPush:
             conf=self.CONF,
             state=DagRunState.RUNNING,
             run_type=DagRunType.MANUAL,
-            run_id=task_id+"_unittest_"+self.EXEC_DATE.isoformat(),
+            run_id=task_id + "_unittest_" + self.EXEC_DATE.isoformat(),
         )
         # create and run a task instance from the dag run
         ti = dagrun.get_task_instance(task_id=task_id)
@@ -29,7 +29,6 @@ class TestXComPush:
 
         assert ti.state == DagRunState.SUCCESS
         assert ti.xcom_pull(task_ids=task_id, key="cID") == self.CONF["COLLECTION_ID"]
-        
 
     def test_push_filepaths_task(self, unittest_dag):
         task_id = "push_filepaths"
@@ -40,7 +39,7 @@ class TestXComPush:
             conf=self.CONF,
             state=DagRunState.RUNNING,
             run_type=DagRunType.MANUAL,
-            run_id=task_id+"_unittest_"+self.EXEC_DATE.isoformat(),
+            run_id=task_id + "_unittest_" + self.EXEC_DATE.isoformat(),
         )
         # create and run a task instance from the dag run
         ti = dagrun.get_task_instance(task_id=task_id)
@@ -49,8 +48,19 @@ class TestXComPush:
 
         assert ti.state == DagRunState.SUCCESS
         assert ti.xcom_pull(task_ids=task_id, key="filepath_raw") == "/data/test.zip"
-        assert ti.xcom_pull(task_ids=task_id, key="filepath_extracted") == "/data/test_extracted.zip"
-        assert ti.xcom_pull(task_ids=task_id, key="filepath_transformed") == "/data/test_transformed.zip"
-        assert ti.xcom_pull(task_ids=task_id, key="filepath_floods") == "/data/test_floods.zip"
-        assert ti.xcom_pull(task_ids=task_id, key="filepath_geocoded") == "/data/test_geocoded.zip"
-    
+        assert (
+            ti.xcom_pull(task_ids=task_id, key="filepath_extracted")
+            == "/data/test_extracted.zip"
+        )
+        assert (
+            ti.xcom_pull(task_ids=task_id, key="filepath_transformed")
+            == "/data/test_transformed.zip"
+        )
+        assert (
+            ti.xcom_pull(task_ids=task_id, key="filepath_floods")
+            == "/data/test_floods.zip"
+        )
+        assert (
+            ti.xcom_pull(task_ids=task_id, key="filepath_geocoded")
+            == "/data/test_geocoded.zip"
+        )

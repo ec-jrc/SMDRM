@@ -7,20 +7,39 @@ from libdrm.datamodels import DataPointModel, ZipFileModel
 
 def test_DataPointModel_with_valid_input():
     """Test if DataPointModel.parse_raw validation is successful."""
-    result = DataPointModel.parse_raw(b'{"id": "1", "created_at": "date", "lang": "id", "text": "text"}')
-    assert str(result) == "id=1 created_at='date' lang='id' text='text' text_clean=None place=None annotation=None"
+    result = DataPointModel.parse_raw(
+        b'{"id": "1", "created_at": "date", "lang": "id", "text": "text"}'
+    )
+    assert (
+        str(result)
+        == "id=1 created_at='date' lang='id' text='text' text_clean=None place=None annotation=None"
+    )
 
 
 def test_DataPointModel_with_invalid_input():
     """Test if DataPointModel validation fails due to invalid input format."""
     with pytest.raises(pydantic.ValidationError):
-        DataPointModel.parse_raw(b'Does it look valid JSON bytes to you??')
+        DataPointModel.parse_raw(b"Does it look valid JSON bytes to you??")
 
 
 def test_DataPointModel_with_enriched_input():
     """Test if DataPointModel validation is successful when the enriched input is given."""
-    datapoint = DataPointModel.parse_raw(b'{"id": "1", "created_at": "date", "lang": "id", "text": "text", "text_clean": null, "place": null, "annotation": null}')
-    assert datapoint.dict() == dict(datapoint) == {"id": 1, "created_at": "date", "lang": "id", "text": "text", "text_clean": None, "place": None, "annotation": None}
+    datapoint = DataPointModel.parse_raw(
+        b'{"id": "1", "created_at": "date", "lang": "id", "text": "text", "text_clean": null, "place": null, "annotation": null}'
+    )
+    assert (
+        datapoint.dict()
+        == dict(datapoint)
+        == {
+            "id": 1,
+            "created_at": "date",
+            "lang": "id",
+            "text": "text",
+            "text_clean": None,
+            "place": None,
+            "annotation": None,
+        }
+    )
 
 
 def test_is_zip_file_with_valid_zipfile(valid_archive_path):
@@ -68,4 +87,3 @@ def test_iter_json_on_valid_zipfile_wrong_data(wrong_archive_path):
     assert zf.is_valid()
     with pytest.raises(StopIteration):
         next(zf.iter_jsonl())
-

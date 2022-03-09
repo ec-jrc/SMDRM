@@ -15,18 +15,20 @@ pandas_df = pandas.core.frame.DataFrame
 def tag_with_mult_bert(texts: list) -> requests.Response:
     """DeepPavlov Named Entity Recognition REST API call to tag a list of texts."""
     headers = {
-        'accept': 'application/json',
-        'Content-Type': 'application/json',
+        "accept": "application/json",
+        "Content-Type": "application/json",
     }
     # API url from within the (default) Docker networks created with docker-compose
     url = "http://{host}:{port}/{endpoint}".format(
-            host="deeppavlov", port=5000, endpoint="model/annotate"
-        )
+        host="deeppavlov", port=5000, endpoint="model/annotate"
+    )
     r = requests.post(url, headers=headers, data=json.dumps({"texts": texts}))
     return r.json()
 
 
-def extract_place_candidates(y_hat: typing.List[list], allowed_tags: typing.List[str]) -> dict:
+def extract_place_candidates(
+    y_hat: typing.List[list], allowed_tags: typing.List[str]
+) -> dict:
     """Extract place candidates given a set of tags allowed by the user."""
 
     place_candidates = list()
@@ -80,13 +82,16 @@ def normalize_places(text: str, place_candidates: dict) -> str:
 
 
 # non natural language compiled regex
-ampersand = re.compile(r'\s+&amp;?\s+')
-user_mentions = re.compile(r'@[A-Za-z0-9_]+\b')
-datetimes = re.compile(r"\b\d\d?\s*[ap]\.?m\.?\b|\b\d\d?:\d\d\s*[ap]\.?m\.?\b|\b\d\d?:\d\d:\d\d\b|\b\d\d?:\d\d\b", flags=re.IGNORECASE)
+ampersand = re.compile(r"\s+&amp;?\s+")
+user_mentions = re.compile(r"@[A-Za-z0-9_]+\b")
+datetimes = re.compile(
+    r"\b\d\d?\s*[ap]\.?m\.?\b|\b\d\d?:\d\d\s*[ap]\.?m\.?\b|\b\d\d?:\d\d:\d\d\b|\b\d\d?:\d\d\b",
+    flags=re.IGNORECASE,
+)
 url = re.compile(r"\bhttps?:\S+", flags=re.IGNORECASE)
 url_broken = re.compile(r"\s+https?$", flags=re.IGNORECASE)
 special_chars = re.compile(r'[^\w\d\s:\'",.\(\)#@\?!\/’_]+')
-more_than_two_whitespaces = re.compile(r'\s{2,}')
+more_than_two_whitespaces = re.compile(r"\s{2,}")
 
 
 def normalize_ampersand(text: str) -> str:
@@ -114,7 +119,7 @@ def remove_retweet_flag(text: str) -> str:
 
 
 def normalize_new_lines(text: str) -> str:
-    return text.replace('\n', ' ').replace('\r', '')
+    return text.replace("\n", " ").replace("\r", "")
 
 
 def remove_special_chars(text: str) -> str:
@@ -140,10 +145,10 @@ def normalize_more_than_two_whitespaces(text: str) -> str:
 def merge_duplicated_normalization_tags(text: str) -> str:
     """Remove duplicate normalization tags,
     and place only one at the end of the input text."""
-    if '_url_' in text:
-        text = text.replace('_url_', '') + " _urlincl_"
-    if '_loc_' in text:
-        text = text.replace('_loc_', '') + " _locincl_"
+    if "_url_" in text:
+        text = text.replace("_url_", "") + " _urlincl_"
+    if "_loc_" in text:
+        text = text.replace("_loc_", "") + " _locincl_"
     return text
 
 
@@ -156,14 +161,14 @@ def remove_punctuation(text: str, punctuation: str = None) -> str:
 
 def group_similar_words(text: str) -> str:
     words = text.split()
-    gr_text=[]
+    gr_text = []
     gr_text.append(words[0])
-    for i in range(1,len(words)):
-        if words[i] == words[i-1]:
+    for i in range(1, len(words)):
+        if words[i] == words[i - 1]:
             continue
         else:
             gr_text.append(words[i])
-    return ' '.join(gr_text)
+    return " ".join(gr_text)
 
 
 def apply_transformations(text: str) -> str:
@@ -182,7 +187,7 @@ def apply_transformations(text: str) -> str:
         normalize_more_than_two_whitespaces,
         merge_duplicated_normalization_tags,
         remove_punctuation,
-        #group_similar_words,
+        # group_similar_words,
     ]
     tmp = text
     for func in funcs:

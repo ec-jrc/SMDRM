@@ -1,5 +1,6 @@
 import os
 import sys
+
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 import geocode_tweets
 
@@ -18,4 +19,3 @@ def ambiguous_places():
     # filtering mask
     ambiguous_places_filter = places_df.city_name.isin(["Barcelona", "Alexandria"])
     yield places_df[ambiguous_places_filter].copy()
-
