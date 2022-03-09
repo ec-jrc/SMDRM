@@ -1,6 +1,6 @@
 # Social Media Disaster Risk Monitoring
 
-Social Media Disaster Risk Monitoring, *SMDRM* in short, is a Python based data ETL
+Social Media Disaster Risk Monitoring, *SMDRM* in short, is a Python based data
 pipeline application to process social media [_datapoints_](docs/glossary.md#datapoint).
 
 The goal of SMDRM is to provide you with an enriched version of your input data
@@ -14,7 +14,7 @@ that you can further analyse, and visualize through a powerful dashboard.
 
 ### Build
 
-Build the app components
+Build the application components
 
 > :coffee: Building the app for the first time can take several minutes to complete
 
@@ -24,7 +24,7 @@ docker-compose --profile pipelines build
 
 ### Run
 
-Start the app
+Start the application
 
 > :coffee: Although the command exits successfully,
 > the app still takes several minutes to be up and running.
@@ -36,12 +36,17 @@ docker-compose up
 ## Usage
 
 > :bangbang: Ensure your input data has the expected format.
-> For details on the expected format of the zipfile,
-> read the [Input Data](docs/architecture.md#input-data) section.
+> For more details, read the [Input Data](docs/architecture.md#input-data) section.
 
-There are two ways to import an input zipfile to a pipeline:
+The application waits on your input data.
+
+There are two ways to enter your data and start a [workflow](docs/glossary.md#workflow):
 1. CLI shell
 2. Imports UI
+
+At the end of the execution, you can collect the enriched data at:
+* ./data/exports/
+* [Kibana Dashboard](http://localhost:5601)
 
 ### CLI Shell
 
@@ -54,7 +59,7 @@ We assume that your shell is in the project root directory.
 > :information_source: For additional details on the steps executed,
 > check the [Run a DAG](airflow/README.md#run-a-dag) section.
 
-## Imports UI
+### Imports UI
 
 > :warning: Currently not unavailable.
 

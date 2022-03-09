@@ -21,7 +21,7 @@ A DAG specifies the dependencies between tasks, and the order in which to execut
 
 ## Disaster
 
-Within the context of SMDRM, a (environmental) disaster can be of the following types:
+Within the context of SMDRM, a (natural) disaster can be of the following types:
 * Floods
 
 ## Task
@@ -31,9 +31,5 @@ be it fetching data, running analysis, triggering other systems, or more.
 
 ## Workflow
 
-A workflow consists of an orchestrated and repeatable pattern of activity,
-enabled by the systematic organization of resources into processes that
-transform materials, provide services, or process information.
-
-Source [Wikipedia](https://en.wikipedia.org/wiki/Workflow)
+A workflow is a set of repeatable coded rules and instructions to run a data pipeline.
 

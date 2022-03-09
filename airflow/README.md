@@ -26,7 +26,7 @@ Table 1 shows the `twitter` DAG _tasks_
 |`transform_tweets`|Apply place and grammar normalization transformations to clean the `text` field and identify place candidates.|
 |`floods_annotate`|Assign a floods related probability score to the datapoint given its (cleaned) `text`.|
 |`geocode_tweets`|Assign latitude and longitude coordinates to the datapoint whose place candidates matches against a [GADM](https://gadm.org) based [Global Places gazettier](geocode_tweets/config/global_places_v1.tsv).|
-|`cache_tweets`|Cache geocoded datapoints to Elasticsearch.|
+|`cache_tweets`|Cache geocoded datapoints to Elasticsearch database.|
 
 _Table 1. Twitter DAG Tasks_
 
@@ -36,8 +36,8 @@ Table 2 shows the external plugins the Twitter DAG uses to enrich the input data
 
 |Name|Image|URL|Responsibilities|
 |----|-----|---|----------------|
-|[DeepPavlov API](annotators/deeppavlov/README.md)|[_deeppavlov_](annotators/deeppavlov/Dockerfile)|`http:/deeppavlov/:5000/`|DeepPavlov NER REST API for geo political, location, and facility entity tagging.|
-|[Floods API](annotators/floods/README.md)|[_floods_](annotators/floods/Dockerfile)|`http://floods:5000/`|Floods NER REST API to annotate floods disaster type related datapoints.|
+|[DeepPavlov API](annotators/deeppavlov/README.md)|[_deeppavlov_](annotators/deeppavlov/Dockerfile)|`http:/deeppavlov:5000`|DeepPavlov NER REST API for geo political, location, and facility entity tagging.|
+|[Floods API](annotators/floods/README.md)|[_floods_](annotators/floods/Dockerfile)|`http://floods:5000`|Floods NER REST API to annotate floods disaster type related datapoints.|
 
 _Table 2. External Plugins_
 
@@ -126,4 +126,20 @@ For instance, we test the Elasticsearch API sensor task as follows:
 ```shell
 docker-compose run --rm airflow-cli airflow tasks test twitter is_elasticsearch_api_ready 2022-01-01
 ```
+
+## Enable Emails Notification
+
+Add the following environment variables in an .env file and save it into the project root directory.
+
+Say, you have a Google Mail account and you want to use that to send notifications out.
+
+```shell
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_EMAIL=youremail@gmail.com
+SMTP_PASSWORD=smtp-provider-auth-token*
+CSV_EMAILS_TO_NOTIFY_FAILURES=emails to send notifications to
+```
+
+\*search for 'google app password'
 
