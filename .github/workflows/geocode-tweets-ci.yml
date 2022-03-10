@@ -1,0 +1,25 @@
+name: Geocode Tweets task CI
+
+on:
+  push:
+    paths:
+      - 'geocode_tweets/**/*.py'
+
+jobs:
+  geocode-tweets-ci:
+    name: Geocode Tweets unittests
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Code checkout
+      uses: actions/checkout@v2
+  
+    - name: Build Docker images
+      run: |
+          # build base image
+          docker build ./libdrm --tag libdrm
+          docker build ./geocode_tweets --tag geocode-tweets
+
+    - name: Run unittests
+      run: docker container run --rm geocode-tweets pytest
+

@@ -1,0 +1,25 @@
+name: Transform Tweets task CI
+
+on:
+  push:
+    paths:
+      - 'transform_tweets/**/*.py'
+
+jobs:
+  transform-tweets-ci:
+    name: Transform Tweets unittests
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Code checkout
+      uses: actions/checkout@v2
+  
+    - name: Build Docker images
+      run: |
+          # build base image
+          docker build ./libdrm --tag libdrm
+          docker build ./transform_tweets --tag transform-tweets
+
+    - name: Run unittests
+      run: docker container run --rm transform-tweets pytest
+
