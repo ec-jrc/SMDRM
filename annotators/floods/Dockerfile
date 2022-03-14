@@ -18,7 +18,7 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends \
         build-essential \
         curl \
-        git \
+        unzip \
         locales && \
     printf '%s\n%s\n' 'en_US.UTF-8 UTF-8' >> /etc/locale.gen && locale-gen && \
     apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false && \
@@ -37,7 +37,8 @@ USER 1000
 # prepare environment
 RUN cd /home/user && \
         python -m venv venv && \
-        venv/bin/pip install -U pip setuptools wheel
+        venv/bin/pip install -U pip setuptools wheel && \
+        mkdir -p models
 ENV PATH=/home/user/venv/bin:$PATH
 WORKDIR /home/user
 
@@ -45,24 +46,12 @@ WORKDIR /home/user
 COPY --chown=1000:1000 requirements.txt  .
 RUN pip install -r requirements.txt
 
-# install models
-COPY --chown=1000:1000 download.sh .
-RUN mkdir ./models && \
-    bash download.sh && \
-    rm -r ./models/.git
-
 # copy souce code
+COPY --chown=1000:1000 start.sh .
 COPY --chown=1000:1000 wsgi.py .
 COPY --chown=1000:1000 app app
 COPY --chown=1000:1000 tests tests
 
 # runtime execution
-CMD flask run --host=0.0.0.0 --port=5000
-
-#CMD gunicorn wsgi:app \
-#      --log-level=${LOG_LEVEL} \
-#      --bind=${FLOODS_HOST}:${FLOODS_PORT} \
-#      --workers=2 \
-#      --threads=4 \
-#      --name floods
+CMD ["./start.sh"]
 

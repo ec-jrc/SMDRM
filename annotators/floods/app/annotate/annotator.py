@@ -10,10 +10,10 @@ models_dir = "/home/user/models"
 
 # load floods models config
 # fail if not found
-config_file = os.path.join(models_dir, "models", "current-model.json")
+config_file = os.path.join(models_dir, "current-model.json")
 if not os.path.exists(config_file):
     raise ValueError(
-        "Configuration file not found. Check if $MODELS_DIR is set, and has valid content."
+        "Configuration file not found. Check if /home/user/models is set, and has valid content."
     )
 with open(config_file) as conf:
     floods_config = json.load(conf)["model-by-language"]
@@ -22,10 +22,9 @@ with open(config_file) as conf:
 available_languages = [lang for lang in floods_config]
 
 # laserembeddings config (multilingual tokenizazion)
-embeddings_dir = os.path.join(models_dir, "embeddings")
-codes_path = os.path.join(embeddings_dir, "93langs.fcodes")
-vocab_path = os.path.join(embeddings_dir, "93langs.fvocab")
-encoder_path = os.path.join(embeddings_dir, "bilstm.93langs.2018-12-26.pt")
+codes_path = os.path.join(models_dir, "93langs.fcodes")
+vocab_path = os.path.join(models_dir, "93langs.fvocab")
+encoder_path = os.path.join(models_dir, "bilstm.93langs.2018-12-26.pt")
 # embeddings instance
 laser = Laser(codes_path, vocab_path, encoder_path)
 
@@ -44,14 +43,14 @@ class FloodsAnnotator(object):
         self._model_id = floods_config[self.lang]
         # load model at init
         self._model = load_model(
-            os.path.join(models_dir, "models", f"{self._model_id}.model.h5"),
+            os.path.join(models_dir, f"{self._model_id}.model.h5"),
             compile=False,
         )
         # load language based tokenizer if lang is not multilingual
         if not self.is_multi_lang:
             # tokenizer model is available only for in-house built models
             self._tokenizer = joblib.load(
-                os.path.join(models_dir, "models", f"{self._model_id}.tokenizer")
+                os.path.join(models_dir, f"{self._model_id}.tokenizer")
             )
             self._tokenizer.oov_token = None
 
@@ -81,3 +80,4 @@ def init_annotators():
     for lang in available_languages:
         annotators_by_lang[lang] = FloodsAnnotator(lang=lang)
     return annotators_by_lang
+
