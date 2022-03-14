@@ -9,7 +9,7 @@ It requires `lang` and `texts` fields to be able to compute a correct annotation
 
 ## Installation and Usage
 
-![Python](https://img.shields.io/badge/Python-3.8-information)&nbsp;&nbsp;![Flask](https://img.shields.io/badge/Flask-2.0.2-information)&nbsp;&nbsp;![Laser](https://img.shields.io/badge/LaserEmbeddings-1.1.2-information)&nbsp;&nbsp;![TensorFlow](https://img.shields.io/badge/Tensorflow-2.6.0-information)&nbsp;&nbsp;![Keras](https://img.shields.io/badge/Keras-2.6.*-information)&nbsp;&nbsp;![Torch](https://img.shields.io/static/v1?label=TorchC%20PU&message=1.10.0&color=information)
+![Python](https://img.shields.io/badge/Python-3.8-information)&nbsp;&nbsp;![Flask](https://img.shields.io/badge/Flask-2.0.2-information)&nbsp;&nbsp;![Laser](https://img.shields.io/badge/LaserEmbeddings-1.1.2-information)&nbsp;&nbsp;![TensorFlow](https://img.shields.io/badge/Tensorflow-2.6.0-information)&nbsp;&nbsp;![Keras](https://img.shields.io/badge/Keras-2.6.*-information)&nbsp;&nbsp;![Torch](https://img.shields.io/static/v1?label=Torch%20CPU&message=1.10.0&color=information)
 
 > :bangbang: Execute all bash commands from project root directory
 
