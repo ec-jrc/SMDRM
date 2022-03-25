@@ -65,7 +65,7 @@ docker-compose up airflow-init && docker-compose up
 
 You should see the following entries in the list of running containers (`docker-compose ps`)
 
-- airflow-scheduler
+e airflow-scheduler
 - airflow-triggerer
 - airflow-worker
 - airflow-webserver
@@ -76,30 +76,31 @@ You should see the following entries in the list of running containers (`docker-
 
 ### Run a DAG
 
-Follow these steps to send your data to the pipeline and have it transformed.
+1. put your zipfile in ./data/youfile.zip
+2. copy your zipfile in the Docker Volume smdrm_uploads-volume i.e. created with docker-compose up
 
-Note the data/ directory in the project root. It contains 2 sub-directories:
-1. _data/imports/_
-2. _data/exports/_
+```shell
+docker-compose run --rm -v smdrm_uploads-volume:/output -v $(pwd)/data:/input libdrm cp /input/youfile.zip /output
+```
 
-Having said that,
-1. copy your zipfile in _data/imports/_
-2. build/execute `trigger-dag-run` Docker service
-    ```shell
-    docker-compose build trigger-dag-run && docker-compose run --rm trigger-dag-run
-    ```
-3. wait on the execution to complete
-4. collect your output at _data/exports/_
+3. trigger a DAG run with Config via the CLI
+
+```shell
+# Twitter DAG --conf '{"COLLECTION_ID": "smdrm_uploads-volume", "INPUT_PATH": "/data/youfile.zip"}'
+docker-compose run --rm airflow-cli airflow dags trigger <dag_ID> --conf '{"key": "value"}' --run-id <helps-you-identify-this run>
+```
+
+Alternatively, you can trigger a DAG run from the UI.
 
 ## UI
 
-Airflow web UI is available at http://localhost:8080 
+Go to the [Airflow UI](http://localhost:8080)
 
 Default credentials are:
 * USERNAME=airflow
 * PASSWORD=airflow
 
-You can monitor the DAG execution, and investigate failures for each task.
+You can monitor DAGs execution, and investigate failures for each task.
 
 ## Tests
 

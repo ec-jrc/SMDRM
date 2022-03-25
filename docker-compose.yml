@@ -419,17 +419,13 @@ services:
       airflow-init:
         condition: service_completed_successfully
 
-  trigger-dag-run:
-    build: ./tools/airflow
-    image: airflow-utils
-    profiles:
-      - debug
+  api:
+    build: ./api
+    image: api
+    ports:
+        - 7000:5000
     volumes:
-      # export volume as link to airflow
-      - export-db-volume:/home/smdrm/data/airflow
-      # inport/export mounts
-      - ./data/exports:/home/smdrm/data/export
-      - ./data/imports:/home/smdrm/data/import
+      - uploads-volume:/home/smdrm/api/instance/uploads
 
   elasticsearch:
     environment:
@@ -460,7 +456,6 @@ services:
 volumes:
   deeppavlov-volume:
   elastic-node:
-  export-db-volume:
+  uploads-volume:
   floods-volume:
   postgres-db-volume:
-

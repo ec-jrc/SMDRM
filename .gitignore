@@ -19,6 +19,8 @@ nbs/*
 # Annotators
 **/models
 **/tmp_trainer
+
+# Flask apps
 **/instance
 
 # Airflow
@@ -27,9 +29,6 @@ airflow/logs
 # Data
 data/*
 !data/README.md
-!data/**/
-data/imports/*
-data/exports/*
 
 # Temp files
 tools/places/temp/*
@@ -37,4 +36,3 @@ tools/places/temp/*
 
 # sys
 .Trash*
-
