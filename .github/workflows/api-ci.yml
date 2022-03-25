@@ -1,0 +1,25 @@
+name: SMDRM API CI
+
+on:
+  push:
+    paths:
+      - 'api/**/*.py'
+
+jobs:
+  api-ci:
+    name: API unittests
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Code checkout
+      uses: actions/checkout@v2
+  
+    - name: Build Docker images
+      run: |
+          # build base image
+          docker build ./libdrm --tag libdrm
+          docker build ./api --tag api
+
+    - name: Run unittests
+      run: docker container run --rm api pytest
+

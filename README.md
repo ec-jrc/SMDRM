@@ -35,35 +35,17 @@ docker-compose up
 
 ## Usage
 
-> :bangbang: Ensure your input data has the expected format.
+> :bangbang: Ensure your input data has the expected format, and it does not exceed **64mb after compression**.
 > For more details, read the [Input Data](docs/architecture.md#input-data) section.
 
-The application waits on your input data.
+The application waits on you to upload your zipfile data, and start an Airflow [workflow](docs/glossary.md#workflow).
 
-There are two ways to enter your data and start a [workflow](docs/glossary.md#workflow):
-1. CLI shell
-2. Imports UI
+Go to the SMDRM UI [upload](http://localhost:7007/upload) page, and upload a zipfile. You will be redirected to the
+[uploads](http://localhost:7007/uploads) page where the enriched version of your input data will land.
 
-At the end of the execution, you can collect the enriched data at:
-* ./data/exports/
-* [Kibana Dashboard](http://localhost:5601)
+Optionally, you can use the [Kibana Dashboard](http://localhost:5601) to visualize your enriched data interactively.
 
-### CLI Shell
-
-We assume that your shell is in the project root directory.
-
-```shell
-./process_zipfile.sh <fullpath-to-zipfile>
-```
-
-> :information_source: For additional details on the steps executed,
-> check the [Run a DAG](airflow/README.md#run-a-dag) section.
-
-### Imports UI
-
-> :warning: Currently not unavailable.
-
-## Documentation Extra
+## Extras
 
 For further documentation resources, check the _docs_ directory
 * [Architecture](docs/architecture.md)

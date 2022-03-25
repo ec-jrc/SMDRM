@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h3 class="panel-title">Processed uploads</h3>
+    </div>
+    <div class="panel-body">
+        <table class="table table-sm table-hover">
+           <thead>
+             <tr>
+               <th scope="col">#</th>
+               <th scope="col">Files</th>
+             </tr>
+           </thead>
+           <tbody>
+             {% for file in files %}
+             <tr>
+               <th scope="row">{{ loop.index }}</th>
+               <td><a href="/download/{{ file }}">{{ file }}</a></td>
+             </tr>
+             {% endfor %}
+           </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}
