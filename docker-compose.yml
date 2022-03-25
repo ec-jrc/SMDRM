@@ -214,10 +214,10 @@ services:
 
   # https://onedevblog.com/how-to-fix-a-permission-denied-when-using-dockeroperator-in-airflow/
   docker-proxy:
-    image: bobrik/socat
     command: "TCP4-LISTEN:2375,fork,reuseaddr UNIX-CONNECT:/var/run/docker.sock"
+    image: bobrik/socat
     ports:
-      - 2376:2375
+      - 2375
     restart: unless-stopped
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
