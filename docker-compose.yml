@@ -186,8 +186,7 @@ services:
     environment:
       <<: *pipelines-common-env
       FLASK_APP: wsgi.py
-      FLASK_ENV: ${FLASK_ENV:-production}
-      SECRET_KEY: ${SECRET_KEY:-}
+      FLASK_DEBUG: 0
     image: annotators/floods
     hostname: floods
     ports:
