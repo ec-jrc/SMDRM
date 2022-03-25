@@ -18,5 +18,5 @@ jobs:
       run: docker build ./airflow --tag airflow:test
 
     - name: Run unittests
-      run: docker container run --rm airflow:test pytest
+      run: docker container run --rm airflow:test bash -c pytest
 
