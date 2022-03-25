@@ -13,7 +13,7 @@ upload_parser = ns.parser()
 upload_parser.add_argument('file', location='files', help="The zipfile to upload.",
                            type=FileStorage, required=True)
 upload_parser.add_argument('dag_id', location='args', default="twitter", help="The ID of the Airflow DAG workflow in charge to run the pipeline.", required=True)
-upload_parser.add_argument('collection_id', location='args', default="smdrm_uploads-db", help="The ID of the collection from which the upload comes.", required=True)
+upload_parser.add_argument('collection_id', location='args', default="smdrm_uploads-volume", help="The ID of the collection from which the upload comes.", required=True)
 
 
 @ns.route('/')
