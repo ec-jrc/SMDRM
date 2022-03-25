@@ -115,16 +115,12 @@ services:
 
   extract-tweets:
     <<: *pipelines-common
-    build:
-      <<: *pipelines-common-build
-      context: ./extract_tweets
+    build: ./tasks/extract_tweets
     image: extract-tweets
 
   transform-tweets:
     <<: *pipelines-common
-    build:
-      <<: *pipelines-common-build
-      context: ./transform_tweets
+    build: ./tasks/transform_tweets
     depends_on:
       <<: *pipelines-common-depends-on
       annotators-deeppavlov:
@@ -133,9 +129,7 @@ services:
 
   floods-annotate:
     <<: *pipelines-common
-    build:
-      <<: *pipelines-common-build
-      context: ./floods_annotate
+    build: ./tasks/floods_annotate
     depends_on:
       <<: *pipelines-common-depends-on
       annotators-floods:
@@ -144,16 +138,12 @@ services:
 
   geocode-tweets:
     <<: *pipelines-common
-    build:
-      <<: *pipelines-common-build
-      context: ./geocode_tweets
+    build: ./tasks/geocode_tweets
     image: geocode-tweets
 
   cache-tweets:
     <<: *pipelines-common
-    build:
-      <<: *pipelines-common-build
-      context: ./cache_tweets
+    build: ./tasks/cache_tweets
     depends_on:
       <<: *pipelines-common-depends-on
       elasticsearch:

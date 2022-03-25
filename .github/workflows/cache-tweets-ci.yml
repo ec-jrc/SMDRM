@@ -3,7 +3,7 @@ name: Cache Tweets task CI
 on:
   push:
     paths:
-      - 'cache_tweets/**/*.py'
+      - 'tasks/cache_tweets/**/*.py'
 
 jobs:
   cache-tweets-ci:
@@ -18,7 +18,7 @@ jobs:
       run: |
           # build base image
           docker build ./libdrm --tag libdrm
-          docker build ./cache_tweets --tag cache-tweets
+          docker build ./tasks/cache_tweets --tag cache-tweets
 
     - name: Run unittests
       run: docker container run --rm cache-tweets pytest

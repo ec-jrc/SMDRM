@@ -3,7 +3,7 @@ name: Extract Tweets task CI
 on:
   push:
     paths:
-      - 'extract_tweets/**/*.py'
+      - 'tasks/extract_tweets/**/*.py'
 
 jobs:
   extract-tweets-ci:
@@ -18,7 +18,7 @@ jobs:
       run: |
           # build base image
           docker build ./libdrm --tag libdrm
-          docker build ./extract_tweets --tag extract-tweets
+          docker build ./tasks/extract_tweets --tag extract-tweets
 
     - name: Run unittests
       run: docker container run --rm extract-tweets pytest

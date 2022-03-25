@@ -3,7 +3,7 @@ name: Floods Annotate task CI
 on:
   push:
     paths:
-      - 'floods_annotate/**/*.py'
+      - 'tasks/floods_annotate/**/*.py'
 
 jobs:
   floods-annotate-ci:
@@ -18,7 +18,7 @@ jobs:
       run: |
           # build base image
           docker build ./libdrm --tag libdrm
-          docker build ./floods_annotate --tag floods-annotate
+          docker build ./tasks/floods_annotate --tag floods-annotate
 
     - name: Run unittests
       run: docker container run --rm floods-annotate pytest
