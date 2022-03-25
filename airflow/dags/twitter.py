@@ -157,7 +157,7 @@ with DAG(
         task_id="extract_tweets",
         api_version="auto",
         auto_remove=True,
-        image="extract-tweets",
+        image="tasks/extract-tweets",
         docker_url=docker_url,
         mounts=[
             Mount(
@@ -185,7 +185,7 @@ with DAG(
         task_id="transform_tweets",
         api_version="auto",
         auto_remove=True,
-        image="transform-tweets",
+        image="tasks/transform-tweets",
         docker_url=docker_url,
         network_mode="smdrm_default",
         mounts=[
@@ -214,7 +214,7 @@ with DAG(
         task_id="floods_annotate_tweets",
         api_version="auto",
         auto_remove=True,
-        image="floods-annotate",
+        image="tasks/floods-annotate",
         docker_url=docker_url,
         network_mode="smdrm_default",
         mounts=[
@@ -242,7 +242,7 @@ with DAG(
         task_id="geocode_tweets",
         api_version="auto",
         auto_remove=True,
-        image="geocode-tweets",
+        image="tasks/geocode-tweets",
         docker_url=docker_url,
         mounts=[
             Mount(
@@ -270,7 +270,7 @@ with DAG(
         task_id="cache_tweets",
         api_version="auto",
         auto_remove=True,
-        image="cache-tweets",
+        image="tasks/cache-tweets",
         docker_url=docker_url,
         network_mode="smdrm_default",
         mounts=[

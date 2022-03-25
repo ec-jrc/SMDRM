@@ -116,7 +116,7 @@ services:
   extract-tweets:
     <<: *pipelines-common
     build: ./tasks/extract_tweets
-    image: extract-tweets
+    image: tasks/extract-tweets
 
   transform-tweets:
     <<: *pipelines-common
@@ -125,7 +125,7 @@ services:
       <<: *pipelines-common-depends-on
       annotators-deeppavlov:
         condition: service_healthy
-    image: transform-tweets
+    image: tasks/transform-tweets
 
   floods-annotate:
     <<: *pipelines-common
@@ -134,12 +134,12 @@ services:
       <<: *pipelines-common-depends-on
       annotators-floods:
         condition: service_healthy
-    image: floods-annotate
+    image: tasks/floods-annotate
 
   geocode-tweets:
     <<: *pipelines-common
     build: ./tasks/geocode_tweets
-    image: geocode-tweets
+    image: tasks/geocode-tweets
 
   cache-tweets:
     <<: *pipelines-common
@@ -148,7 +148,7 @@ services:
       <<: *pipelines-common-depends-on
       elasticsearch:
         condition: service_healthy
-    image: cache-tweets
+    image: tasks/cache-tweets
 
   annotators-deeppavlov:
     build:
