@@ -25,5 +25,5 @@ if [ ! -f "$MODEL_DIR/bilstm.93langs.2018-12-26.pt" ]; then
 fi
 
 # start app
-flask run --host=$(hostname -i) --port=5000
+flask run --host=0.0.0.0 --port=5000
 
