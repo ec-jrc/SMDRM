@@ -18,7 +18,11 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 USER airflow
 # override docker operator with custom version
-COPY custom_ops/docker.py $DOCKER_OP_PATH
+COPY --chown=airflow:0 custom_ops/docker.py $DOCKER_OP_PATH
+
+# copy source code
+COPY --chown=airflow:0 dags dags
+COPY --chown=airflow:0 tests tests
 
 # update pip and install pytest
 RUN python -m pip install --upgrade pip pytest

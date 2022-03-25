@@ -24,9 +24,9 @@ console = logging.getLogger(__name__)
 docker_url = "tcp://docker-proxy:2375"
 
 # emails to send failure notifications to
-emails_to_notify = list(
-    filter(None, Variable.get("CSV_EMAILS_TO_NOTIFY_FAILURES").split(","))
-)
+csv_emails = Variable.get("CSV_EMAILS_TO_NOTIFY_FAILURES", default_var="user@test.py")
+emails_to_notify = [email for email in csv_emails.split(",")]
+
 # enable email notification for DAG failures if emails are given
 notifications_on = bool(emails_to_notify)
 
