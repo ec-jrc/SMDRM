@@ -127,15 +127,14 @@ services:
         condition: service_healthy
     image: tasks/transform-tweets
 
-  floods-annotate:
+  annotate-tweets:
     <<: *pipelines-common
-    build: ./tasks/floods_annotate
+    build: ./tasks/annotate_tweets
     depends_on:
       <<: *pipelines-common-depends-on
       annotators-floods:
         condition: service_healthy
-    image: tasks/floods-annotate
-
+    image: tasks/annotate-tweets
   geocode-tweets:
     <<: *pipelines-common
     build: ./tasks/geocode_tweets

@@ -10,7 +10,6 @@ class DataPointModel(pydantic.BaseModel, extra=pydantic.Extra.ignore):
 
     id: int
     created_at: str
-    lang: str
     text: str
     # enriched fields
     # generated at runtime by pipeline tasks
