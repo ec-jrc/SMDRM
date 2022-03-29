@@ -15,8 +15,10 @@ jobs:
       uses: actions/checkout@v2
   
     - name: Build Docker image
-      run: docker build ./airflow --tag airflow:test
+      run: |
+          echo -e "AIRFLOW_UID=$(id -u)" > .env
+          docker-compose up --build airflow-init
 
     - name: Run unittests
-      run: docker container run --rm airflow:test bash -c pytest
+      run: docker-compose run --rm airflow-worker bash -c pytest
 
