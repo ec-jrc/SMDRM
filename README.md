@@ -56,8 +56,8 @@ Once the workflow is successful, you can use the [Kibana Dashboard](http://local
 For further documentation resources, check the _docs_ directory
 * [Architecture](docs/architecture.md)
 * [Background](docs/background.md)
-* [Dev Notes](docs/architecture.md)
-* [Glossary](docs/architecture.md)
+* [Dev Notes](docs/devnotes.md)
+* [Glossary](docs/glossary.md)
 
 ## Credits
 
