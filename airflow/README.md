@@ -22,11 +22,11 @@ Table 1 shows the `twitter` DAG _tasks_
 
 |Name|Description|
 |----|-----------|
-|`extract_tweets`|Extracts required fields from raw data, and generates new fields to create the Datapoint model.|
-|`transform_tweets`|Apply place and grammar normalization transformations to clean the `text` field and identify place candidates.|
-|`floods_annotate`|Assign a floods related probability score to the datapoint given its (cleaned) `text`.|
-|`geocode_tweets`|Assign latitude and longitude coordinates to the datapoint whose place candidates matches against a [GADM](https://gadm.org) based [Global Places gazettier](geocode_tweets/config/global_places_v1.tsv).|
-|`cache_tweets`|Cache geocoded datapoints to Elasticsearch database.|
+|`extract-tweets`|Extracts required fields from raw data, and generates new fields to create the Datapoint model.|
+|`transform-tweets`|Apply place and grammar normalization transformations to clean the `text` field and identify place candidates.|
+|`annotate-tweets`|Assign a (natural) disaster related probability score to the datapoint given its (cleaned) `text`, and the chosen ANNOTATOR_ID env.|
+|`geocode-tweets`|Assign latitude and longitude coordinates to the datapoint whose place candidates matches against a [GADM](https://gadm.org) based [Global Places gazettier](geocode_tweets/config/global_places_v1.tsv).|
+|`cache-tweets`|Cache geocoded datapoints to Elasticsearch database.|
 
 _Table 1. Twitter DAG Tasks_
 
@@ -143,4 +143,3 @@ CSV_EMAILS_TO_NOTIFY_FAILURES=emails to send notifications to
 ```
 
 \*search for 'google app password'
-
