@@ -10,7 +10,7 @@ import pytest
 @pytest.fixture()
 def valid_json_line():
     yield dict(
-        id=1, created_at="datetime", lang="ml", text="a text from valid datapoint"
+        id=1, created_at="datetime", text="a text from valid datapoint"
     )
 
 
@@ -23,7 +23,7 @@ def invalid_json_line():
 def preprocessed_json_line():
     yield {
         "unprocessed": dict(
-            id=1, created_at="datetime", lang="ml", text="a text from legacy datapoint"
+            id=1, created_at="datetime", text="a text from legacy datapoint"
         ),
         "fake": "key",
     }

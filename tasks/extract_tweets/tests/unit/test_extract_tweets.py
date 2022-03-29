@@ -40,7 +40,6 @@ def test_build_datapoints(valid_json_line):
         assert res == {
             "id": 1,
             "created_at": "datetime",
-            "lang": "ml",
             "text": "a text from valid datapoint",
             "annotation": None,
             "text_clean": None,

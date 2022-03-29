@@ -11,17 +11,19 @@ def dag(dagbag):
 
 class TestTwitterDagDefinition:
 
-    EXPECTED_N_TASKS = 8
     EXPECTED_TASKS = [
         "push_collection_id",
         "push_filepaths",
         "is_deeppavlov_api_ready",
         "is_floods_api_ready",
+        "is_elasticsearch_api_ready",
         "extract_tweets",
         "transform_tweets",
-        "floods_annotate_tweets",
+        "annotate_tweets",
         "geocode_tweets",
+        "cache_tweets"
     ]
+    EXPECTED_N_TASKS = len(EXPECTED_TASKS)
 
     # check if 2 lists are equivalent
     compare = lambda self, x, y: sorted(set(x)) == sorted(set(y))
@@ -55,10 +57,12 @@ class TestTwitterDagDefinition:
                     "push_filepaths",
                     "is_deeppavlov_api_ready",
                     "is_floods_api_ready",
+                    "is_elasticsearch_api_ready",
                 ],
                 ["transform_tweets"],
             ),
-            ("floods_annotate_tweets", ["transform_tweets"], ["geocode_tweets"]),
+            ("annotate_tweets", ["transform_tweets"], ["geocode_tweets"]),
+            ("cache_tweets", ["geocode_tweets"], []),
         ],
     )
     def test_dependencies_of_tasks(

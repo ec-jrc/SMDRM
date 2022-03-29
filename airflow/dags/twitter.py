@@ -23,12 +23,19 @@ console = logging.getLogger(__name__)
 # a proxy (container) in the Docker network
 docker_url = "tcp://docker-proxy:2375"
 
-# emails to send failure notifications to
-csv_emails = Variable.get("CSV_EMAILS_TO_NOTIFY_FAILURES", default_var="user@test.py")
-emails_to_notify = [email for email in csv_emails.split(",")]
 
-# enable email notification for DAG failures if emails are given
-notifications_on = bool(emails_to_notify)
+def get_notification_emails_from_env():
+    # emails to send failure notifications to
+    emails_to_notify = []
+    csv_emails = Variable.get("CSV_EMAILS_TO_NOTIFY_FAILURES", default_var=None)
+
+    # enable email notification for DAG failures if emails are given
+    if csv_emails is not None:
+        for email in csv_emails.split(","):
+            if email:
+                emails_to_notify.append(email)
+
+    return emails_to_notify
 
 
 @task(task_id="push_collection_id")
@@ -53,12 +60,15 @@ def push_filepaths(ti=None, params=None, dag_run=None, test_mode=None):
         console.info("XCom filepath pushed: {}".format(output_fp))
 
 
+# notification emails
+emails = get_notification_emails_from_env()
+
 # default arguments for DAG
 default_args = {
     "owner": "airflow",
     "depends_on_past": False,
-    "email": emails_to_notify,
-    "email_on_failure": notifications_on,
+    "email": emails,
+    "email_on_failure": len(emails) > 0,
     "email_on_retry": False,
     "retries": 1,
     "retry_delay": timedelta(minutes=1),

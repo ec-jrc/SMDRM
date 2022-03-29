@@ -57,8 +57,8 @@ class TestXComPush:
             == "/data/test_transformed.zip"
         )
         assert (
-            ti.xcom_pull(task_ids=task_id, key="filepath_floods")
-            == "/data/test_floods.zip"
+            ti.xcom_pull(task_ids=task_id, key="filepath_annotated")
+            == "/data/test_annotated.zip"
         )
         assert (
             ti.xcom_pull(task_ids=task_id, key="filepath_geocoded")

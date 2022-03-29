@@ -2,12 +2,12 @@ import os
 import pytest
 from airflow.models import DagBag
 
+from conftest import twitter
 
 class TestDagsValidation:
 
     LOAD_SECOND_THRESHOLD = 2
     EXPECTED_NUMBER_OF_DAGS = 1
-    EMAILS = os.getenv("CSV_EMAILS_TO_NOTIFY_FAILURES")
 
     def test_import_dags(self, dagbag):
         """
@@ -40,17 +40,21 @@ class TestDagsValidation:
         )
 
     def test_default_args_email_and_email_on_failure(self, dagbag):
-        """
-        Verify that DAGs sets the correct config if CSV_EMAILS_TO_NOTIFY_FAILURES env is given
-        - Check email + email_on_failure
-        """
+        """Verify DAG email config if AIRFLOW_VAR_CSV_EMAILS_TO_NOTIFY_FAILURES env is given or not"""
+       
+        # get csv email list from env
+        emails = twitter.get_notification_emails_from_env()
+
         for dag_id, dag in dagbag.dags.items():
             email = dag.default_args.get("email")
-            email_on_failure = dag.default_args.get("email_on_failure")
-            if self.EMAILS:
-                assert len(email) > 0 and email_on_failure
+            onfail = dag.default_args.get("email_on_failure")
+
+            if emails:
+                assert email == emails
+                assert onfail is True
             else:
-                assert email == [] and not email_on_failure
+                assert email == []
+                assert not onfail
 
     def test_default_args_retries(self, dagbag):
         """
