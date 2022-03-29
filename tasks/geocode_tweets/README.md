@@ -3,8 +3,7 @@
 Search place candidates identified at [transform_tweets](../transform_tweets/README.md)
 task against our Global Places datasets.
 
-For more details on the Global Places dataset,
-check [tools/locations/README.md](../tools/locations/README.md)
+For more details on the Global Places dataset, go to [add repo url](here).
 
 Execution
 * create a subset of the Global Places dataset using the `region_id` argument

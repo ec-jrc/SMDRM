@@ -30,9 +30,5 @@ airflow/logs
 data/*
 !data/README.md
 
-# Temp files
-tools/places/temp/*
-!tools/places/temp/.gitkeep
-
 # sys
 .Trash*

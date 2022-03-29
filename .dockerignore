@@ -11,9 +11,6 @@ docker-compose.*
 # Config
 *.env
 
-# Development
-nbs/**
-
 # Tasks
 **/build
 **/dist

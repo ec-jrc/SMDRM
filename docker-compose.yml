@@ -91,10 +91,10 @@ x-airflow-common:
     AIRFLOW_CONN_ELASTICSEARCH_API: 'http://elasticsearch:9200'
     # csv emails to notify in case of failure
     AIRFLOW_VAR_CSV_EMAILS_TO_NOTIFY_FAILURES: ${CSV_EMAILS_TO_NOTIFY_FAILURES:-}
-  volumes:
-    - ./airflow/dags:/opt/airflow/dags
-    - ./airflow/logs:/opt/airflow/logs
-    - ./airflow/tests:/opt/airflow/tests
+#  volumes:
+#    - ./airflow/dags:/opt/airflow/dags
+#    - ./airflow/logs:/opt/airflow/logs
+#    - ./airflow/tests:/opt/airflow/tests
   user: "${AIRFLOW_UID:-50000}:0"
   depends_on:
     &airflow-common-depends-on
@@ -135,6 +135,7 @@ services:
       annotators-floods:
         condition: service_healthy
     image: tasks/annotate-tweets
+
   geocode-tweets:
     <<: *pipelines-common
     build: ./tasks/geocode_tweets
