@@ -8,10 +8,6 @@ import pytest
 
 
 @pytest.fixture(scope="module")
-def floods_ita():
-    yield annotator.FloodsAnnotator(lang="it")
+def model():
+    yield annotator.FloodsAnnotator()
 
-
-@pytest.fixture(scope="module")
-def floods_ml():
-    yield annotator.FloodsAnnotator(lang="ml")

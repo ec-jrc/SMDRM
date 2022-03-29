@@ -58,7 +58,6 @@ Table 1 shows the input data fields of a datapoint.
 |-----|----|------|-----------|----|
 |`id`|int| |The unique identifier of a datapoint|A string number will be converted to integer|
 |`created_at`|str|`EEE LLL dd HH:mm:ss Z yyyy`|The date and time at which the datapoint is created|Twitter based datetime format. Elasticsearch will convert this field to a date provided that it comes in this format. Therefore, make sure you convert your equivalent `created_at` field accordingly.|
-|`lang`|str|2 character language code|`en`=English|Any language beside `en`, `es`, `de`, `fr`, `it`, `ar`, `ja`, and `pt` will be converted to `ml` (multilingual) and vectorized with Laserembeddings. For more info, check the Annotators [README.md](annotators/README.md)|
 |`text`|str| |The textual information to be annotated and/or geo located|Only textual information that fall inside this field will be considered. Therefore, make sure you sanitize your data accordingly.|
 
 _Table 1. Datapoint Fields_

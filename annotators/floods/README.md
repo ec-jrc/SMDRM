@@ -1,11 +1,15 @@
 # Floods API
 
-[Python:3.8-slim] based Docker image provides a REST API to call pre-trained
+Python:3.8-slim based Docker image provides a REST API to call pre-trained
 Named Entity Recognition Machine Learning annotators.
 We used `Floods` disaster related multilingual texts as training data to annotate
 new incoming texts.
 
-It requires `lang` and `texts` fields to be able to compute a correct annotation.
+It requires `texts` field to be able to compute a correct annotation.
+
+## Publication
+
+Publicated on [Zenodo](https://zenodo.org/record/6351658).
 
 ## Installation and Usage
 
@@ -29,13 +33,13 @@ docker-compose up annotators-floods
 
 Send a REST HTTP POST request to the API
 
-Note the `texts` key in the payload, and the `en` (lang ISO code) in the URL.
+Note the `texts` key in the payload in the URL.
 
 > :information_source: The container's port is randomly assigned to enable scaling.
 > Run `docker-compose ps` to find the port number
 
 ```shell
-curl http://localhost:<port>/model/annotate/en \
+curl http://localhost:<port>/model/annotate \
   -H "Content-Type: application/json" \
   -d '{"texts": ["a flood disaster text url","another flood disaster text url"]}'
 
@@ -65,7 +69,7 @@ docker-compose run --rm \
 Run the unittests
 
 ```shell
-docker-compose run --rm annotators-floods tests/unit
+docker-compose run --rm annotators-floods pytest tests/unit
 ```
 
 Run the integration tests

@@ -183,10 +183,10 @@ def task_metrics(datapoints: typing.Iterable[dict]) -> typing.Iterable[dict]:
         total += 1
         if get_gpes(datapoint):
             with_gpe += 1
-        coords = datapoint["place"].get("coordinates")
-        if coords:
+        meta = datapoint["place"].get("meta")
+        if meta:
             geolocated += 1
-            if len(coords) > 1:
+            if len(meta) > 1:
                 geolocated_fuzzy += 1
         yield datapoint
     console.info(

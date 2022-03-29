@@ -1,13 +1,13 @@
-name: Floods Annotate task CI
+name: Annotate Tweets task CI
 
 on:
   push:
     paths:
-      - 'tasks/floods_annotate/**/*.py'
+      - 'tasks/annotate_tweets/**/*.py'
 
 jobs:
-  floods-annotate-ci:
-    name: Floods Annotate unittests
+  annotate-tweets-ci:
+    name: Annotate Tweets unittests
     runs-on: ubuntu-latest
 
     steps:
@@ -18,8 +18,8 @@ jobs:
       run: |
           # build base image
           docker build ./libdrm --tag libdrm
-          docker build ./tasks/floods_annotate --tag floods-annotate
+          docker build ./tasks/annotate_tweets --tag annotate-tweets
 
     - name: Run unittests
-      run: docker container run --rm floods-annotate pytest
+      run: docker container run --rm annotate-tweets pytest
 

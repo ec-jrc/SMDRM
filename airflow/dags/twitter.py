@@ -47,7 +47,7 @@ def push_filepaths(ti=None, params=None, dag_run=None, test_mode=None):
     console.info("XCom filepath pushed: {}".format(fp))
     # suffixes added to input fp to generate output filepaths
     file_extension = ".zip"
-    for suffix in ["_extracted", "_transformed", "_floods", "_geocoded"]:
+    for suffix in ["_extracted", "_transformed", "_annotated", "_geocoded"]:
         output_fp = fp.replace(file_extension, suffix + file_extension)
         ti.xcom_push(key="filepath" + suffix, value=output_fp)
         console.info("XCom filepath pushed: {}".format(output_fp))
@@ -210,11 +210,15 @@ with DAG(
     )
 
     # annotations
-    floods_annotate = DockerOperator(
-        task_id="floods_annotate_tweets",
+    annotate_tweets = DockerOperator(
+        task_id="annotate_tweets",
         api_version="auto",
         auto_remove=True,
-        image="tasks/floods-annotate",
+        environment={
+            # TODO: parametize
+            "ANNOTATOR_ID": "floods",
+            },
+        image="tasks/annotate-tweets",
         docker_url=docker_url,
         network_mode="smdrm_default",
         mounts=[
@@ -225,15 +229,15 @@ with DAG(
             ),
         ],
         mount_tmp_dir=False,
-        command='python floods_annotate.py \
+        command='python annotate_tweets.py \
         --input-path {{ ti.xcom_pull(task_ids="push_filepaths", key="filepath_transformed") }} \
-        --output-path {{ ti.xcom_pull(task_ids="push_filepaths", key="filepath_floods") }}',
+        --output-path {{ ti.xcom_pull(task_ids="push_filepaths", key="filepath_annotated") }}',
     )
     # documentation
-    floods_annotate.doc_m = dedent(
+    annotate_tweets.doc_m = dedent(
         """\
-        #### Floods Annotate
-        Annotate `text` data with the Floods Named Entity Recognition annotator.
+        #### Annotate Tweets
+        Annotate `text` data with a chose Named Entity Recognition annotator.
         """
     )
 
@@ -253,7 +257,7 @@ with DAG(
         ],
         mount_tmp_dir=False,
         command='python geocode_tweets.py \
-        --input-path {{ ti.xcom_pull(task_ids="push_filepaths", key="filepath_floods") }} \
+        --input-path {{ ti.xcom_pull(task_ids="push_filepaths", key="filepath_annotated") }} \
         --output-path {{ ti.xcom_pull(task_ids="push_filepaths", key="filepath_geocoded") }}',
     )
     # documentation
@@ -311,7 +315,7 @@ with DAG(
     (
         extract_tweets
         >> transform_tweets
-        >> floods_annotate
+        >> annotate_tweets
         >> geocode_tweets
         >> cache_tweets
     )

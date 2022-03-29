@@ -63,6 +63,9 @@ Provides a OOP data processing pipeline.
 
 ## Releases
 
+- **0.1.11**
+  Remove `lang` field.
+
 - **0.1.10**
   New DataPointModel fields:
    * include legacy fields

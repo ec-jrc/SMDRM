@@ -2,13 +2,13 @@
 FROM libdrm
 
 # set working directory
-WORKDIR /home/smdrm/floods_annotate
+WORKDIR /home/smdrm/annotate_tweets
 
 # copy source code
 COPY VERSION.txt .
-COPY floods_annotate.py .
+COPY annotate_tweets.py .
 COPY tests tests
 
 # runtime execution
-CMD python floods_annotate.py --help
+CMD python annotate_tweets.py --help
 
