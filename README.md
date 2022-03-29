@@ -40,10 +40,16 @@ docker-compose up
 
 The application waits on you to upload your zipfile data, and start an Airflow [workflow](docs/glossary.md#workflow).
 
-Go to the SMDRM UI [upload](http://localhost:7007/upload) page, and upload a zipfile. You will be redirected to the
-[uploads](http://localhost:7007/uploads) page where the enriched version of your input data will land.
+Go to the [SMDRM API](http://localhost:7000/api/v1) swagger UI, and select the uploads/upload endpoint to upload a zipfile.
 
-Optionally, you can use the [Kibana Dashboard](http://localhost:5601) to visualize your enriched data interactively.
+> :bangbang: Leave the default values for the `dag_id`, and `collection_id` fields.
+
+A response with `{"status": "queued"}` in the payload indicates that Airflow has received the request,
+and it has triggered a workflow to processing you input zipfile.
+
+You can check the status of the workflow progress. Go to the [Airflow UI](http://localhost:8080), and click on the Twitter DAG.
+
+Once the workflow is successful, you can use the [Kibana Dashboard](http://localhost:5601) to interactively visualize your enriched data.
 
 ## Extras
 
@@ -58,6 +64,7 @@ For further documentation resources, check the _docs_ directory
 * [stackoverflow.com](http://stackoverflow.com)
 * [towardsdatascience.com](https://towardsdatascience.com)
 * [medium.com](https://medium.com)
+* [freecodecamp.org](https://www.freecodecamp.org/)
 
 ## Licence
 

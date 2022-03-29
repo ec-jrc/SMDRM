@@ -1,11 +1,17 @@
 # Annotators
 
-The Machine Learning models to annotate the textual information in the disaster related data points.
+The Named Entity Recognition (NER) Machine Learning models to annotate the
+textual information in the disaster related data points.
 Each model is available by means of HTTP API call to a dedicated endpoint.
 
-At the moment, the following annotators are available:
-* `deeppavlov` (external) [Apache Licence](https://github.com/deepmipt/DeepPavlov/blob/master/LICENSE)
-* `floods` (in-house) [European Union Public Licence V1.2](https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12)
+At the moment, the following annotators are shown in table 1.
+
+|Name|Description|Licence|Notes|
+|----|-----------|-------|-----|
+|[DeepPavlov](deeppavlov/README.md)|Multilingual Geo Political Entities (GPE), Locations (LOC), and Facilities (FAC) NER tagging|[Apache Licence](https://github.com/deepmipt/DeepPavlov/blob/master/LICENSE)|External|
+|[Floods](floods/README.md)|Multilingual floods disaster related probability annotation.|[European Union Public Licence V1.2](https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12)|Internal|
+
+_Table 1. Available Machine Learning Annotators._
 
 ## Performance Tests
 

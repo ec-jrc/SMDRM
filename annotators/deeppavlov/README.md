@@ -1,6 +1,6 @@
 # DeepPavlov API
 
-[Python:3.7-slim] based Docker image provides a REST API to
+Python:3.7-slim based Docker image provides a REST API to
 call the DeepPavlov Named Entity Recongnition AI framework.
 It is an external plugin to tag input texts.
 
@@ -35,7 +35,7 @@ Send a REST HTTP POST request to the API
 > Run `docker-compose ps` to find the port number
 
 ```shell
-curl -X POST http://localhost:<port>/model \
+curl -X POST http://localhost:<port>/model/annotate \
   -H 'Content-Type: application/json' \
   -d '{"texts": ["Un texte d`information sur Rio de Janeiro, écrit à Paris."]}'
 ```

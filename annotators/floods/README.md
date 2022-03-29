@@ -9,7 +9,7 @@ It requires `texts` field to be able to compute a correct annotation.
 
 ## Publication
 
-Publicated on [Zenodo](https://zenodo.org/record/6351658).
+See [Zenodo](https://zenodo.org/record/6351658).
 
 ## Installation and Usage
 
