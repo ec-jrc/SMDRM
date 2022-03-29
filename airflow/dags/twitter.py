@@ -1,6 +1,15 @@
 """
 ### Twitter DAG
-Add the documentation here...
+Twitter DAG is the workflow to run the pipeline tasks responsible to manipulate Twitter datapoints.
+
+The expected input file format is zipfile. One zipfile at the time can be processed in each DAG run.
+Each zipfile may contain 1 or more Newline Delimited JSON file(s), for a total size of 64 mb after compression.
+
+A DAG run is a running instance of the workflow. It requires you to set a `COLLECTION_ID`, and a `INPUT_PATH`.
+The COLLECTION_ID is the Docker volume name with the zipfile to be manipulated. Whereas the INPUT_PATH is the zipfile name.
+
+The easiest way to trigger a DAG run is to upload a zipfile through the SMDRM API, available on the host @ http://localhost:7000/api/v1.
+Ensure that the arguments in the body of the HTTP POST request are `dag_id=twitter`, and `collection_id=smdrm_uploads-volume`.
 """
 
 import logging
