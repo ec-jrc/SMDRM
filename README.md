@@ -1,5 +1,7 @@
 # Social Media Disaster Risk Monitoring
 
+![EuropeanCommission](docs/eclogo.png)
+
 Social Media Disaster Risk Monitoring, *SMDRM* in short, is a Python based data
 pipeline application to process social media [_datapoints_](docs/glossary.md#datapoint).
 
