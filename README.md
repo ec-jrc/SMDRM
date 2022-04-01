@@ -12,6 +12,22 @@ that you can further analyse, and visualize through a powerful dashboard.
 
 ![Docker](https://img.shields.io/badge/Docker-20.10.9-information)&nbsp;&nbsp;![Docker-compose](https://img.shields.io/static/v1?label=Docker%20Compose&message=1.29.1&color=information)&nbsp;&nbsp;![Python](https://img.shields.io/static/v1?label=Python&message=>3.7%20<3.9&color=information)&nbsp;&nbsp;![Code Format](https://img.shields.io/static/v1?label=Code%20Formatter&message=Black&color=information)
 
+### Requirements
+
+SMDRM application is Docker Compose based. A running Docker daemon, and docker-compose software are required.
+
+The current configuration is intended to run on a single machine. Ensure your machine meets the _minimum_ requirements:
+
+* 8 CPUs
+* 12 GB free memory
+* 10 GB free disk storage
+* Access to public docker registry
+
+If you have multiple machines, and you instend to use this solution in a production environment,
+we recommend to setup an orchestrated solution that runs on several machines.
+
+In that case, Docker Swarm may be the easiest way, as it is configurable via docker-compose.yaml files.
+
 > :bangbang: Execute all bash commands from project root directory
 
 ### Build
