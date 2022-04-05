@@ -2,7 +2,7 @@ from datetime import datetime, timezone
 import os
 import requests
 
-class AirflowJobsHandler:
+class AirflowJobsTrigger:
     """Represents an object to handle jobs for the Airflow API."""
 
     # Airflow API config

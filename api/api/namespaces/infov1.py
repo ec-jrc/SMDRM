@@ -1,4 +1,4 @@
-from flask_restx import Namespace, Resource, fields
+from flask_restx import Namespace, Resource
 
 ns = Namespace('info', description='API status operations')
 
@@ -8,4 +8,3 @@ class InfoHealth(Resource):
     def get(self):
         '''API health'''
         return ["OK"], 200
-
