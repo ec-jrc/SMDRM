@@ -1,20 +1,14 @@
-from conftest import apiv1 
-
-def test_config():
+def test_config(app):
     """Test app initialization with default and manual config."""
-    assert not apiv1.create_app().testing
-    assert apiv1.create_app({'TESTING': True}).testing
-
+    assert app.config['TESTING']
+    assert app.config["SQLALCHEMY_DATABASE_URI"] == "sqlite:///:memory:"
+    assert app.config["MAX_CONTENT_LENGTH"] == 1000
 
 def test_registered_blueprint(app):
     """Test if main blueprint is registered to the app."""
     bp = app.blueprints['api']
     assert bp.name == "api"
-
-
-def test_blueprint_url_prefix():
-    """Test the main blueprint url prefix."""
-    assert apiv1.blueprint.url_prefix == "/api/v1"
+    assert bp.url_prefix == "/api/v1"
 
 
 def test_api_blueprint_root(client):

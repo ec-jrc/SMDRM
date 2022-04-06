@@ -12,10 +12,6 @@ class TestResponse:
 def mocked_airflow_dagrun_post(*args, **kwargs):
     return TestResponse()
 
-def test_max_content_length_app_config(app):
-    '''Test if app is configured with the correct number of bytes for MAX_CONTENT_LENGTH var'''
-    assert app.config["MAX_CONTENT_LENGTH"] == 1000
-
 def test_upload(client, monkeypatch):
     '''Test if upload endpoint send POST request to Airflow API and receive expected output'''
 
@@ -91,7 +87,7 @@ def test_upload_with_exceeded_content_length(client):
             content_type='multipart/form-data',
             data=data,
         )
-    
+
     # mocking requests.post is not required for this test because
     # the content_length is checked prior to sending the POST request
     assert res.status_code == 413, "RequestEntityTooLarge exception (413) should occur when uploading files larger than the MAX_CONTENT_LENGTH limit (1000 bytes)"
@@ -105,7 +101,7 @@ def test_upload_list(client, monkeypatch):
 
     # apply the monkeypatch to os.listdir to mock the response payload
     monkeypatch.setattr(os, "listdir", mocked_listdir)
-    
+
     res = client.get("/api/v1/uploads/")
     assert res.status_code == 200
     assert res.json == expected
