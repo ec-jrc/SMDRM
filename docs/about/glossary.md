@@ -1,3 +1,8 @@
+---
+layout: default
+permalink: /about/glossary/
+---
+
 # Glossary
 
 Let us establish a concise glossary of terms that will be the jargon used throughout the documentation.
@@ -32,4 +37,3 @@ be it fetching data, running analysis, triggering other systems, or more.
 ## Workflow
 
 A workflow is a set of repeatable coded rules and instructions to run a data pipeline.
-

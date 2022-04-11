@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ site.title }}</title>
+    <script type="application/ld+json">
+        {"@context":"https://schema.org","@type":"WebSite","description":{{ site.description }},"headline":{{ site.title }},"name":{{ site.title }},"url":{{ site.url }}}</script>
+    <link rel="stylesheet" href="/SMDRM/assets/main.css"><link type="application/atom+xml" rel="alternate" href={{ site.url }}"/feed.xml" title={{ site.title }} />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous" />
+    <link rel="icon" type="image/x-icon" href="/SMDRM/img/favicon.ico" />
+  </head>
+
+  <body>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+    {% include navbar.html %}
+
+    <main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <div class="home">
+          {{ content }}
+        </div>
+      </div>
+    </main>
+
+    <footer class="site-footer h-card">
+      <div class="container-fluid">
+        <p class=text-end>&copy; {{ site.time | date: '%Y' }} {{ site.name | default: site.title }}. {{ site.data.ui-text[site.locale].powered_by | default: "Powered by" }} <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a>.</p>
+      </div>
+    </footer>
+  </body>
+
+</html>

@@ -1,4 +1,0 @@
-# Extras
-
-Extra documentation resources.
-
