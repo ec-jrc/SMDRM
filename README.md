@@ -1,4 +1,4 @@
-# Social Media Disaster Risk Monitoring
+# Social Media Disaster Risk Management
 
 ![EuropeanCommission](docs/eclogo.png)
 
